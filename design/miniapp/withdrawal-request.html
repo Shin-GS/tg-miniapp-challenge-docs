@@ -1,0 +1,944 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Withdrawal Request - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Withdrawal Request Screen Styles ===== */
+
+    /* Source Tabs */
+    .source-tabs {
+      display: flex;
+      gap: var(--space-2);
+      padding: var(--space-2);
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-md);
+    }
+
+    .source-tabs__btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      text-transform: uppercase;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      background: transparent;
+      border: none;
+      min-height: 44px;
+    }
+
+    .source-tabs__btn.active {
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Available Balance Display */
+    .available-balance {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-6);
+      background: linear-gradient(to bottom right, var(--color-bg-card), var(--color-bg-elevated));
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .available-balance__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+    }
+
+    .available-balance__value {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .available-balance__unit {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+
+    /* Fee Info */
+    .fee-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-info-bg);
+      border: 1px solid var(--color-info-border);
+      border-radius: var(--radius-sm);
+    }
+
+    .fee-info__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-info-text);
+    }
+
+    .fee-info__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-info-text);
+    }
+
+    /* Amount Input Group */
+    .amount-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .amount-input-group__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+    }
+
+    .amount-input-group__wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background-color: var(--color-bg);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-md);
+      transition: border-color var(--transition-fast);
+    }
+
+    .amount-input-group__wrapper:focus-within {
+      border-color: var(--color-primary);
+    }
+
+    .amount-input-group__wrapper--error {
+      border-color: var(--color-danger);
+    }
+
+    .amount-input-group__input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      background: transparent;
+      min-width: 0;
+    }
+
+    .amount-input-group__input::placeholder {
+      color: var(--color-text-tertiary);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .amount-input-group__input:disabled {
+      color: var(--color-text-disabled);
+    }
+
+    .amount-input-group__unit {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+    }
+
+    .amount-input-group__hint {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-tertiary);
+    }
+
+    .amount-input-group__error {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-danger-text);
+    }
+
+    /* Fee Preview */
+    .fee-preview {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      padding: var(--space-4);
+      background-color: var(--color-warning-bg);
+      border: 1px solid var(--color-warning-border);
+      border-radius: var(--radius-sm);
+    }
+
+    .fee-preview__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .fee-preview__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-warning-text);
+    }
+
+    .fee-preview__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-warning-text);
+    }
+
+    .fee-preview__value--highlight {
+      font-size: var(--font-size-base);
+      color: var(--color-text);
+    }
+
+    /* Wallet Address */
+    .wallet-address {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .wallet-address__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+    }
+
+    .wallet-address__box {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+
+    .wallet-address__text {
+      flex: 1;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+      font-family: monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .wallet-address__copy {
+      font-size: var(--font-size-base);
+      cursor: pointer;
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: none;
+    }
+
+    .wallet-address__note {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+      line-height: var(--line-height-normal);
+    }
+
+    /* Blocked State */
+    .blocked-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-8) var(--space-4);
+      text-align: center;
+    }
+
+    .blocked-state__icon {
+      font-size: 48px;
+    }
+
+    .blocked-state__title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .blocked-state__description {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-relaxed);
+    }
+
+    .blocked-state__link {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-primary);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Confirm Modal */
+    .confirm-modal__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      text-align: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .confirm-modal__detail {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      padding: var(--space-4);
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-sm);
+    }
+
+    .confirm-modal__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .confirm-modal__row-label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    .confirm-modal__row-value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .confirm-modal__note {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-tertiary);
+      text-align: center;
+      margin-top: var(--space-3);
+    }
+
+    .confirm-modal__buttons {
+      display: flex;
+      gap: var(--space-3);
+      margin-top: var(--space-6);
+    }
+
+    .confirm-modal__buttons .btn {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">
+    <!-- Case Switcher -->
+    <nav class="case-switcher">
+      <button class="active" data-case="1">Reward</button>
+      <button data-case="2">Deposit</button>
+      <button data-case="3">Reward Blocked</button>
+      <button data-case="4">Deposit Blocked</button>
+      <button data-case="5">No Balance</button>
+      <button data-case="6">Invalid</button>
+    </nav>
+
+    <!-- ===== Case 1: REWARD Tab — Normal Request ===== -->
+    <main class="screen active" id="case-1">
+
+      <div class="space-y-6" style="padding: var(--space-4);">
+        <!-- Source Tabs -->
+        <div class="source-tabs">
+          <button class="source-tabs__btn active">💎 REWARD</button>
+          <button class="source-tabs__btn">💰 DEPOSIT</button>
+        </div>
+
+        <!-- Available Balance -->
+        <div class="available-balance">
+          <span class="available-balance__label">Available</span>
+          <span class="available-balance__value">12</span>
+          <span class="available-balance__unit">TON</span>
+        </div>
+
+        <!-- Fee Info -->
+        <div class="fee-info">
+          <span class="fee-info__label">Withdrawal Fee (Level 2)</span>
+          <span class="fee-info__value">8%</span>
+        </div>
+
+        <!-- Amount Input -->
+        <div class="amount-input-group">
+          <span class="amount-input-group__label">Amount</span>
+          <div class="amount-input-group__wrapper">
+            <input type="number" class="amount-input-group__input" placeholder="0" inputmode="numeric" pattern="[0-9]*" id="amount-reward">
+            <span class="amount-input-group__unit">TON</span>
+          </div>
+          <span class="amount-input-group__hint">Min: 1 TON · Max: 12 TON</span>
+        </div>
+
+        <!-- Fee Preview -->
+        <div class="fee-preview">
+          <div class="fee-preview__row">
+            <span class="fee-preview__label">Fee (8%)</span>
+            <span class="fee-preview__value" id="reward-fee-amount">0 TON</span>
+          </div>
+          <div class="fee-preview__row">
+            <span class="fee-preview__label">You'll receive</span>
+            <span class="fee-preview__value fee-preview__value--highlight" id="reward-receive-amount">0 TON</span>
+          </div>
+        </div>
+
+        <!-- Wallet Address -->
+        <div class="wallet-address">
+          <span class="wallet-address__label">Withdrawal Address</span>
+          <div class="wallet-address__box">
+            <span class="wallet-address__text">UQBx...7k3F</span>
+            <button class="wallet-address__copy" id="copy-btn-1">📋</button>
+          </div>
+          <span class="wallet-address__note">Withdrawal will be sent to your connected wallet</span>
+        </div>
+
+        <!-- Request Button -->
+        <button class="btn btn--primary btn--full" id="btn-request-reward" disabled>REQUEST WITHDRAWAL</button>
+
+        <!-- Pending Requests -->
+        <div style="margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+          <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-black); color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: var(--space-3);">Pending Requests</div>
+          
+          <div class="list">
+            <div class="list-item" style="justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <span class="badge badge--neutral" style="font-size: var(--font-size-2xs);">DEPOSIT</span>
+                <div>
+                  <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold);">10 TON</div>
+                  <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">2026-05-13</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <span class="badge badge--info">PROCESSING</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirm Modal -->
+      <div class="modal" id="modal-reward" hidden>
+        <div class="modal__backdrop" data-action="close-modal"></div>
+        <div class="modal__content">
+          <h3 class="confirm-modal__title">Withdraw from Reward?</h3>
+          <div class="confirm-modal__detail">
+            <div class="confirm-modal__row">
+              <span class="confirm-modal__row-label">Amount</span>
+              <span class="confirm-modal__row-value" id="modal-reward-amount">5 TON</span>
+            </div>
+            <div class="confirm-modal__row">
+              <span class="confirm-modal__row-label">Fee (8%)</span>
+              <span class="confirm-modal__row-value" id="modal-reward-fee">0.4 TON</span>
+            </div>
+            <div class="confirm-modal__row">
+              <span class="confirm-modal__row-label">You'll receive</span>
+              <span class="confirm-modal__row-value" id="modal-reward-receive">4.6 TON</span>
+            </div>
+          </div>
+          <p class="confirm-modal__note">This amount will be deducted immediately.</p>
+          <div class="confirm-modal__buttons">
+            <button class="btn btn--secondary btn--sm" data-action="close-modal">CANCEL</button>
+            <button class="btn btn--primary btn--sm" id="btn-confirm-reward">CONFIRM</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: DEPOSIT Tab — Normal Request ===== -->
+    <main class="screen" id="case-2">
+
+      <div class="space-y-6" style="padding: var(--space-4);">
+        <!-- Source Tabs -->
+        <div class="source-tabs">
+          <button class="source-tabs__btn">💎 REWARD</button>
+          <button class="source-tabs__btn active">💰 DEPOSIT</button>
+        </div>
+
+        <!-- Available Balance -->
+        <div class="available-balance">
+          <span class="available-balance__label">Available</span>
+          <span class="available-balance__value">25</span>
+          <span class="available-balance__unit">TON</span>
+        </div>
+
+        <!-- Fee Info -->
+        <div class="fee-info">
+          <span class="fee-info__label">Withdrawal Fee</span>
+          <span class="fee-info__value" style="color: var(--color-success);">FREE</span>
+        </div>
+
+        <!-- Amount Input -->
+        <div class="amount-input-group">
+          <span class="amount-input-group__label">Amount</span>
+          <div class="amount-input-group__wrapper">
+            <input type="number" class="amount-input-group__input" placeholder="0" inputmode="numeric" pattern="[0-9]*" id="amount-deposit" value="10">
+            <span class="amount-input-group__unit">TON</span>
+          </div>
+          <span class="amount-input-group__hint">Min: 1 TON · Max: 25 TON · No fee for deposit withdrawal</span>
+        </div>
+
+        <!-- Fee Preview -->
+        <div class="fee-preview">
+          <div class="fee-preview__row">
+            <span class="fee-preview__label">Fee</span>
+            <span class="fee-preview__value">0 TON (Free)</span>
+          </div>
+          <div class="fee-preview__row">
+            <span class="fee-preview__label">You'll receive</span>
+            <span class="fee-preview__value fee-preview__value--highlight">10 TON</span>
+          </div>
+        </div>
+
+        <!-- Wallet Address -->
+        <div class="wallet-address">
+          <span class="wallet-address__label">Withdrawal Address</span>
+          <div class="wallet-address__box">
+            <span class="wallet-address__text">UQBx...7k3F</span>
+            <button class="wallet-address__copy" id="copy-btn-2">📋</button>
+          </div>
+          <span class="wallet-address__note">Withdrawal will be sent to your connected wallet</span>
+        </div>
+
+        <!-- Request Button -->
+        <button class="btn btn--primary btn--full" id="btn-request-deposit">REQUEST WITHDRAWAL</button>
+
+        <!-- Pending Requests -->
+        <div style="margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+          <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-black); color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: var(--space-3);">Pending Requests</div>
+          
+          <div class="list">
+            <div class="list-item" style="justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <span class="badge badge--info" style="font-size: var(--font-size-2xs);">REWARD</span>
+                <div>
+                  <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold);">5 TON</div>
+                  <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">2026-05-14</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <span class="badge badge--warning">PENDING</span>
+                <button class="btn btn--danger btn--sm" style="padding: var(--space-1) var(--space-3); min-height: 32px; font-size: var(--font-size-xs);">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirm Modal -->
+      <div class="modal" id="modal-deposit" hidden>
+        <div class="modal__backdrop" data-action="close-modal"></div>
+        <div class="modal__content">
+          <h3 class="confirm-modal__title">Withdraw from Deposit?</h3>
+          <div class="confirm-modal__detail">
+            <div class="confirm-modal__row">
+              <span class="confirm-modal__row-label">Amount</span>
+              <span class="confirm-modal__row-value" id="modal-deposit-amount">10 TON</span>
+            </div>
+            <div class="confirm-modal__row">
+              <span class="confirm-modal__row-label">Fee</span>
+              <span class="confirm-modal__row-value" id="modal-deposit-fee">0 TON (Free)</span>
+            </div>
+            <div class="confirm-modal__row">
+              <span class="confirm-modal__row-label">You'll receive</span>
+              <span class="confirm-modal__row-value" id="modal-deposit-receive">10 TON</span>
+            </div>
+          </div>
+          <p class="confirm-modal__note">This amount will be deducted immediately.</p>
+          <div class="confirm-modal__buttons">
+            <button class="btn btn--secondary btn--sm" data-action="close-modal">CANCEL</button>
+            <button class="btn btn--primary btn--sm" id="btn-confirm-deposit">CONFIRM</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: REWARD Tab — Blocked (Pending Request) ===== -->
+    <main class="screen" id="case-3">
+
+      <div class="space-y-6" style="padding: var(--space-4);">
+        <!-- Source Tabs -->
+        <div class="source-tabs">
+          <button class="source-tabs__btn active">💎 REWARD</button>
+          <button class="source-tabs__btn">💰 DEPOSIT</button>
+        </div>
+
+        <!-- Blocked State -->
+        <div class="blocked-state">
+          <span class="blocked-state__icon">⏳</span>
+          <h3 class="blocked-state__title">Pending Request Exists</h3>
+          <p class="blocked-state__description">You already have a pending REWARD withdrawal request. Cancel it below to make a new one.</p>
+        </div>
+
+        <!-- Pending Requests (Cancel 가능) -->
+        <div style="padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+          <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-black); color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: var(--space-3);">Pending Requests</div>
+          <div class="list">
+            <div class="list-item" style="justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <span class="badge badge--info" style="font-size: var(--font-size-2xs);">REWARD</span>
+                <div>
+                  <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold);">5 TON</div>
+                  <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">2026-05-14</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <span class="badge badge--warning">PENDING</span>
+                <button class="btn btn--danger btn--sm" style="padding: var(--space-1) var(--space-3); min-height: 32px; font-size: var(--font-size-xs);">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Amount Input (Disabled) -->
+        <div class="amount-input-group">
+          <span class="amount-input-group__label">Amount</span>
+          <div class="amount-input-group__wrapper">
+            <input type="number" class="amount-input-group__input" placeholder="0" disabled>
+            <span class="amount-input-group__unit">TON</span>
+          </div>
+        </div>
+
+        <!-- Request Button (Disabled) -->
+        <button class="btn btn--primary btn--full" disabled>REQUEST WITHDRAWAL</button>
+      </div>
+    </main>
+
+    <!-- ===== Case 4: DEPOSIT Tab — Blocked (Pending Request) ===== -->
+    <main class="screen" id="case-4">
+
+      <div class="space-y-6" style="padding: var(--space-4);">
+        <!-- Source Tabs -->
+        <div class="source-tabs">
+          <button class="source-tabs__btn">💎 REWARD</button>
+          <button class="source-tabs__btn active">💰 DEPOSIT</button>
+        </div>
+
+        <!-- Blocked State -->
+        <div class="blocked-state">
+          <span class="blocked-state__icon">⏳</span>
+          <h3 class="blocked-state__title">Pending Request Exists</h3>
+          <p class="blocked-state__description">You already have a pending DEPOSIT withdrawal request. Cancel it below to make a new one.</p>
+        </div>
+
+        <!-- Pending Requests (Cancel 가능) -->
+        <div style="padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+          <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-black); color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: var(--space-3);">Pending Requests</div>
+          <div class="list">
+            <div class="list-item" style="justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <span class="badge badge--neutral" style="font-size: var(--font-size-2xs);">DEPOSIT</span>
+                <div>
+                  <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold);">10 TON</div>
+                  <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">2026-05-13</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <span class="badge badge--warning">PENDING</span>
+                <button class="btn btn--danger btn--sm" style="padding: var(--space-1) var(--space-3); min-height: 32px; font-size: var(--font-size-xs);">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Amount Input (Disabled) -->
+        <div class="amount-input-group">
+          <span class="amount-input-group__label">Amount</span>
+          <div class="amount-input-group__wrapper">
+            <input type="number" class="amount-input-group__input" placeholder="0" disabled>
+            <span class="amount-input-group__unit">TON</span>
+          </div>
+        </div>
+
+        <!-- Request Button (Disabled) -->
+        <button class="btn btn--primary btn--full" disabled>REQUEST WITHDRAWAL</button>
+      </div>
+    </main>
+
+    <!-- ===== Case 5: No Balance ===== -->
+    <main class="screen" id="case-5">
+
+      <div class="space-y-6" style="padding: var(--space-4);">
+        <!-- Source Tabs -->
+        <div class="source-tabs">
+          <button class="source-tabs__btn active">💎 REWARD</button>
+          <button class="source-tabs__btn">💰 DEPOSIT</button>
+        </div>
+
+        <!-- Available Balance (Zero) -->
+        <div class="available-balance">
+          <span class="available-balance__label">Available</span>
+          <span class="available-balance__value">0</span>
+          <span class="available-balance__unit">TON</span>
+        </div>
+
+        <!-- Empty State -->
+        <div class="notice notice--warning">
+          <span style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); line-height: var(--line-height-relaxed);">
+            💡 No reward balance to withdraw. Complete challenges to earn rewards!
+          </span>
+        </div>
+
+        <!-- Amount Input (Disabled) -->
+        <div class="amount-input-group">
+          <span class="amount-input-group__label">Amount</span>
+          <div class="amount-input-group__wrapper">
+            <input type="number" class="amount-input-group__input" placeholder="0" disabled>
+            <span class="amount-input-group__unit">TON</span>
+          </div>
+        </div>
+
+        <!-- Request Button (Disabled) -->
+        <button class="btn btn--primary btn--full" disabled>REQUEST WITHDRAWAL</button>
+      </div>
+    </main>
+
+    <!-- ===== Case 6: Invalid Amount ===== -->
+    <main class="screen" id="case-6">
+
+      <div class="space-y-6" style="padding: var(--space-4);">
+        <!-- Source Tabs -->
+        <div class="source-tabs">
+          <button class="source-tabs__btn active">💎 REWARD</button>
+          <button class="source-tabs__btn">💰 DEPOSIT</button>
+        </div>
+
+        <!-- Available Balance -->
+        <div class="available-balance">
+          <span class="available-balance__label">Available</span>
+          <span class="available-balance__value">12</span>
+          <span class="available-balance__unit">TON</span>
+        </div>
+
+        <!-- Fee Info -->
+        <div class="fee-info">
+          <span class="fee-info__label">Withdrawal Fee (Level 2)</span>
+          <span class="fee-info__value">8%</span>
+        </div>
+
+        <!-- Amount Input (Error State) -->
+        <div class="amount-input-group">
+          <span class="amount-input-group__label">Amount</span>
+          <div class="amount-input-group__wrapper amount-input-group__wrapper--error">
+            <input type="number" class="amount-input-group__input" value="50" id="amount-invalid">
+            <span class="amount-input-group__unit">TON</span>
+          </div>
+          <span class="amount-input-group__error">Exceeds available balance (max: 12 TON)</span>
+        </div>
+
+        <!-- Wallet Address -->
+        <div class="wallet-address">
+          <span class="wallet-address__label">Withdrawal Address</span>
+          <div class="wallet-address__box">
+            <span class="wallet-address__text">UQBx...7k3F</span>
+            <button class="wallet-address__copy" id="copy-btn-6">📋</button>
+          </div>
+          <span class="wallet-address__note">Withdrawal will be sent to your connected wallet</span>
+        </div>
+
+        <!-- Request Button (Disabled) -->
+        <button class="btn btn--primary btn--full" disabled>REQUEST WITHDRAWAL</button>
+      </div>
+    </main>
+
+    <!-- Toast -->
+    <div class="toast toast--success" id="toast-success" hidden>
+      ✓ Withdrawal request submitted!
+    </div>
+    <div class="toast toast--error" id="toast-error" hidden>
+      ✕ Failed to submit withdrawal request. Please try again.
+    </div>
+
+  </div>
+
+  <script>
+    // ===== Case Switcher =====
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // ===== REWARD Amount Input — Real-time Validation =====
+    const amountReward = document.getElementById('amount-reward');
+    const btnRequestReward = document.getElementById('btn-request-reward');
+    const maxReward = 12;
+
+    if (amountReward) {
+      amountReward.addEventListener('input', () => {
+        const val = parseInt(amountReward.value, 10);
+        const wrapper = amountReward.closest('.amount-input-group__wrapper');
+        const group = amountReward.closest('.amount-input-group');
+        let existingError = group.querySelector('.amount-input-group__error');
+
+        // Remove existing error
+        if (existingError) existingError.remove();
+        wrapper.classList.remove('amount-input-group__wrapper--error');
+
+        if (!amountReward.value || isNaN(val)) {
+          btnRequestReward.disabled = true;
+          return;
+        }
+
+        // Validate
+        if (val <= 0) {
+          wrapper.classList.add('amount-input-group__wrapper--error');
+          const err = document.createElement('span');
+          err.className = 'amount-input-group__error';
+          err.textContent = 'Minimum withdrawal is 1 TON';
+          group.appendChild(err);
+          btnRequestReward.disabled = true;
+        } else if (val > maxReward) {
+          wrapper.classList.add('amount-input-group__wrapper--error');
+          const err = document.createElement('span');
+          err.className = 'amount-input-group__error';
+          err.textContent = 'Exceeds available balance (max: ' + maxReward + ' TON)';
+          group.appendChild(err);
+          btnRequestReward.disabled = true;
+        } else if (amountReward.value.includes('.')) {
+          wrapper.classList.add('amount-input-group__wrapper--error');
+          const err = document.createElement('span');
+          err.className = 'amount-input-group__error';
+          err.textContent = 'Only whole numbers are allowed';
+          group.appendChild(err);
+          btnRequestReward.disabled = true;
+        } else {
+          btnRequestReward.disabled = false;
+        }
+      });
+    }
+
+    // ===== REWARD Request Button — Open Modal =====
+    if (btnRequestReward) {
+      btnRequestReward.addEventListener('click', () => {
+        const val = parseInt(amountReward.value, 10);
+        const fee = Math.round(val * 0.08 * 100) / 100;
+        const receive = (val - fee).toFixed(1);
+        document.getElementById('modal-reward-amount').textContent = val + ' TON';
+        document.getElementById('modal-reward-fee').textContent = fee + ' TON';
+        document.getElementById('modal-reward-receive').textContent = receive + ' TON';
+        document.getElementById('modal-reward').hidden = false;
+      });
+    }
+
+    // ===== DEPOSIT Amount Input — Real-time Fee Calculation =====
+    const amountDeposit = document.getElementById('amount-deposit');
+    const btnRequestDeposit = document.getElementById('btn-request-deposit');
+    const maxDeposit = 25;
+    const feeRate = 0;
+
+    if (amountDeposit) {
+      const updateFeePreview = () => {
+        const val = parseInt(amountDeposit.value, 10);
+        const feePreview = amountDeposit.closest('.space-y-6').querySelector('.fee-preview');
+
+        if (!amountDeposit.value || isNaN(val) || val <= 0 || val > maxDeposit) {
+          if (feePreview) {
+            feePreview.querySelector('.fee-preview__row:first-child .fee-preview__value').textContent = '0 TON (Free)';
+            feePreview.querySelector('.fee-preview__row:last-child .fee-preview__value').textContent = '0 TON';
+          }
+          btnRequestDeposit.disabled = true;
+          return;
+        }
+
+        if (feePreview) {
+          feePreview.querySelector('.fee-preview__row:first-child .fee-preview__value').textContent = '0 TON (Free)';
+          feePreview.querySelector('.fee-preview__row:last-child .fee-preview__value').textContent = val + ' TON';
+        }
+
+        btnRequestDeposit.disabled = false;
+      };
+
+      amountDeposit.addEventListener('input', updateFeePreview);
+      // Initialize
+      updateFeePreview();
+    }
+
+    // ===== DEPOSIT Request Button — Open Modal =====
+    if (btnRequestDeposit) {
+      btnRequestDeposit.addEventListener('click', () => {
+        const val = parseInt(amountDeposit.value, 10);
+        document.getElementById('modal-deposit-amount').textContent = val + ' TON';
+        document.getElementById('modal-deposit-fee').textContent = '0 TON (Free)';
+        document.getElementById('modal-deposit-receive').textContent = val + ' TON';
+        document.getElementById('modal-deposit').hidden = false;
+      });
+    }
+
+    // ===== Confirm Buttons — Show Toast =====
+    const btnConfirmReward = document.getElementById('btn-confirm-reward');
+    const btnConfirmDeposit = document.getElementById('btn-confirm-deposit');
+
+    function showToast(id) {
+      const toast = document.getElementById(id);
+      toast.hidden = false;
+      setTimeout(() => { toast.hidden = true; }, 3000);
+    }
+
+    if (btnConfirmReward) {
+      btnConfirmReward.addEventListener('click', () => {
+        document.getElementById('modal-reward').hidden = true;
+        showToast('toast-success');
+      });
+    }
+
+    if (btnConfirmDeposit) {
+      btnConfirmDeposit.addEventListener('click', () => {
+        document.getElementById('modal-deposit').hidden = true;
+        showToast('toast-success');
+      });
+    }
+
+    // ===== Modal Close =====
+    document.querySelectorAll('[data-action="close-modal"]').forEach(el => {
+      el.addEventListener('click', () => {
+        const modal = el.closest('.modal');
+        if (modal) modal.hidden = true;
+      });
+    });
+
+    // ===== Copy Button =====
+    document.querySelectorAll('.wallet-address__copy').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.textContent = '✓';
+        setTimeout(() => { btn.textContent = '📋'; }, 1500);
+      });
+    });
+
+    // ===== Header Back Button Feedback =====
+    document.querySelectorAll('.header__back').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.style.opacity = '0.5';
+        setTimeout(() => { btn.style.opacity = ''; }, 150);
+      });
+    });
+  </script>
+</body>
+</html>

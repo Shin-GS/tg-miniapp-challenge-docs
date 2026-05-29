@@ -1,0 +1,994 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>대시보드 - Admin</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/admin-layout.css">
+  <style>
+    /* 대시보드 전용 스타일 */
+
+    .admin-content .screen {
+      padding: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    .admin-content .screen.active {
+      display: block;
+    }
+
+    .dashboard-section {
+      margin-bottom: var(--space-6);
+    }
+
+    .dashboard-section__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      margin-bottom: var(--space-3);
+    }
+
+    /* Revenue Card */
+    .revenue-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-4);
+    }
+
+    .revenue-header__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+    }
+
+    .revenue-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--space-4);
+    }
+
+    .revenue-table th {
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      background-color: var(--color-bg-elevated);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .revenue-table td {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text);
+    }
+
+    .revenue-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .revenue-table .total-row td {
+      font-weight: var(--font-weight-black);
+      border-top: 2px solid var(--color-border-strong);
+      border-bottom: none;
+    }
+
+    .revenue-net-profit {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4);
+      background-color: var(--color-success-bg);
+      border: 1px solid var(--color-success-border);
+      border-radius: var(--radius-sm);
+    }
+
+    .revenue-net-profit__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .revenue-net-profit__value {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-success);
+    }
+
+    /* Revenue: Negative net profit (순이익 ≤ 0) */
+    .revenue-net-profit--negative {
+      background-color: var(--color-danger-bg, #fef2f2);
+      border-color: var(--color-danger-border, #fca5a5);
+    }
+
+    .revenue-net-profit--negative .revenue-net-profit__value {
+      color: var(--color-danger, #dc2626);
+    }
+
+    /* Revenue: Group header row (AWS 비용, AI 비용) */
+    .revenue-table .group-header td {
+      font-weight: var(--font-weight-semibold, 600);
+      color: var(--color-text-secondary);
+      border-bottom: none;
+      padding-top: var(--space-3);
+    }
+
+    /* Revenue: Sub-item row (└ EC2, └ GPT-4o 등) */
+    .revenue-table .sub-item td:first-child {
+      padding-left: var(--space-8, 2rem);
+      color: var(--color-text-secondary);
+    }
+
+    /* Revenue: Exchange rate info */
+    .revenue-exchange-rate {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      text-align: right;
+      margin-top: var(--space-3);
+    }
+
+    /* Wallet Card */
+    .wallet-info {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .wallet-info__balance {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-ton);
+    }
+
+    .wallet-info__address {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      font-family: monospace;
+    }
+
+    /* Two column grid for revenue + wallet */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--space-4);
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">할 일 있음</button>
+    <button data-case="2">모두 완료</button>
+    <button data-case="modal">Top 100 모달</button>
+    <button data-case="4">랭킹 없음</button>
+  </nav>
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="sidebar">
+      <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="#">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">✅</span>
+            인증 검수
+            <span class="admin-sidebar__item-badge">3</span>
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+            <span class="admin-sidebar__item-badge">3</span>
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">🏆</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💳</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📋</span>
+            활동 로그
+          </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="admin-content">
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn" id="menu-toggle">☰</button>
+        <span class="admin-topbar__title">대시보드</span>
+        <span style="width: 44px;"></span>
+      </div>
+
+      <!-- Page Header -->
+      <div class="admin-page-header">
+        <h1 class="admin-page-header__title">대시보드</h1>
+      </div>
+
+      <!-- ===== Case 1: 할 일 있음 ===== -->
+      <main class="screen active" id="case-1">
+        <!-- Todo Banner -->
+        <div class="dashboard-section">
+          <div class="admin-todo">
+            <div class="admin-todo__item" title="출금 관리 화면으로 이동">
+              <span class="admin-todo__item-count">3</span>
+              <span class="admin-todo__item-label">출금 대기</span>
+            </div>
+            <div class="admin-todo__item" title="인증 검수 화면으로 이동">
+              <span class="admin-todo__item-count">2</span>
+              <span class="admin-todo__item-label">이의제기</span>
+            </div>
+            <div class="admin-todo__item" title="인증 검수 화면으로 이동">
+              <span class="admin-todo__item-count">1</span>
+              <span class="admin-todo__item-label">검토 필요</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="dashboard-section">
+          <div class="admin-stats">
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">전체 사용자</div>
+              <div class="admin-stat-card__value">1,250</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">활성 사용자</div>
+              <div class="admin-stat-card__value">340</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">활성 챌린지</div>
+              <div class="admin-stat-card__value">15</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">오늘 인증</div>
+              <div class="admin-stat-card__value">87</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Revenue + Wallet Grid -->
+        <div class="dashboard-grid">
+          <!-- Revenue -->
+          <div class="admin-detail">
+            <div class="revenue-header">
+              <span class="revenue-header__title">수익 통계</span>
+              <select class="admin-filter__select" id="period-select-1">
+                <option value="DAILY">일간</option>
+                <option value="WEEKLY">주간</option>
+                <option value="MONTHLY" selected>월간</option>
+                <option value="YEARLY">연간</option>
+              </select>
+            </div>
+
+            <!-- Income Table -->
+            <div class="dashboard-section__title">수입</div>
+            <table class="revenue-table">
+              <thead>
+                <tr>
+                  <th>항목</th>
+                  <th style="text-align: right;">금액</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>구매 수수료</td>
+                  <td style="text-align: right;">25.5 TON (₩77,469)</td>
+                </tr>
+                <tr>
+                  <td>실패 패널티</td>
+                  <td style="text-align: right;">12.3 TON (₩37,367)</td>
+                </tr>
+                <tr>
+                  <td>숨기기 비용</td>
+                  <td style="text-align: right;">8.0 TON (₩24,304)</td>
+                </tr>
+                <tr>
+                  <td>출금 수수료</td>
+                  <td style="text-align: right;">3.2 TON (₩9,722)</td>
+                </tr>
+                <tr class="total-row">
+                  <td>합계</td>
+                  <td style="text-align: right;">₩148,862</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Expense Table -->
+            <div class="dashboard-section__title" style="margin-top: var(--space-4);">지출</div>
+            <table class="revenue-table">
+              <thead>
+                <tr>
+                  <th>항목</th>
+                  <th style="text-align: right;">금액</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>리워드 지급</td>
+                  <td style="text-align: right;">10.0 TON (₩30,380)</td>
+                </tr>
+                <tr>
+                  <td>네트워크 수수료</td>
+                  <td style="text-align: right;">0.25 TON (₩760)</td>
+                </tr>
+                <tr class="group-header">
+                  <td>AWS 비용</td>
+                  <td></td>
+                </tr>
+                <tr class="sub-item">
+                  <td>└ EC2</td>
+                  <td style="text-align: right;">$25 (₩37,425)</td>
+                </tr>
+                <tr class="sub-item">
+                  <td>└ RDS</td>
+                  <td style="text-align: right;">$35 (₩52,395)</td>
+                </tr>
+                <tr class="sub-item">
+                  <td>└ S3</td>
+                  <td style="text-align: right;">$3 (₩4,491)</td>
+                </tr>
+                <tr class="sub-item">
+                  <td>└ CloudFront</td>
+                  <td style="text-align: right;">$5 (₩7,485)</td>
+                </tr>
+                <tr class="group-header">
+                  <td>AI 비용</td>
+                  <td></td>
+                </tr>
+                <tr class="sub-item">
+                  <td>└ GPT-4o</td>
+                  <td style="text-align: right;">$30 (₩44,910)</td>
+                </tr>
+                <tr class="total-row">
+                  <td>합계</td>
+                  <td style="text-align: right;">₩177,846</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Net Profit -->
+            <div class="revenue-net-profit revenue-net-profit--negative">
+              <span class="revenue-net-profit__label">순이익</span>
+              <span class="revenue-net-profit__value">-₩28,984</span>
+            </div>
+            <div class="revenue-exchange-rate">1 TON = ₩3,038 · 1 USD = ₩1,497</div>
+          </div>
+
+          <!-- Service Wallet -->
+          <div class="admin-stat-card">
+            <div class="admin-stat-card__label">서비스 지갑</div>
+            <div class="wallet-info">
+              <span class="wallet-info__balance">125.5 TON</span>
+              <span class="wallet-info__address">UQBx...3kF2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top 10 Ranking -->
+        <div class="dashboard-section" style="margin-top: var(--space-6);">
+          <div class="revenue-header">
+            <span class="revenue-header__title">Top 10 랭킹</span>
+            <span style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">매일 새벽 3시 갱신</span>
+          </div>
+          <div class="admin-detail">
+            <table class="revenue-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>사용자</th>
+                  <th style="text-align: center;">레벨</th>
+                  <th style="text-align: center;">완료</th>
+                  <th style="text-align: right;">최근 완료</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: var(--font-weight-black); color: var(--color-primary);">1</td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: var(--space-2);">
+                      <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 12px;">👤</div>
+                      <div>
+                        <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-sm);">Challenger_xK9m2P</div>
+                        <div style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">@john_doe</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">Lv.7</td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">24</td>
+                  <td style="text-align: right; font-size: var(--font-size-xs); color: var(--color-text-secondary);">2025-05-18</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: var(--font-weight-black); color: var(--color-primary);">2</td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: var(--space-2);">
+                      <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 12px;">👤</div>
+                      <div>
+                        <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-sm);">HabitMaster_42</div>
+                        <div style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">@habit_master</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">Lv.6</td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">18</td>
+                  <td style="text-align: right; font-size: var(--font-size-xs); color: var(--color-text-secondary);">2025-05-17</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: var(--font-weight-black); color: var(--color-primary);">3</td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: var(--space-2);">
+                      <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 12px;">👤</div>
+                      <div>
+                        <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-sm);">RunnerPro_7</div>
+                        <div style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">—</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">Lv.5</td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">15</td>
+                  <td style="text-align: right; font-size: var(--font-size-xs); color: var(--color-text-secondary);">2025-05-16</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="text-align: center; padding: var(--space-3);">
+              <button class="btn btn--ghost" style="font-size: var(--font-size-sm);">전체 보기 (Top 100)</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Case 2: 모두 완료 ===== -->
+      <main class="screen" id="case-2">
+        <!-- Todo Banner (Empty) -->
+        <div class="dashboard-section">
+          <div class="admin-todo--empty">
+            ✅ 모두 처리 완료
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="dashboard-section">
+          <div class="admin-stats">
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">전체 사용자</div>
+              <div class="admin-stat-card__value">1,250</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">활성 사용자</div>
+              <div class="admin-stat-card__value">340</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">활성 챌린지</div>
+              <div class="admin-stat-card__value">15</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">오늘 인증</div>
+              <div class="admin-stat-card__value">87</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Revenue + Wallet Grid -->
+        <div class="dashboard-grid">
+          <!-- Revenue -->
+          <div class="admin-detail">
+            <div class="revenue-header">
+              <span class="revenue-header__title">수익 통계</span>
+              <select class="admin-filter__select" id="period-select-2">
+                <option value="DAILY">일간</option>
+                <option value="WEEKLY">주간</option>
+                <option value="MONTHLY" selected>월간</option>
+                <option value="YEARLY">연간</option>
+              </select>
+            </div>
+
+            <!-- Income Table -->
+            <div class="dashboard-section__title">수입</div>
+            <table class="revenue-table">
+              <thead>
+                <tr>
+                  <th>항목</th>
+                  <th style="text-align: right;">금액</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>구매 수수료</td>
+                  <td style="text-align: right;">25.5 TON (₩77,469)</td>
+                </tr>
+                <tr>
+                  <td>실패 패널티</td>
+                  <td style="text-align: right;">12.3 TON (₩37,367)</td>
+                </tr>
+                <tr>
+                  <td>숨기기 비용</td>
+                  <td style="text-align: right;">8.0 TON (₩24,304)</td>
+                </tr>
+                <tr>
+                  <td>출금 수수료</td>
+                  <td style="text-align: right;">3.2 TON (₩9,722)</td>
+                </tr>
+                <tr class="total-row">
+                  <td>합계</td>
+                  <td style="text-align: right;">₩148,862</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Expense Table -->
+            <div class="dashboard-section__title" style="margin-top: var(--space-4);">지출</div>
+            <table class="revenue-table">
+              <thead>
+                <tr>
+                  <th>항목</th>
+                  <th style="text-align: right;">금액</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>리워드 지급</td>
+                  <td style="text-align: right;">10.0 TON (₩30,380)</td>
+                </tr>
+                <tr>
+                  <td>네트워크 수수료</td>
+                  <td style="text-align: right;">0.25 TON (₩760)</td>
+                </tr>
+                <tr class="group-header">
+                  <td>AWS 비용</td>
+                  <td></td>
+                </tr>
+                <tr class="sub-item">
+                  <td>└ EC2</td>
+                  <td style="text-align: right;">$25 (₩37,425)</td>
+                </tr>
+                <tr class="sub-item">
+                  <td>└ RDS</td>
+                  <td style="text-align: right;">$35 (₩52,395)</td>
+                </tr>
+                <tr class="sub-item">
+                  <td>└ S3</td>
+                  <td style="text-align: right;">$3 (₩4,491)</td>
+                </tr>
+                <tr class="sub-item">
+                  <td>└ CloudFront</td>
+                  <td style="text-align: right;">$5 (₩7,485)</td>
+                </tr>
+                <tr class="group-header">
+                  <td>AI 비용</td>
+                  <td></td>
+                </tr>
+                <tr class="sub-item">
+                  <td>└ GPT-4o</td>
+                  <td style="text-align: right;">$30 (₩44,910)</td>
+                </tr>
+                <tr class="total-row">
+                  <td>합계</td>
+                  <td style="text-align: right;">₩177,846</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Net Profit -->
+            <div class="revenue-net-profit revenue-net-profit--negative">
+              <span class="revenue-net-profit__label">순이익</span>
+              <span class="revenue-net-profit__value">-₩28,984</span>
+            </div>
+            <div class="revenue-exchange-rate">1 TON = ₩3,038 · 1 USD = ₩1,497</div>
+          </div>
+
+          <!-- Service Wallet -->
+          <div class="admin-stat-card">
+            <div class="admin-stat-card__label">서비스 지갑</div>
+            <div class="wallet-info">
+              <span class="wallet-info__balance">125.5 TON</span>
+              <span class="wallet-info__address">UQBx...3kF2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top 10 Ranking -->
+        <div class="dashboard-section" style="margin-top: var(--space-6);">
+          <div class="revenue-header">
+            <span class="revenue-header__title">Top 10 랭킹</span>
+            <span style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">매일 새벽 3시 갱신</span>
+          </div>
+          <div class="admin-detail">
+            <table class="revenue-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>사용자</th>
+                  <th style="text-align: center;">레벨</th>
+                  <th style="text-align: center;">완료</th>
+                  <th style="text-align: right;">최근 완료</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: var(--font-weight-black); color: var(--color-primary);">1</td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: var(--space-2);">
+                      <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 12px;">👤</div>
+                      <div>
+                        <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-sm);">Challenger_xK9m2P</div>
+                        <div style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">@john_doe</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">Lv.7</td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">24</td>
+                  <td style="text-align: right; font-size: var(--font-size-xs); color: var(--color-text-secondary);">2025-05-18</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: var(--font-weight-black); color: var(--color-primary);">2</td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: var(--space-2);">
+                      <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 12px;">👤</div>
+                      <div>
+                        <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-sm);">HabitMaster_42</div>
+                        <div style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">@habit_master</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">Lv.6</td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">18</td>
+                  <td style="text-align: right; font-size: var(--font-size-xs); color: var(--color-text-secondary);">2025-05-17</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: var(--font-weight-black); color: var(--color-primary);">3</td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: var(--space-2);">
+                      <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 12px;">👤</div>
+                      <div>
+                        <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-sm);">RunnerPro_7</div>
+                        <div style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">—</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">Lv.5</td>
+                  <td style="text-align: center; font-weight: var(--font-weight-bold);">15</td>
+                  <td style="text-align: right; font-size: var(--font-size-xs); color: var(--color-text-secondary);">2025-05-16</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="text-align: center; padding: var(--space-3);">
+              <button class="btn btn--ghost" style="font-size: var(--font-size-sm);">전체 보기 (Top 100)</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Case 4: 랭킹 데이터 없음 ===== -->
+      <main class="screen" id="case-4">
+        <!-- Todo Banner (Empty) -->
+        <div class="dashboard-section">
+          <div class="admin-todo--empty">
+            ✅ 모두 처리 완료
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="dashboard-section">
+          <div class="admin-stats">
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">전체 사용자</div>
+              <div class="admin-stat-card__value">5</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">활성 사용자</div>
+              <div class="admin-stat-card__value">2</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">활성 챌린지</div>
+              <div class="admin-stat-card__value">1</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__label">오늘 인증</div>
+              <div class="admin-stat-card__value">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Revenue + Wallet Grid -->
+        <div class="dashboard-grid">
+          <!-- Revenue -->
+          <div class="admin-detail">
+            <div class="revenue-header">
+              <span class="revenue-header__title">수익 통계</span>
+              <select class="admin-filter__select">
+                <option value="DAILY">일간</option>
+                <option value="WEEKLY">주간</option>
+                <option value="MONTHLY" selected>월간</option>
+                <option value="YEARLY">연간</option>
+              </select>
+            </div>
+
+            <div class="dashboard-section__title">수입</div>
+            <table class="revenue-table">
+              <thead><tr><th>항목</th><th style="text-align: right;">금액</th></tr></thead>
+              <tbody>
+                <tr><td>구매 수수료</td><td style="text-align: right;">0 TON (₩0)</td></tr>
+                <tr><td>실패 패널티</td><td style="text-align: right;">0 TON (₩0)</td></tr>
+                <tr><td>숨기기 비용</td><td style="text-align: right;">0 TON (₩0)</td></tr>
+                <tr><td>출금 수수료</td><td style="text-align: right;">0 TON (₩0)</td></tr>
+                <tr class="total-row"><td>합계</td><td style="text-align: right;">₩0</td></tr>
+              </tbody>
+            </table>
+
+            <div class="dashboard-section__title" style="margin-top: var(--space-4);">지출</div>
+            <table class="revenue-table">
+              <thead><tr><th>항목</th><th style="text-align: right;">금액</th></tr></thead>
+              <tbody>
+                <tr><td>리워드 지급</td><td style="text-align: right;">0 TON (₩0)</td></tr>
+                <tr><td>네트워크 수수료</td><td style="text-align: right;">0 TON (₩0)</td></tr>
+                <tr class="total-row"><td>합계</td><td style="text-align: right;">₩0</td></tr>
+              </tbody>
+            </table>
+
+            <div class="revenue-net-profit revenue-net-profit--negative">
+              <span class="revenue-net-profit__label">순이익</span>
+              <span class="revenue-net-profit__value">₩0</span>
+            </div>
+            <div class="revenue-exchange-rate">1 TON = ₩3,038 · 1 USD = ₩1,497</div>
+          </div>
+
+          <!-- Service Wallet -->
+          <div class="admin-stat-card">
+            <div class="admin-stat-card__label">서비스 지갑</div>
+            <div class="wallet-info">
+              <span class="wallet-info__balance">0 TON</span>
+              <span class="wallet-info__address">UQBx...3kF2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top 10 Ranking — Empty State -->
+        <div class="dashboard-section" style="margin-top: var(--space-6);">
+          <div class="revenue-header">
+            <span class="revenue-header__title">Top 10 랭킹</span>
+            <span style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">매일 새벽 3시 갱신</span>
+          </div>
+          <div class="admin-detail">
+            <div style="padding: var(--space-8) var(--space-4); text-align: center;">
+              <div style="font-size: 48px; margin-bottom: var(--space-3);">🏆</div>
+              <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); margin-bottom: var(--space-2);">랭킹 데이터 없음</div>
+              <div style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">배치 실행 후 갱신됩니다.</div>
+            </div>
+            <div style="text-align: center; padding: var(--space-3); border-top: 1px solid var(--color-border);">
+              <button class="btn btn--ghost" style="font-size: var(--font-size-sm); opacity: 0.4; pointer-events: none;">전체 보기 (Top 100)</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===== Top 100 Ranking Modal ===== -->
+  <div class="ranking-modal" id="ranking-modal">
+    <div class="ranking-modal__container">
+      <div class="ranking-modal__header">
+        <h2 class="ranking-modal__title">🏆 Top 100 랭킹</h2>
+        <button class="ranking-modal__close" id="modal-close">✕</button>
+      </div>
+      <div class="ranking-modal__subtitle">매일 새벽 3시 갱신 · 마지막 갱신: 2025-05-19 03:00</div>
+      <div class="ranking-modal__body">
+        <table class="revenue-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">#</th>
+              <th>사용자</th>
+              <th style="text-align: center;">레벨</th>
+              <th style="text-align: center;">완료</th>
+              <th style="text-align: right;">최근 완료</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-modal-tbody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Ranking Modal */
+    .ranking-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4);
+    }
+    .ranking-modal.active {
+      display: flex;
+    }
+    .ranking-modal__container {
+      background: var(--color-bg);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 700px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .ranking-modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .ranking-modal__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin: 0;
+    }
+    .ranking-modal__close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--color-bg-elevated);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-lg);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ranking-modal__close:hover {
+      background: var(--color-border);
+    }
+    .ranking-modal__subtitle {
+      padding: var(--space-2) var(--space-5);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .ranking-modal__body {
+      overflow-y: auto;
+      max-height: 60vh;
+      padding: var(--space-3) var(--space-5);
+    }
+    .ranking-modal__rank {
+      font-weight: var(--font-weight-black);
+    }
+    .ranking-modal__rank--gold {
+      color: #D4AF37;
+    }
+    .ranking-modal__rank--silver {
+      color: #A0A0A0;
+    }
+    .ranking-modal__rank--bronze {
+      color: #CD7F32;
+    }
+  </style>
+
+  <script>
+    // Modal reference (must be after modal HTML)
+    const modal = document.getElementById('ranking-modal');
+
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (caseId === 'modal') {
+        modal.classList.add('active');
+      } else {
+        modal.classList.remove('active');
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('case-' + caseId).classList.add('active');
+      }
+    });
+
+    // Mobile Sidebar Toggle
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+
+    if (menuToggle) {
+      menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('admin-sidebar--open');
+      });
+    }
+
+    // Close sidebar on backdrop click (mobile)
+    document.addEventListener('click', (e) => {
+      if (sidebar.classList.contains('admin-sidebar--open') &&
+          !sidebar.contains(e.target) &&
+          e.target !== menuToggle) {
+        sidebar.classList.remove('admin-sidebar--open');
+      }
+    });
+
+    // Top 100 Modal — open from "전체 보기" buttons
+    document.querySelectorAll('.btn--ghost').forEach(btn => {
+      if (btn.textContent.includes('전체 보기')) {
+        btn.addEventListener('click', () => modal.classList.add('active'));
+      }
+    });
+
+    // Modal close
+    document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('active'));
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+
+    // Generate mock ranking data (20 rows to demonstrate scroll)
+    const mockNames = ['Challenger_xK9m2P','HabitMaster_42','RunnerPro_7','EarlyBird_99','FitnessFan_3','MorningGuy_11','YogaQueen_8','SwimChamp_5','BookWorm_22','GymRat_77','WalkDaily_4','MealPrep_9','SleepWell_6','NoSugar_13','Meditate_21','CodeDaily_88','PushUp_100','Hydrate_55','Stretch_33','ReadMore_44'];
+    const mockUsernames = ['@john_doe','@habit_master',null,'@early_bird',null,'@morning_guy','@yoga_queen',null,'@bookworm','@gym_rat',null,'@meal_prep',null,null,'@meditate21','@code_daily',null,'@hydrate55',null,'@read_more'];
+    const tbody = document.getElementById('ranking-modal-tbody');
+    for (let i = 0; i < 20; i++) {
+      const rank = i + 1;
+      const level = Math.max(0, 10 - Math.floor(i / 2));
+      const completed = Math.max(1, 25 - i);
+      const date = new Date(2025, 4, 19 - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const username = mockUsernames[i] || '—';
+      let rankClass = '';
+      if (rank === 1) rankClass = 'ranking-modal__rank ranking-modal__rank--gold';
+      else if (rank === 2) rankClass = 'ranking-modal__rank ranking-modal__rank--silver';
+      else if (rank === 3) rankClass = 'ranking-modal__rank ranking-modal__rank--bronze';
+      else rankClass = '';
+      const rankStyle = rank > 3 ? 'font-weight: var(--font-weight-black); color: var(--color-text-secondary);' : '';
+
+      tbody.innerHTML += `<tr>
+        <td class="${rankClass}" style="${rankStyle}">${rank}</td>
+        <td>
+          <div style="display: flex; align-items: center; gap: var(--space-2);">
+            <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 12px;">👤</div>
+            <div>
+              <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-sm);">${mockNames[i]}</div>
+              <div style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">${username}</div>
+            </div>
+          </div>
+        </td>
+        <td style="text-align: center; font-weight: var(--font-weight-bold);">Lv.${level}</td>
+        <td style="text-align: center; font-weight: var(--font-weight-bold);">${completed}</td>
+        <td style="text-align: right; font-size: var(--font-size-xs); color: var(--color-text-secondary);">${dateStr}</td>
+      </tr>`;
+    }
+  </script>
+</body>
+</html>

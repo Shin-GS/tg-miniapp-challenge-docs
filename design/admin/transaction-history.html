@@ -1,0 +1,1779 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>거래 내역 - Admin</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/admin-layout.css">
+  <style>
+    /* 이 화면 전용 스타일 */
+    .th-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      align-items: flex-end;
+      margin-bottom: var(--space-4);
+    }
+
+    .th-filter__group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .th-filter__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    .th-filter__input {
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--font-size-sm);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      min-height: 36px;
+      min-width: 140px;
+    }
+
+    .th-filter__input::placeholder {
+      color: var(--color-text-tertiary);
+    }
+
+    .th-period-presets {
+      display: flex;
+      gap: var(--space-1);
+    }
+
+    .th-period-presets__btn {
+      padding: var(--space-1) var(--space-3);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      background-color: var(--color-bg);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      min-height: 32px;
+    }
+
+    .th-period-presets__btn.active {
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+      border-color: transparent;
+    }
+
+    .th-custom-dates {
+      display: flex;
+      gap: var(--space-2);
+      align-items: center;
+    }
+
+    .th-custom-dates--hidden {
+      display: none;
+    }
+
+    .th-filter__actions {
+      display: flex;
+      gap: var(--space-2);
+      align-items: flex-end;
+    }
+
+    .th-filter__btn {
+      padding: var(--space-2) var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      min-height: 36px;
+      border: none;
+      transition: all var(--transition-fast);
+    }
+
+    .th-filter__btn--search {
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+    }
+
+    .th-filter__btn--reset {
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+
+    .th-result-count {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-3);
+    }
+
+    .th-amount--plus {
+      color: var(--color-success);
+      font-weight: var(--font-weight-bold);
+    }
+
+    .th-amount--minus {
+      color: var(--color-danger);
+      font-weight: var(--font-weight-bold);
+    }
+
+    .th-balance-change {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+    }
+
+    .th-user-link {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .th-user-link:hover {
+      text-decoration: underline;
+    }
+
+    .admin-table tr.th-row--clickable {
+      cursor: pointer;
+    }
+
+    /* 뱃지 추가: expert */
+    .badge--expert {
+      background-color: var(--color-expert-bg);
+      color: var(--color-expert-text);
+      border: 1px solid var(--color-expert-border);
+    }
+
+    /* 결제 수단 뱃지 */
+    .th-payment-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
+      border-radius: var(--radius-full);
+    }
+
+    .th-payment-badge--ton-connect {
+      background-color: var(--color-info-bg);
+      color: var(--color-info-text);
+    }
+
+    .th-payment-badge--stars {
+      background-color: var(--color-expert-bg);
+      color: var(--color-expert-text);
+    }
+
+    /* 상세 모달 */
+    .th-modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-4);
+    }
+
+    .th-modal__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .th-modal__close {
+      font-size: 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .th-modal__field {
+      display: flex;
+      padding: var(--space-2) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .th-modal__field:last-child {
+      border-bottom: none;
+    }
+
+    .th-modal__label {
+      width: 120px;
+      flex-shrink: 0;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    .th-modal__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .th-modal__copy-btn {
+      padding: var(--space-1) var(--space-2);
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
+      background-color: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--color-text-secondary);
+    }
+
+    .th-modal__copy-btn:hover {
+      background-color: var(--color-primary);
+      color: var(--color-text-white);
+      border-color: var(--color-primary);
+    }
+
+    .th-modal__failure-reason {
+      background-color: var(--color-danger-bg);
+      border: 1px solid var(--color-danger-border);
+      border-radius: var(--radius-sm);
+      padding: var(--space-3);
+      margin-top: var(--space-3);
+    }
+
+    .th-modal__failure-reason-title {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-danger-text);
+      margin-bottom: var(--space-1);
+    }
+
+    .th-modal__failure-reason-text {
+      font-size: var(--font-size-sm);
+      color: var(--color-danger-text);
+    }
+
+    /* 멀티셀렉트 (체크박스 드롭다운 시뮬레이션) */
+    .th-multiselect {
+      position: relative;
+    }
+
+    .th-multiselect__trigger {
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--font-size-sm);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      min-height: 36px;
+      min-width: 160px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+    }
+
+    .th-multiselect__trigger--active {
+      border-color: var(--color-primary);
+    }
+
+    @media (max-width: 768px) {
+      .th-filter {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .th-filter__group {
+        width: 100%;
+      }
+
+      .th-filter__input,
+      .th-multiselect__trigger,
+      .admin-filter__select {
+        width: 100%;
+      }
+
+      .th-period-presets {
+        flex-wrap: wrap;
+      }
+
+      .th-filter__actions {
+        width: 100%;
+      }
+
+      .th-filter__btn {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">목록 (기본)</button>
+    <button data-case="2">필터 적용</button>
+    <button data-case="3">상세 모달</button>
+    <button data-case="4">빈 상태</button>
+    <button data-case="5">사용자 진입</button>
+    <button data-case="6">유형 드롭다운</button>
+    <button data-case="7">커스텀 기간</button>
+  </nav>
+
+  <!-- ===== Case 1: 목록 (기본) ===== -->
+  <main class="screen active" id="case-1">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">✅</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">🏆</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="#">
+            <span class="admin-sidebar__item-icon">💳</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📋</span>
+            활동 로그
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">거래 내역</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">거래 내역</h1>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="th-filter">
+          <div class="th-filter__group">
+            <span class="th-filter__label">사용자 ID</span>
+            <input type="number" class="th-filter__input" placeholder="User ID" style="min-width:100px;">
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">유형 그룹</span>
+            <div class="th-multiselect">
+              <div class="th-multiselect__trigger">전체 ▾</div>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">기간</span>
+            <div class="th-period-presets">
+              <button class="th-period-presets__btn">오늘</button>
+              <button class="th-period-presets__btn">7일</button>
+              <button class="th-period-presets__btn">이번 달</button>
+              <button class="th-period-presets__btn">커스텀</button>
+            </div>
+          </div>
+          <div class="th-filter__group th-custom-dates th-custom-dates--hidden">
+            <span class="th-filter__label">기간 (커스텀)</span>
+            <div style="display:flex;gap:var(--space-2);align-items:center;">
+              <input type="date" class="th-filter__input" style="min-width:130px;">
+              <span style="color:var(--color-text-secondary);">~</span>
+              <input type="date" class="th-filter__input" style="min-width:130px;">
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">상태</span>
+            <select class="admin-filter__select">
+              <option value="" selected>전체</option>
+              <option value="COMPLETED">COMPLETED</option>
+              <option value="PENDING">PENDING</option>
+              <option value="FAILED">FAILED</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+          </div>
+          <div class="th-filter__actions">
+            <button class="th-filter__btn th-filter__btn--search">검색</button>
+            <button class="th-filter__btn th-filter__btn--reset">초기화</button>
+          </div>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>일시</th>
+                <th>사용자</th>
+                <th>유형</th>
+                <th>금액</th>
+                <th>수수료</th>
+                <th>잔액 변동</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="th-row--clickable" data-tx-id="1001">
+                <td>2026-05-19 14:30</td>
+                <td><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></td>
+                <td>
+                  <span class="badge badge--info">충전</span> TON 구매
+                  <div style="margin-top:2px;"><span class="th-payment-badge th-payment-badge--ton-connect">TON Connect</span></div>
+                </td>
+                <td><span class="th-amount--plus">+5.0 TON</span></td>
+                <td>0.5 TON</td>
+                <td><span class="th-balance-change">10.0 → 15.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1002">
+                <td>2026-05-19 13:00</td>
+                <td><a class="th-user-link" href="#">#2 Challenger_xY7mP2</a></td>
+                <td>
+                  <span class="badge badge--info">충전</span> TON 구매
+                  <div style="margin-top:2px;"><span class="th-payment-badge th-payment-badge--stars">Stars</span></div>
+                </td>
+                <td><span class="th-amount--plus">+5.0 TON</span></td>
+                <td>0.75 TON</td>
+                <td><span class="th-balance-change">3.0 → 8.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1003">
+                <td>2026-05-19 12:30</td>
+                <td><a class="th-user-link" href="#">#2 Challenger_xY7mP2</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 예치금 잠금</td>
+                <td><span class="th-amount--minus">-3.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">8.0 → 5.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1004">
+                <td>2026-05-19 11:45</td>
+                <td><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 리워드 지급</td>
+                <td><span class="th-amount--plus">+2.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">15.0 → 17.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1004">
+                <td>2026-05-19 10:20</td>
+                <td><a class="th-user-link" href="#">#3 Challenger_kL9nQ4</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 패널티 차감</td>
+                <td><span class="th-amount--minus">-1.5 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">6.5 → 5.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1005">
+                <td>2026-05-18 22:10</td>
+                <td><a class="th-user-link" href="#">#4 Challenger_rT2wE8</a></td>
+                <td><span class="badge badge--expert">출금</span> 리워드 출금</td>
+                <td><span class="th-amount--minus">-10.0 TON</span></td>
+                <td>1.0 TON</td>
+                <td><span class="th-balance-change">25.0 → 15.0</span></td>
+                <td><span class="badge badge--warning">PENDING</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1006">
+                <td>2026-05-18 18:30</td>
+                <td><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 숨기기 비용</td>
+                <td><span class="th-amount--minus">-1.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">17.0 → 16.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1007">
+                <td>2026-05-18 15:00</td>
+                <td><a class="th-user-link" href="#">#5 Challenger_jH6bN1</a></td>
+                <td><span class="badge badge--neutral">어드민</span> 잔액 증가</td>
+                <td><span class="th-amount--plus">+3.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">2.0 → 5.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="admin-mobile-card">
+          <div class="admin-mobile-card__item" data-tx-id="1001">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">일시</span>
+              <span class="admin-mobile-card__value">2026-05-19 14:30</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">사용자</span>
+              <span class="admin-mobile-card__value"><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span><span class="badge badge--info">충전</span> TON 구매</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">금액</span>
+              <span class="th-amount--plus">+5.0 TON</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상태</span>
+              <span class="badge badge--success">COMPLETED</span>
+            </div>
+          </div>
+          <div class="admin-mobile-card__item" data-tx-id="1002">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">일시</span>
+              <span class="admin-mobile-card__value">2026-05-19 13:00</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">사용자</span>
+              <span class="admin-mobile-card__value"><a class="th-user-link" href="#">#2 Challenger_xY7mP2</a></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span><span class="badge badge--warning">챌린지</span> 예치금 잠금</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">금액</span>
+              <span class="th-amount--minus">-3.0 TON</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상태</span>
+              <span class="badge badge--success">COMPLETED</span>
+            </div>
+          </div>
+          <div class="admin-mobile-card__item" data-tx-id="1005">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">일시</span>
+              <span class="admin-mobile-card__value">2026-05-18 22:10</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">사용자</span>
+              <span class="admin-mobile-card__value"><a class="th-user-link" href="#">#4 Challenger_rT2wE8</a></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span><span class="badge badge--expert">출금</span> 리워드 출금</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">금액</span>
+              <span class="th-amount--minus">-10.0 TON</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상태</span>
+              <span class="badge badge--warning">PENDING</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" style="margin-top: var(--space-4);">
+          <button class="pagination__btn" disabled>‹</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn">2</button>
+          <button class="pagination__btn">3</button>
+          <button class="pagination__btn">›</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 2: 필터 적용 ===== -->
+  <main class="screen" id="case-2">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">✅</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">🏆</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="#">
+            <span class="admin-sidebar__item-icon">💳</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📋</span>
+            활동 로그
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">거래 내역</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">거래 내역</h1>
+        </div>
+
+        <!-- Filter Bar (필터 적용 상태) -->
+        <div class="th-filter">
+          <div class="th-filter__group">
+            <span class="th-filter__label">사용자 ID</span>
+            <input type="number" class="th-filter__input" value="1" style="min-width:100px; border-color: var(--color-primary);">
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">유형 그룹</span>
+            <div class="th-multiselect">
+              <div class="th-multiselect__trigger th-multiselect__trigger--active">챌린지 ▾</div>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">기간</span>
+            <div class="th-period-presets">
+              <button class="th-period-presets__btn">오늘</button>
+              <button class="th-period-presets__btn">7일</button>
+              <button class="th-period-presets__btn">이번 달</button>
+              <button class="th-period-presets__btn">커스텀</button>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">상태</span>
+            <select class="admin-filter__select">
+              <option value="" selected>전체</option>
+              <option value="COMPLETED">COMPLETED</option>
+              <option value="PENDING">PENDING</option>
+              <option value="FAILED">FAILED</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+          </div>
+          <div class="th-filter__actions">
+            <button class="th-filter__btn th-filter__btn--search">검색</button>
+            <button class="th-filter__btn th-filter__btn--reset">초기화</button>
+          </div>
+        </div>
+
+        <div class="th-result-count">총 3건</div>
+
+        <!-- Desktop Table (필터 결과) -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>일시</th>
+                <th>사용자</th>
+                <th>유형</th>
+                <th>금액</th>
+                <th>수수료</th>
+                <th>잔액 변동</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="th-row--clickable" data-tx-id="1003">
+                <td>2026-05-19 11:45</td>
+                <td><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 리워드 지급</td>
+                <td><span class="th-amount--plus">+2.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">15.0 → 17.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1006">
+                <td>2026-05-18 18:30</td>
+                <td><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 숨기기 비용</td>
+                <td><span class="th-amount--minus">-1.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">17.0 → 16.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1008">
+                <td>2026-05-17 09:00</td>
+                <td><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 예치금 잠금</td>
+                <td><span class="th-amount--minus">-5.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">20.0 → 15.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards (필터 결과) -->
+        <div class="admin-mobile-card">
+          <div class="admin-mobile-card__item" data-tx-id="1003">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">일시</span>
+              <span class="admin-mobile-card__value">2026-05-19 11:45</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">사용자</span>
+              <span class="admin-mobile-card__value"><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span><span class="badge badge--warning">챌린지</span> 리워드 지급</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">금액</span>
+              <span class="th-amount--plus">+2.0 TON</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상태</span>
+              <span class="badge badge--success">COMPLETED</span>
+            </div>
+          </div>
+          <div class="admin-mobile-card__item" data-tx-id="1006">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">일시</span>
+              <span class="admin-mobile-card__value">2026-05-18 18:30</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">사용자</span>
+              <span class="admin-mobile-card__value"><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span><span class="badge badge--warning">챌린지</span> 숨기기 비용</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">금액</span>
+              <span class="th-amount--minus">-1.0 TON</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상태</span>
+              <span class="badge badge--success">COMPLETED</span>
+            </div>
+          </div>
+          <div class="admin-mobile-card__item" data-tx-id="1008">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">일시</span>
+              <span class="admin-mobile-card__value">2026-05-17 09:00</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">사용자</span>
+              <span class="admin-mobile-card__value"><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span><span class="badge badge--warning">챌린지</span> 예치금 잠금</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">금액</span>
+              <span class="th-amount--minus">-5.0 TON</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상태</span>
+              <span class="badge badge--success">COMPLETED</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" style="margin-top: var(--space-4);">
+          <button class="pagination__btn" disabled>‹</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn" disabled>›</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 3: 상세 모달 ===== -->
+  <main class="screen" id="case-3">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">✅</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">🏆</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="#">
+            <span class="admin-sidebar__item-icon">💳</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📋</span>
+            활동 로그
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">거래 내역</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content (same as Case 1 table behind modal) -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">거래 내역</h1>
+        </div>
+
+        <div class="th-filter">
+          <div class="th-filter__group">
+            <span class="th-filter__label">사용자 ID</span>
+            <input type="number" class="th-filter__input" placeholder="User ID" style="min-width:100px;">
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">유형 그룹</span>
+            <div class="th-multiselect">
+              <div class="th-multiselect__trigger">전체 ▾</div>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">기간</span>
+            <div class="th-period-presets">
+              <button class="th-period-presets__btn">오늘</button>
+              <button class="th-period-presets__btn">7일</button>
+              <button class="th-period-presets__btn">이번 달</button>
+              <button class="th-period-presets__btn">커스텀</button>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">상태</span>
+            <select class="admin-filter__select">
+              <option value="" selected>전체</option>
+              <option value="COMPLETED">COMPLETED</option>
+              <option value="PENDING">PENDING</option>
+              <option value="FAILED">FAILED</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+          </div>
+          <div class="th-filter__actions">
+            <button class="th-filter__btn th-filter__btn--search">검색</button>
+            <button class="th-filter__btn th-filter__btn--reset">초기화</button>
+          </div>
+        </div>
+
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>일시</th>
+                <th>사용자</th>
+                <th>유형</th>
+                <th>금액</th>
+                <th>수수료</th>
+                <th>잔액 변동</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="th-row--clickable" data-tx-id="1001" style="background-color: var(--color-bg-secondary);">
+                <td>2026-05-19 14:30</td>
+                <td><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></td>
+                <td><span class="badge badge--info">충전</span> TON 구매</td>
+                <td><span class="th-amount--plus">+5.0 TON</span></td>
+                <td>0.5 TON</td>
+                <td><span class="th-balance-change">10.0 → 15.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1002">
+                <td>2026-05-19 13:00</td>
+                <td><a class="th-user-link" href="#">#2 Challenger_xY7mP2</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 예치금 잠금</td>
+                <td><span class="th-amount--minus">-3.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">8.0 → 5.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal" id="tx-detail-modal">
+      <div class="modal__backdrop"></div>
+      <div class="modal__content" style="max-width: 520px;">
+        <div class="th-modal__header">
+          <h2 class="th-modal__title">거래 상세</h2>
+          <button class="th-modal__close" data-close-modal>✕</button>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">Transaction ID</span>
+          <span class="th-modal__value">#1001</span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">유형</span>
+          <span class="th-modal__value"><span class="badge badge--info">충전</span>&nbsp;TON 구매</span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">결제 수단</span>
+          <span class="th-modal__value"><span class="th-payment-badge th-payment-badge--ton-connect">TON Connect</span></span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">상태</span>
+          <span class="th-modal__value"><span class="badge badge--success">COMPLETED</span></span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">사용자</span>
+          <span class="th-modal__value">#1 Challenger_aB3xK9 (@john)</span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">금액</span>
+          <span class="th-modal__value th-amount--plus">+5.5 TON</span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">수수료</span>
+          <span class="th-modal__value">0.5 TON</span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">실수령</span>
+          <span class="th-modal__value">5.0 TON</span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">잔액 변동</span>
+          <span class="th-modal__value">10.0 → 15.0 TON</span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">참조 ID</span>
+          <span class="th-modal__value">—</span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">설명</span>
+          <span class="th-modal__value">TON purchase</span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">TX Hash</span>
+          <span class="th-modal__value">
+            <code style="font-size:var(--font-size-xs);color:var(--color-text-secondary);">abc123def456ghi789...</code>
+            <button class="th-modal__copy-btn" data-copy="abc123def456ghi789jkl012mno345">복사</button>
+          </span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">멱등성 키</span>
+          <span class="th-modal__value" style="font-size:var(--font-size-xs);color:var(--color-text-secondary);">uuid-a1b2c3d4-e5f6-7890</span>
+        </div>
+        <div class="th-modal__field">
+          <span class="th-modal__label">생성일시</span>
+          <span class="th-modal__value">2026-05-19 14:30:22</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 4: 빈 상태 ===== -->
+  <main class="screen" id="case-4">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">✅</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">🏆</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="#">
+            <span class="admin-sidebar__item-icon">💳</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📋</span>
+            활동 로그
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">거래 내역</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">거래 내역</h1>
+        </div>
+
+        <!-- Filter Bar (필터 적용 상태) -->
+        <div class="th-filter">
+          <div class="th-filter__group">
+            <span class="th-filter__label">사용자 ID</span>
+            <input type="number" class="th-filter__input" value="999" style="min-width:100px; border-color: var(--color-primary);">
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">유형 그룹</span>
+            <div class="th-multiselect">
+              <div class="th-multiselect__trigger">전체 ▾</div>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">기간</span>
+            <div class="th-period-presets">
+              <button class="th-period-presets__btn">오늘</button>
+              <button class="th-period-presets__btn">7일</button>
+              <button class="th-period-presets__btn">이번 달</button>
+              <button class="th-period-presets__btn">커스텀</button>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">상태</span>
+            <select class="admin-filter__select">
+              <option value="" selected>전체</option>
+              <option value="COMPLETED">COMPLETED</option>
+              <option value="PENDING">PENDING</option>
+              <option value="FAILED">FAILED</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+          </div>
+          <div class="th-filter__actions">
+            <button class="th-filter__btn th-filter__btn--search">검색</button>
+            <button class="th-filter__btn th-filter__btn--reset">초기화</button>
+          </div>
+        </div>
+
+        <div class="th-result-count">총 0건</div>
+
+        <!-- Empty State -->
+        <div class="empty-state">
+          <div class="empty-state__icon">💳</div>
+          <div class="empty-state__title">거래 내역 없음</div>
+          <div class="empty-state__description">조건에 맞는 거래 내역이 없습니다</div>
+          <button class="btn btn--sm btn--secondary" style="margin-top: var(--space-2);">필터 초기화</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 5: 사용자 진입 (userId 자동 필터) ===== -->
+  <main class="screen" id="case-5">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">✅</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">🏆</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="#">
+            <span class="admin-sidebar__item-icon">💳</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📋</span>
+            활동 로그
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">거래 내역</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">거래 내역</h1>
+        </div>
+
+        <!-- Filter Bar (사용자 ID 자동 적용) -->
+        <div class="th-filter">
+          <div class="th-filter__group">
+            <span class="th-filter__label">사용자 ID</span>
+            <input type="number" class="th-filter__input" value="3" style="min-width:100px; border-color: var(--color-primary);">
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">유형 그룹</span>
+            <div class="th-multiselect">
+              <div class="th-multiselect__trigger">전체 ▾</div>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">기간</span>
+            <div class="th-period-presets">
+              <button class="th-period-presets__btn">오늘</button>
+              <button class="th-period-presets__btn">7일</button>
+              <button class="th-period-presets__btn">이번 달</button>
+              <button class="th-period-presets__btn">커스텀</button>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">상태</span>
+            <select class="admin-filter__select">
+              <option value="" selected>전체</option>
+              <option value="COMPLETED">COMPLETED</option>
+              <option value="PENDING">PENDING</option>
+              <option value="FAILED">FAILED</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+          </div>
+          <div class="th-filter__actions">
+            <button class="th-filter__btn th-filter__btn--search">검색</button>
+            <button class="th-filter__btn th-filter__btn--reset">초기화</button>
+          </div>
+        </div>
+
+        <div class="th-result-count">총 4건</div>
+
+        <!-- Desktop Table -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>일시</th>
+                <th>사용자</th>
+                <th>유형</th>
+                <th>금액</th>
+                <th>수수료</th>
+                <th>잔액 변동</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="th-row--clickable" data-tx-id="1004">
+                <td>2026-05-19 10:20</td>
+                <td><a class="th-user-link" href="#">#3 Challenger_kL9nQ4</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 패널티 차감</td>
+                <td><span class="th-amount--minus">-1.5 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">6.5 → 5.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1009">
+                <td>2026-05-18 08:00</td>
+                <td><a class="th-user-link" href="#">#3 Challenger_kL9nQ4</a></td>
+                <td><span class="badge badge--info">충전</span> TON 구매</td>
+                <td><span class="th-amount--plus">+15.0 TON</span></td>
+                <td>1.5 TON</td>
+                <td><span class="th-balance-change">0.0 → 15.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1010">
+                <td>2026-05-17 14:30</td>
+                <td><a class="th-user-link" href="#">#3 Challenger_kL9nQ4</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 예치금 잠금</td>
+                <td><span class="th-amount--minus">-5.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">15.0 → 10.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable" data-tx-id="1011">
+                <td>2026-05-16 20:00</td>
+                <td><a class="th-user-link" href="#">#3 Challenger_kL9nQ4</a></td>
+                <td><span class="badge badge--expert">출금</span> 예치금 출금</td>
+                <td><span class="th-amount--minus">-3.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">10.0 → 7.0</span></td>
+                <td><span class="badge badge--danger">FAILED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="admin-mobile-card">
+          <div class="admin-mobile-card__item" data-tx-id="1004">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">일시</span>
+              <span class="admin-mobile-card__value">2026-05-19 10:20</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">사용자</span>
+              <span class="admin-mobile-card__value"><a class="th-user-link" href="#">#3 Challenger_kL9nQ4</a></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span><span class="badge badge--warning">챌린지</span> 패널티 차감</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">금액</span>
+              <span class="th-amount--minus">-1.5 TON</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상태</span>
+              <span class="badge badge--success">COMPLETED</span>
+            </div>
+          </div>
+          <div class="admin-mobile-card__item" data-tx-id="1009">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">일시</span>
+              <span class="admin-mobile-card__value">2026-05-18 08:00</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">사용자</span>
+              <span class="admin-mobile-card__value"><a class="th-user-link" href="#">#3 Challenger_kL9nQ4</a></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span><span class="badge badge--info">충전</span> TON 구매</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">금액</span>
+              <span class="th-amount--plus">+15.0 TON</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상태</span>
+              <span class="badge badge--success">COMPLETED</span>
+            </div>
+          </div>
+          <div class="admin-mobile-card__item" data-tx-id="1011">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">일시</span>
+              <span class="admin-mobile-card__value">2026-05-16 20:00</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">사용자</span>
+              <span class="admin-mobile-card__value"><a class="th-user-link" href="#">#3 Challenger_kL9nQ4</a></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span><span class="badge badge--expert">출금</span> 예치금 출금</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">금액</span>
+              <span class="th-amount--minus">-3.0 TON</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상태</span>
+              <span class="badge badge--danger">FAILED</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" style="margin-top: var(--space-4);">
+          <button class="pagination__btn" disabled>‹</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn" disabled>›</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 6: 유형 그룹 멀티셀렉트 드롭다운 열림 ===== -->
+  <main class="screen" id="case-6">
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">✅</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">🏆</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="#">
+            <span class="admin-sidebar__item-icon">💳</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📋</span>
+            활동 로그
+          </a>
+        </nav>
+      </aside>
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">거래 내역</span>
+        <span style="width:44px;"></span>
+      </div>
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">거래 내역</h1>
+        </div>
+
+        <!-- Filter Bar (유형 드롭다운 열림 상태) -->
+        <div class="th-filter">
+          <div class="th-filter__group">
+            <span class="th-filter__label">사용자 ID</span>
+            <input type="number" class="th-filter__input" placeholder="User ID" style="min-width:100px;">
+          </div>
+          <div class="th-filter__group" style="position:relative;">
+            <span class="th-filter__label">유형 그룹</span>
+            <div class="th-multiselect">
+              <div class="th-multiselect__trigger th-multiselect__trigger--active">2개 선택 ▾</div>
+              <!-- Dropdown Panel (열림 상태) -->
+              <div style="position:absolute; top:100%; left:0; z-index:100; margin-top:var(--space-1); background:var(--color-bg); border:1px solid var(--color-border); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); padding:var(--space-3); min-width:220px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:var(--space-2); padding-bottom:var(--space-2); border-bottom:1px solid var(--color-border);">
+                  <button style="font-size:var(--font-size-xs); font-weight:var(--font-weight-bold); color:var(--color-primary); background:none; border:none; cursor:pointer;">전체 선택</button>
+                  <button style="font-size:var(--font-size-xs); font-weight:var(--font-weight-bold); color:var(--color-text-secondary); background:none; border:none; cursor:pointer;">전체 해제</button>
+                </div>
+                <label style="display:flex; align-items:center; gap:var(--space-2); padding:var(--space-2) 0; font-size:var(--font-size-sm); cursor:pointer;">
+                  <input type="checkbox" checked> <span class="badge badge--info" style="font-size:var(--font-size-2xs);">충전</span> <span style="color:var(--color-text-secondary); font-size:var(--font-size-xs);">(1)</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:var(--space-2); padding:var(--space-2) 0; font-size:var(--font-size-sm); cursor:pointer;">
+                  <input type="checkbox"> <span class="badge badge--expert" style="font-size:var(--font-size-2xs);">출금</span> <span style="color:var(--color-text-secondary); font-size:var(--font-size-xs);">(2)</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:var(--space-2); padding:var(--space-2) 0; font-size:var(--font-size-sm); cursor:pointer;">
+                  <input type="checkbox" checked> <span class="badge badge--warning" style="font-size:var(--font-size-2xs);">챌린지</span> <span style="color:var(--color-text-secondary); font-size:var(--font-size-xs);">(4)</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:var(--space-2); padding:var(--space-2) 0; font-size:var(--font-size-sm); cursor:pointer;">
+                  <input type="checkbox"> <span class="badge badge--neutral" style="font-size:var(--font-size-2xs);">어드민</span> <span style="color:var(--color-text-secondary); font-size:var(--font-size-xs);">(2)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">기간</span>
+            <div class="th-period-presets">
+              <button class="th-period-presets__btn">오늘</button>
+              <button class="th-period-presets__btn">7일</button>
+              <button class="th-period-presets__btn">이번 달</button>
+              <button class="th-period-presets__btn">커스텀</button>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">상태</span>
+            <select class="admin-filter__select">
+              <option value="" selected>전체</option>
+              <option value="COMPLETED">COMPLETED</option>
+              <option value="PENDING">PENDING</option>
+              <option value="FAILED">FAILED</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+          </div>
+          <div class="th-filter__actions">
+            <button class="th-filter__btn th-filter__btn--search">검색</button>
+            <button class="th-filter__btn th-filter__btn--reset">초기화</button>
+          </div>
+        </div>
+
+        <!-- Table (same as Case 1, abbreviated) -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr><th>일시</th><th>사용자</th><th>유형</th><th>금액</th><th>수수료</th><th>잔액 변동</th><th>상태</th></tr>
+            </thead>
+            <tbody>
+              <tr class="th-row--clickable">
+                <td>2026-05-19 14:30</td>
+                <td><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></td>
+                <td><span class="badge badge--info">충전</span> TON 구매</td>
+                <td><span class="th-amount--plus">+5.0 TON</span></td>
+                <td>0.5 TON</td>
+                <td><span class="th-balance-change">10.0 → 15.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable">
+                <td>2026-05-19 13:00</td>
+                <td><a class="th-user-link" href="#">#2 Challenger_xY7mP2</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 예치금 잠금</td>
+                <td><span class="th-amount--minus">-3.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">8.0 → 5.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 7: 커스텀 기간 선택 ===== -->
+  <main class="screen" id="case-7">
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">✅</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">🏆</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="#">
+            <span class="admin-sidebar__item-icon">💳</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📋</span>
+            활동 로그
+          </a>
+        </nav>
+      </aside>
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">거래 내역</span>
+        <span style="width:44px;"></span>
+      </div>
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">거래 내역</h1>
+        </div>
+
+        <!-- Filter Bar (커스텀 기간 활성 상태) -->
+        <div class="th-filter">
+          <div class="th-filter__group">
+            <span class="th-filter__label">사용자 ID</span>
+            <input type="number" class="th-filter__input" placeholder="User ID" style="min-width:100px;">
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">유형 그룹</span>
+            <div class="th-multiselect">
+              <div class="th-multiselect__trigger">전체 ▾</div>
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">기간</span>
+            <div class="th-period-presets">
+              <button class="th-period-presets__btn">오늘</button>
+              <button class="th-period-presets__btn">7일</button>
+              <button class="th-period-presets__btn">이번 달</button>
+              <button class="th-period-presets__btn active">커스텀</button>
+            </div>
+          </div>
+          <div class="th-filter__group th-custom-dates">
+            <span class="th-filter__label">기간 (커스텀)</span>
+            <div style="display:flex;gap:var(--space-2);align-items:center;">
+              <input type="date" class="th-filter__input" value="2026-05-01" style="min-width:130px;">
+              <span style="color:var(--color-text-secondary);">~</span>
+              <input type="date" class="th-filter__input" value="2026-05-19" style="min-width:130px;">
+            </div>
+          </div>
+          <div class="th-filter__group">
+            <span class="th-filter__label">상태</span>
+            <select class="admin-filter__select">
+              <option value="" selected>전체</option>
+              <option value="COMPLETED">COMPLETED</option>
+              <option value="PENDING">PENDING</option>
+              <option value="FAILED">FAILED</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+          </div>
+          <div class="th-filter__actions">
+            <button class="th-filter__btn th-filter__btn--search">검색</button>
+            <button class="th-filter__btn th-filter__btn--reset">초기화</button>
+          </div>
+        </div>
+
+        <div class="th-result-count">총 15건 (2026-05-01 ~ 2026-05-19)</div>
+
+        <!-- Table (abbreviated) -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr><th>일시</th><th>사용자</th><th>유형</th><th>금액</th><th>수수료</th><th>잔액 변동</th><th>상태</th></tr>
+            </thead>
+            <tbody>
+              <tr class="th-row--clickable">
+                <td>2026-05-19 14:30</td>
+                <td><a class="th-user-link" href="#">#1 Challenger_aB3xK9</a></td>
+                <td><span class="badge badge--info">충전</span> TON 구매</td>
+                <td><span class="th-amount--plus">+5.0 TON</span></td>
+                <td>0.5 TON</td>
+                <td><span class="th-balance-change">10.0 → 15.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable">
+                <td>2026-05-15 09:00</td>
+                <td><a class="th-user-link" href="#">#3 Challenger_kL9nQ4</a></td>
+                <td><span class="badge badge--warning">챌린지</span> 패널티 차감</td>
+                <td><span class="th-amount--minus">-2.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">7.0 → 5.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable">
+                <td>2026-05-10 16:45</td>
+                <td><a class="th-user-link" href="#">#2 Challenger_xY7mP2</a></td>
+                <td><span class="badge badge--expert">출금</span> 예치금 출금</td>
+                <td><span class="th-amount--minus">-5.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">10.0 → 5.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+              <tr class="th-row--clickable">
+                <td>2026-05-03 11:20</td>
+                <td><a class="th-user-link" href="#">#4 Challenger_rT2wE8</a></td>
+                <td><span class="badge badge--neutral">어드민</span> 잔액 증가</td>
+                <td><span class="th-amount--plus">+10.0 TON</span></td>
+                <td>—</td>
+                <td><span class="th-balance-change">0.0 → 10.0</span></td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" style="margin-top: var(--space-4);">
+          <button class="pagination__btn" disabled>‹</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn">2</button>
+          <button class="pagination__btn">›</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div class="toast toast--success" id="copy-toast" hidden>클립보드에 복사되었습니다</div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Mobile sidebar toggle
+    document.querySelectorAll('.admin-topbar__menu-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sidebar = btn.closest('.admin-layout').querySelector('.admin-sidebar');
+        sidebar.classList.toggle('admin-sidebar--open');
+      });
+    });
+
+    // Period preset toggle
+    document.querySelectorAll('.th-period-presets').forEach(group => {
+      group.addEventListener('click', (e) => {
+        const btn = e.target.closest('.th-period-presets__btn');
+        if (!btn) return;
+        // Toggle active state within this group
+        group.querySelectorAll('.th-period-presets__btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Show/hide custom date fields
+        const filterContainer = btn.closest('.th-filter');
+        const customDates = filterContainer ? filterContainer.querySelector('.th-custom-dates') : null;
+        if (customDates) {
+          if (btn.textContent.trim() === '커스텀') {
+            customDates.classList.remove('th-custom-dates--hidden');
+          } else {
+            customDates.classList.add('th-custom-dates--hidden');
+          }
+        }
+      });
+    });
+
+    // Table row click → open modal (Case 3 demo)
+    document.querySelectorAll('.th-row--clickable').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('a')) return; // Don't trigger on user link click
+        const modal = document.getElementById('tx-detail-modal');
+        if (modal) modal.removeAttribute('hidden');
+      });
+    });
+
+    // Mobile card click → open modal
+    document.querySelectorAll('.admin-mobile-card__item[data-tx-id]').forEach(card => {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('a')) return;
+        const modal = document.getElementById('tx-detail-modal');
+        if (modal) modal.removeAttribute('hidden');
+      });
+    });
+
+    // Close modal
+    document.querySelectorAll('[data-close-modal]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modal = btn.closest('.modal');
+        if (modal) modal.setAttribute('hidden', '');
+      });
+    });
+
+    // Close modal on backdrop click
+    document.querySelectorAll('.modal__backdrop').forEach(backdrop => {
+      backdrop.addEventListener('click', () => {
+        const modal = backdrop.closest('.modal');
+        if (modal) modal.setAttribute('hidden', '');
+      });
+    });
+
+    // Copy TX Hash
+    document.querySelectorAll('.th-modal__copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = btn.dataset.copy || btn.previousElementSibling?.textContent || '';
+        navigator.clipboard.writeText(text).then(() => {
+          const toast = document.getElementById('copy-toast');
+          if (toast) {
+            toast.removeAttribute('hidden');
+            setTimeout(() => toast.setAttribute('hidden', ''), 2000);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Home - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Home Screen Styles ===== */
+
+    /* Level Progress Bar */
+    .level-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .level-bar:active {
+      transform: scale(0.98);
+    }
+
+    .level-bar__badge {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-white);
+      background: var(--color-primary-gradient);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+
+    .level-bar__info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .level-bar__name {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+
+    .level-bar__next {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+    }
+
+    /* Hero Section */
+    .hero {
+      background: var(--gradient-yellow);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      text-align: center;
+      color: var(--color-text-white);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .hero__streak {
+      font-size: var(--font-size-display);
+      font-weight: var(--font-weight-black);
+      line-height: var(--line-height-tight);
+    }
+
+    .hero__label {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-black);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-4);
+    }
+
+    .hero__stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-3);
+    }
+
+    .hero--empty {
+      background: var(--color-bg-elevated);
+      color: var(--color-text-secondary);
+    }
+
+    .hero--empty .stat-box {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Mission Button */
+    .mission-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-3);
+      width: 100%;
+      padding: var(--space-5);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-black);
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+      color: var(--color-text-white);
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      box-shadow: var(--shadow-lg);
+      min-height: 56px;
+    }
+
+    .mission-btn:active {
+      transform: scale(0.98);
+    }
+
+    .mission-btn--todo {
+      background: var(--gradient-blue);
+    }
+
+    .mission-btn--done {
+      background: var(--gradient-green);
+    }
+
+    .mission-btn--disabled {
+      background: var(--color-bg-elevated);
+      color: var(--color-text-tertiary);
+      box-shadow: none;
+      cursor: default;
+    }
+
+    .mission-btn--disabled:active {
+      transform: none;
+    }
+
+    /* Settings full-width button */
+    .settings-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      width: 100%;
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .settings-btn:active {
+      transform: scale(0.98);
+    }
+
+    .settings-btn__icon {
+      font-size: 28px;
+    }
+
+    .settings-btn__text {
+      flex: 1;
+    }
+
+    .settings-btn__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .settings-btn__subtitle {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    /* Toast for level up */
+    .levelup-toast {
+      position: fixed;
+      top: var(--space-6);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3000;
+      padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      text-transform: uppercase;
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+      box-shadow: var(--shadow-lg);
+      animation: slideDown var(--transition-normal);
+    }
+
+    .levelup-toast[hidden] {
+      display: none;
+    }
+
+    .hero__challenge-name {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: var(--space-2);
+    }
+
+    .hero--empty .hero__challenge-name {
+      color: var(--color-text-tertiary);
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translate(-50%, -10px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">
+    <!-- Case Switcher -->
+    <nav class="case-switcher">
+      <button class="active" data-case="1">New User</button>
+      <button data-case="2">Mission Todo</button>
+      <button data-case="3">Mission Done</button>
+      <button data-case="4">Partial Done</button>
+      <button data-case="5">Level Up</button>
+      <button data-case="6">Streak Reset</button>
+      <button data-case="7">Notice Banner</button>
+    </nav>
+
+    <!-- ===== Case 1: New User (첫 진입) ===== -->
+    <main class="screen active" id="case-1">
+      <div class="space-y-4">
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.0</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 0</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 0%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 1 TON</span>
+        </div>
+
+        <!-- Hero Section (Empty) -->
+        <div class="hero hero--empty">
+          <div class="hero__streak">0</div>
+          <div class="hero__label">Start your streak!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 0</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 0</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 0%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Disabled) -->
+        <button class="mission-btn mission-btn--disabled" disabled>
+          ✨ Start your first challenge!
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">0.0 TON</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: Active + Mission Todo ===== -->
+    <main class="screen" id="case-2">
+      <div class="space-y-4">
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.2</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 2</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 40%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 7 TON</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero">
+          <div class="hero__streak">🔥 5</div>
+          <div class="hero__challenge-name">30-Day Morning Run</div>
+          <div class="hero__label">On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 2</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 3</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 85%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo) -->
+        <button class="mission-btn mission-btn--todo" data-action="mission">
+          📸 DO YOUR MISSION
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">7.5 TON</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: Active + Mission Done ===== -->
+    <main class="screen" id="case-3">
+      <div class="space-y-4">
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.2</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 2</span>
+            <div class="progress">
+              <div class="progress__bar progress__bar--success" style="width: 40%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 7 TON</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero">
+          <div class="hero__streak">🔥 6</div>
+          <div class="hero__challenge-name">Daily Reading Challenge</div>
+          <div class="hero__label">On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 2</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 3</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 88%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Done) -->
+        <button class="mission-btn mission-btn--done" data-action="mission-done">
+          ✅ MISSION DONE!
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">7.5 TON</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 4: Multiple Active + Partial Done ===== -->
+    <main class="screen" id="case-4">
+      <div class="space-y-4">
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.3</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 3</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 33%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 15 TON</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero">
+          <div class="hero__streak">🔥 12</div>
+          <div class="hero__challenge-name">Morning Meditation</div>
+          <div class="hero__label">On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 3</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 7</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 92%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo - partial done) -->
+        <button class="mission-btn mission-btn--todo" data-action="mission">
+          📸 DO YOUR MISSION
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">18.2 TON</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 5: Level Up ===== -->
+    <main class="screen" id="case-5">
+      <div class="space-y-4">
+        <!-- Level Bar (New Level) -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.3</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 3</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 5%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 15 TON</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero">
+          <div class="hero__streak">🔥 14</div>
+          <div class="hero__challenge-name">Fitness Challenge</div>
+          <div class="hero__label">On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 2</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 5</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 95%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo) -->
+        <button class="mission-btn mission-btn--todo" data-action="mission">
+          📸 DO YOUR MISSION
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">15.8 TON</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level Up Toast -->
+      <div class="levelup-toast" id="levelup-toast">
+        🎉 Level Up! You're now Level 3
+      </div>
+    </main>
+
+    <!-- ===== Case 6: Streak Reset ===== -->
+    <main class="screen" id="case-6">
+      <div class="space-y-4">
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.2</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 2</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 60%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 7 TON</span>
+        </div>
+
+        <!-- Hero Section (Streak Reset) -->
+        <div class="hero hero--empty">
+          <div class="hero__streak">0</div>
+          <div class="hero__label">Start your streak!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 1</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 2</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 67%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo - restart streak) -->
+        <button class="mission-btn mission-btn--todo" data-action="mission">
+          📸 DO YOUR MISSION
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">9.3 TON</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 7: Notice Banner (공지 배너 있음) ===== -->
+    <main class="screen" id="case-7">
+      <div class="space-y-4">
+        <!-- Notice Banner -->
+        <div class="card card--compact card--interactive" style="background: var(--color-warning-bg); border-color: var(--color-warning-border);">
+          <div class="flex items-center gap-3">
+            <span style="font-size: 20px;">📢</span>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                Server maintenance on May 20
+              </div>
+            </div>
+            <span class="badge badge--warning" style="flex-shrink: 0;">+2 more</span>
+          </div>
+        </div>
+
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.3</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 3</span>
+            <div class="progress" style="height: 6px;">
+              <div class="progress__bar" style="width: 45%;"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 15 TON</span>
+        </div>
+
+        <!-- Hero -->
+        <div class="hero">
+          <div class="hero__streak">🔥 12</div>
+          <div class="hero__challenge-name">Morning Meditation</div>
+          <div class="hero__label">Days On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 3</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 5</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 87%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo) -->
+        <button class="mission-btn mission-btn--todo">
+          <span class="mission-btn__icon">📸</span>
+          <div class="mission-btn__text">
+            <div class="mission-btn__title">Do Your Mission</div>
+            <div class="mission-btn__subtitle">Keep your streak alive</div>
+          </div>
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">15.5 TON</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+
+      // Show level up toast for Case 5
+      const toast = document.getElementById('levelup-toast');
+      if (toast) {
+        if (caseId === '5') {
+          toast.hidden = false;
+          setTimeout(() => { toast.hidden = true; }, 3000);
+        } else {
+          toast.hidden = true;
+        }
+      }
+    });
+
+    // Mission Button Interaction (visual feedback only)
+    document.querySelectorAll('[data-action="mission"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.style.transform = 'scale(0.95)';
+        btn.style.opacity = '0.8';
+        setTimeout(() => {
+          btn.style.transform = '';
+          btn.style.opacity = '';
+        }, 200);
+      });
+    });
+
+    document.querySelectorAll('[data-action="mission-done"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          btn.style.transform = '';
+        }, 200);
+      });
+    });
+
+    // Action Grid Item Interaction (visual feedback)
+    document.querySelectorAll('.action-grid__item').forEach(item => {
+      item.addEventListener('click', () => {
+        item.style.transform = 'scale(0.96)';
+        setTimeout(() => {
+          item.style.transform = '';
+        }, 150);
+      });
+    });
+
+    // Level Bar Interaction
+    document.querySelectorAll('.level-bar').forEach(bar => {
+      bar.addEventListener('click', () => {
+        bar.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+          bar.style.transform = '';
+        }, 150);
+      });
+    });
+
+    // Show level up toast on initial load if Case 5 is active
+    window.addEventListener('DOMContentLoaded', () => {
+      const activeCase = document.querySelector('.case-switcher button.active');
+      if (activeCase && activeCase.dataset.case === '5') {
+        const toast = document.getElementById('levelup-toast');
+        if (toast) {
+          toast.hidden = false;
+          setTimeout(() => { toast.hidden = true; }, 3000);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

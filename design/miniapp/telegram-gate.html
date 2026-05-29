@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Open in Telegram - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Telegram Gate Screen ===== */
+
+    .gate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: var(--space-6);
+      text-align: center;
+    }
+
+    .gate__icon {
+      font-size: 72px;
+      margin-bottom: var(--space-6);
+    }
+
+    .gate__title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin-bottom: var(--space-3);
+    }
+
+    .gate__description {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-relaxed);
+      margin-bottom: var(--space-8);
+      max-width: 300px;
+    }
+
+    .gate__cta {
+      width: 100%;
+      max-width: 300px;
+      margin-bottom: var(--space-10);
+    }
+
+    .gate__footer {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-tertiary);
+    }
+
+    .gate__footer a {
+      color: var(--color-primary);
+      font-weight: var(--font-weight-bold);
+      text-decoration: none;
+    }
+
+    .gate__footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">
+    <!-- No case-switcher: single screen -->
+
+    <main class="gate">
+      <!-- Icon -->
+      <div class="gate__icon">📱</div>
+
+      <!-- Title -->
+      <h1 class="gate__title">Open in Telegram</h1>
+
+      <!-- Description -->
+      <p class="gate__description">
+        DefyTON works best inside Telegram. Open the app in Telegram to get started.
+      </p>
+
+      <!-- CTA Button -->
+      <div class="gate__cta">
+        <a href="https://t.me/BOT_USERNAME/app" class="btn btn--primary btn--full btn--lg">
+          Open in Telegram
+        </a>
+      </div>
+
+      <!-- Footer helper text -->
+      <p class="gate__footer">
+        Don't have Telegram? <a href="https://telegram.org/apps" target="_blank" rel="noopener">Download here</a>
+      </p>
+    </main>
+  </div>
+</body>
+</html>

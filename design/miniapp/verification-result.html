@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Verification Result - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Verification Result Screen Styles ===== */
+
+    /* Full-screen result layout */
+    .result-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 60px);
+      padding: var(--space-6);
+      text-align: center;
+      position: relative;
+    }
+
+    /* Background gradients per state */
+    .result-screen--pending {
+      background: linear-gradient(180deg, var(--color-info-bg) 0%, var(--color-info-bg-deep) 50%, var(--color-bg) 100%);
+    }
+
+    .result-screen--approved {
+      background: linear-gradient(180deg, var(--color-success-bg) 0%, var(--color-success-bg-deep) 50%, var(--color-bg) 100%);
+    }
+
+    .result-screen--completed {
+      background: linear-gradient(180deg, var(--color-gold-bg) 0%, var(--color-gold-bg-mid) 30%, var(--color-gold-bg-deep) 60%, var(--color-bg) 100%);
+    }
+
+    .result-screen--rejected {
+      background: linear-gradient(180deg, var(--color-danger-bg) 0%, var(--color-danger-bg-deep) 50%, var(--color-bg) 100%);
+    }
+
+    .result-screen--dispute {
+      background: linear-gradient(180deg, var(--color-info-bg) 0%, var(--color-expert-bg-deep) 50%, var(--color-bg) 100%);
+    }
+
+    .result-screen--givenup {
+      background: linear-gradient(180deg, var(--color-bg-elevated) 0%, var(--color-border) 50%, var(--color-bg) 100%);
+    }
+
+    /* Large icon */
+    .result-icon {
+      font-size: 72px;
+      margin-bottom: var(--space-6);
+      line-height: 1;
+    }
+
+    /* Pulse animation for pending */
+    .result-icon--pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    /* Main text */
+    .result-title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .result-subtitle {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-6);
+      line-height: var(--line-height-relaxed);
+      max-width: 300px;
+    }
+
+    /* Info cards within result */
+    .result-info {
+      width: 100%;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin-bottom: var(--space-6);
+    }
+
+    .result-info__item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-3) var(--space-4);
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+    }
+
+    .result-info__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    .result-info__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .result-info__value--success {
+      color: var(--color-success);
+    }
+
+    .result-info__value--danger {
+      color: var(--color-danger);
+    }
+
+    .result-info__value--warning {
+      color: var(--color-warning);
+    }
+
+    /* Streak badge */
+    .result-streak {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background: var(--gradient-yellow);
+      border-radius: var(--radius-full);
+      color: var(--color-text-white);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      margin-bottom: var(--space-4);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Challenge info chip */
+    .result-challenge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-6);
+    }
+
+    /* Rejection reason box */
+    .result-reason {
+      width: 100%;
+      max-width: 320px;
+      padding: var(--space-4);
+      background-color: var(--color-danger-bg);
+      border: 2px solid var(--color-danger-border);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+    }
+
+    .result-reason__title {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-black);
+      color: var(--color-danger-text);
+      text-transform: uppercase;
+      margin-bottom: var(--space-2);
+    }
+
+    .result-reason__text {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+      line-height: var(--line-height-relaxed);
+    }
+
+    /* Button group */
+    .result-actions {
+      width: 100%;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .result-actions .btn {
+      width: 100%;
+    }
+
+    /* Link-style button */
+    .btn--link {
+      background: none;
+      color: var(--color-text-secondary);
+      font-weight: var(--font-weight-bold);
+      text-decoration: underline;
+      min-height: 44px;
+      box-shadow: none;
+    }
+
+    .btn--link:hover {
+      color: var(--color-text);
+    }
+
+    /* Dispute form */
+    .dispute-form {
+      width: 100%;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    .dispute-form__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      text-align: left;
+    }
+
+    .dispute-form__hint {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      text-align: left;
+      line-height: var(--line-height-relaxed);
+    }
+
+    .dispute-form__textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: var(--space-4);
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-normal);
+      background-color: var(--color-bg);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text);
+      resize: vertical;
+      transition: border-color var(--transition-fast);
+      font-family: var(--font-family);
+    }
+
+    .dispute-form__textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .dispute-form__textarea::placeholder {
+      color: var(--color-text-tertiary);
+    }
+
+    .dispute-form__counter {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+      text-align: right;
+    }
+
+    .dispute-form__counter--error {
+      color: var(--color-danger);
+    }
+
+    /* Photo preview in dispute */
+    .dispute-photo {
+      width: 100%;
+      max-width: 200px;
+      aspect-ratio: 1;
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      margin: 0 auto;
+    }
+
+    /* Loading dots for pending */
+    .loading-dots {
+      display: flex;
+      gap: var(--space-2);
+      justify-content: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .loading-dots__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      background-color: var(--color-info);
+      animation: dotBounce 1.4s ease-in-out infinite;
+    }
+
+    .loading-dots__dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .loading-dots__dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes dotBounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Confetti-like decoration for completed */
+    .result-confetti {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 200px;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .result-confetti::before,
+    .result-confetti::after {
+      content: '🎊';
+      position: absolute;
+      font-size: 24px;
+      animation: confettiFall 3s ease-in-out infinite;
+    }
+
+    .result-confetti::before {
+      left: 15%;
+      animation-delay: 0s;
+    }
+
+    .result-confetti::after {
+      right: 15%;
+      animation-delay: 1.5s;
+    }
+
+    @keyframes confettiFall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+      20% { opacity: 1; }
+      100% { transform: translateY(180px) rotate(360deg); opacity: 0; }
+    }
+
+    /* Pending bounce dots */
+    .pending-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .pending-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      animation: pendingBounce 0.6s ease-in-out infinite alternate;
+    }
+    .pending-dot:nth-child(2) { animation-delay: 0.15s; }
+    .pending-dot:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes pendingBounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-8px); }
+    }
+
+    /* Pending hint text */
+    .pending-hint {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+      margin-top: var(--space-3);
+      text-align: center;
+    }
+
+    /* Disabled button style */
+    .btn--disabled-state {
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-tertiary);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Share buttons row */
+    .share-buttons {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .share-buttons .btn {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">
+    <!-- Case Switcher -->
+    <nav class="case-switcher">
+      <button class="active" data-case="1">Pending</button>
+      <button data-case="2">Approved</button>
+      <button data-case="3">Completed</button>
+      <button data-case="4">Rejected</button>
+      <button data-case="5">Dispute</button>
+      <button data-case="6">Given Up</button>
+      <button data-case="7">Cancelled</button>
+    </nav>
+
+    <!-- ===== Case 1: PENDING (AI 분석 중 — 폴링 없음, 1회 조회) ===== -->
+    <main class="screen active" id="case-1">
+      <div class="result-screen result-screen--pending">
+        <div class="result-icon">🤖</div>
+        <h1 class="result-title">Analyzing Your Photo...</h1>
+        <p class="result-subtitle">AI is reviewing your submission. This usually takes a few seconds.</p>
+
+        <div class="pending-dots">
+          <span class="pending-dot"></span>
+          <span class="pending-dot"></span>
+          <span class="pending-dot"></span>
+        </div>
+
+        <div class="result-actions">
+          <button class="btn btn--primary btn--full">Back to Home</button>
+          <p class="pending-hint">You'll get a notification when the result is ready.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: APPROVED (인증 성공) ===== -->
+    <main class="screen" id="case-2">
+      <div class="result-screen result-screen--approved">
+        <div class="result-icon">✅</div>
+        <h1 class="result-title">Perfect! Mission Complete!</h1>
+
+        <div class="result-streak">🔥 5 Day Streak</div>
+
+        <div class="result-challenge">
+          <span>🏃</span>
+          <span>Morning Run Challenge</span>
+        </div>
+
+        <div class="result-info">
+          <div class="result-info__item">
+            <span class="result-info__label">Progress</span>
+            <span class="result-info__value result-info__value--success">Day 5 of 30 completed</span>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <div class="share-buttons">
+            <button class="btn btn--secondary">📤 Share to Telegram</button>
+            <button class="btn btn--ghost">🔗 Copy Link</button>
+          </div>
+          <button class="btn btn--success btn--full">Back to Home</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: APPROVED + 챌린지 완료 ===== -->
+    <main class="screen" id="case-3">
+      <div class="result-screen result-screen--completed">
+        <div class="result-confetti"></div>
+        <div class="result-icon">🎉</div>
+        <h1 class="result-title">Challenge Complete!</h1>
+        <p class="result-subtitle">Congratulations! You've completed the challenge!</p>
+
+        <div class="result-streak">🔥 30 Day Streak</div>
+
+        <div class="result-info">
+          <div class="result-info__item">
+            <span class="result-info__label">Deposit Returned</span>
+            <span class="result-info__value">5.0 TON</span>
+          </div>
+          <div class="result-info__item">
+            <span class="result-info__label">Reward Earned</span>
+            <span class="result-info__value result-info__value--success">+0.5 TON</span>
+          </div>
+          <div class="result-info__item">
+            <span class="result-info__label">Completion Rate</span>
+            <span class="result-info__value result-info__value--success">100%</span>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <div class="share-buttons">
+            <button class="btn btn--secondary">📤 Share to Telegram</button>
+            <button class="btn btn--ghost">🔗 Copy Link</button>
+          </div>
+          <button class="btn btn--primary btn--full">Back to Home</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 4: REJECTED (인증 실패) ===== -->
+    <main class="screen" id="case-4">
+      <div class="result-screen result-screen--rejected">
+        <div class="result-icon">❌</div>
+        <h1 class="result-title">Verification Failed</h1>
+
+        <div class="result-reason">
+          <div class="result-reason__title">Reason</div>
+          <p class="result-reason__text">Photo does not clearly show the required activity. Please ensure your running route or activity is visible.</p>
+        </div>
+
+        <div class="result-challenge">
+          <span>🏃</span>
+          <span>Morning Run Challenge</span>
+        </div>
+
+        <p class="result-subtitle">You can try again today with a new photo.</p>
+
+        <div class="result-actions">
+          <button class="btn btn--primary btn--full">Try Again</button>
+          <button class="btn btn--secondary btn--full" id="dispute-btn">File a Dispute</button>
+          <button class="btn btn--link btn--full">Back to Home</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 5: 이의제기 작성 ===== -->
+    <main class="screen" id="case-5">
+      <div class="result-screen result-screen--dispute">
+        <div class="result-icon">📋</div>
+        <h1 class="result-title">File a Dispute</h1>
+        <p class="result-subtitle">Explain why you believe this verification should be approved.</p>
+
+        <div class="dispute-photo">📷</div>
+
+        <div class="dispute-form">
+          <label class="dispute-form__label">Your Reason</label>
+          <p class="dispute-form__hint">Describe what the photo shows and why it should be approved. (Min 10 characters)</p>
+          <textarea class="dispute-form__textarea" id="dispute-textarea" placeholder="I was running in the park and the photo clearly shows..." maxlength="500"></textarea>
+          <span class="dispute-form__counter" id="dispute-counter">0 / 500</span>
+        </div>
+
+        <div class="result-actions">
+          <button class="btn btn--primary btn--full" id="submit-dispute-btn" disabled>Submit Dispute</button>
+          <button class="btn btn--ghost btn--full" id="cancel-dispute-btn">Cancel</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 6: GIVEN_UP (포기 결과) ===== -->
+    <main class="screen" id="case-6">
+      <div class="result-screen result-screen--givenup">
+        <div class="result-icon">🏳️</div>
+        <h1 class="result-title">Challenge Abandoned</h1>
+        <p class="result-subtitle">You've given up on this challenge.</p>
+
+        <div class="result-info">
+          <div class="result-info__item">
+            <span class="result-info__label">Penalty (10%)</span>
+            <span class="result-info__value result-info__value--danger">-0.5 TON</span>
+          </div>
+          <div class="result-info__item">
+            <span class="result-info__label">Returned</span>
+            <span class="result-info__value">4.5 TON</span>
+          </div>
+          <div class="result-info__item">
+            <span class="result-info__label">Streak</span>
+            <span class="result-info__value result-info__value--danger">Reset to 0</span>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <button class="btn btn--primary btn--full">Back to Home</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 7: CANCELLED (어드민 취소) ===== -->
+    <main class="screen" id="case-7">
+      <div class="result-screen result-screen--givenup">
+        <span class="result-icon">🚫</span>
+        <h1 class="result-title">Verification Cancelled</h1>
+        <p class="result-subtitle">
+          This verification was cancelled by admin review.
+        </p>
+
+        <!-- Admin Reason -->
+        <div class="result-reason">
+          <div class="result-reason__title">Reason</div>
+          <p class="result-reason__text">Fraudulent activity detected in submitted photo.</p>
+        </div>
+
+        <!-- Button -->
+        <div class="result-actions">
+          <button class="btn btn--primary btn--full">Back to Home</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast for dispute submission -->
+    <div class="toast toast--success" id="dispute-success-toast" hidden>
+      ✅ Dispute submitted successfully
+    </div>
+    <div class="toast toast--error" id="dispute-error-toast" hidden>
+      ❌ Failed to submit dispute. Please try again.
+    </div>
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Dispute textarea character counter
+    const textarea = document.getElementById('dispute-textarea');
+    const counter = document.getElementById('dispute-counter');
+    const submitBtn = document.getElementById('submit-dispute-btn');
+
+    if (textarea) {
+      textarea.addEventListener('input', () => {
+        const len = textarea.value.length;
+        counter.textContent = len + ' / 500';
+
+        // Enable/disable submit based on min length
+        if (len >= 10) {
+          submitBtn.disabled = false;
+          counter.classList.remove('dispute-form__counter--error');
+        } else {
+          submitBtn.disabled = true;
+        }
+
+        // Max length warning
+        if (len >= 480) {
+          counter.classList.add('dispute-form__counter--error');
+        } else if (len >= 10) {
+          counter.classList.remove('dispute-form__counter--error');
+        }
+      });
+    }
+
+    // Submit dispute interaction
+    if (submitBtn) {
+      submitBtn.addEventListener('click', () => {
+        if (textarea.value.length < 10) return;
+
+        // Simulate submission
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        setTimeout(() => {
+          // Show success toast
+          const toast = document.getElementById('dispute-success-toast');
+          toast.hidden = false;
+          setTimeout(() => { toast.hidden = true; }, 3000);
+
+          // Reset form
+          submitBtn.textContent = 'Submit Dispute';
+          submitBtn.disabled = true;
+          textarea.value = '';
+          counter.textContent = '0 / 500';
+        }, 1000);
+      });
+    }
+
+    // Cancel dispute — switch back to Rejected case
+    const cancelBtn = document.getElementById('cancel-dispute-btn');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        // Switch to case 4 (Rejected)
+        document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const rejectedBtn = document.querySelector('[data-case="4"]');
+        rejectedBtn.classList.add('active');
+        document.getElementById('case-4').classList.add('active');
+      });
+    }
+
+    // File a Dispute button — switch to dispute case
+    const disputeBtn = document.getElementById('dispute-btn');
+    if (disputeBtn) {
+      disputeBtn.addEventListener('click', () => {
+        document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const disputeCaseBtn = document.querySelector('[data-case="5"]');
+        disputeCaseBtn.classList.add('active');
+        document.getElementById('case-5').classList.add('active');
+      });
+    }
+
+    // Button click feedback
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        btn.style.transform = 'scale(0.96)';
+        btn.style.opacity = '0.9';
+        setTimeout(() => {
+          btn.style.transform = '';
+          btn.style.opacity = '';
+        }, 150);
+      });
+    });
+  </script>
+</body>
+</html>

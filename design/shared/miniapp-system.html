@@ -1,0 +1,449 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System - Component Catalog</title>
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    body {
+      background-color: var(--color-bg-secondary);
+      padding: 40px 20px;
+    }
+
+    .system-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section__title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--color-border);
+      text-transform: uppercase;
+    }
+
+    .section__subtitle {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-secondary);
+      margin-top: 24px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .color-swatch {
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 2px solid var(--color-border);
+    }
+
+    .color-swatch__preview {
+      height: 60px;
+    }
+
+    .color-swatch__info {
+      padding: 8px;
+      background-color: var(--color-bg);
+    }
+
+    .color-swatch__name {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .color-swatch__value {
+      font-size: var(--font-size-2xs);
+      color: var(--color-text-tertiary);
+      font-family: monospace;
+    }
+
+    .type-sample {
+      margin-bottom: 12px;
+      padding: 16px;
+      background-color: var(--color-bg);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+
+    .type-sample__label {
+      font-size: var(--font-size-2xs);
+      color: var(--color-text-tertiary);
+      margin-bottom: 4px;
+      font-family: monospace;
+    }
+
+    .spacing-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .spacing-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .spacing-item__bar {
+      background: var(--color-primary-gradient);
+      height: 16px;
+      border-radius: 4px;
+    }
+
+    .spacing-item__label {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      font-family: monospace;
+      min-width: 120px;
+    }
+
+    .showcase {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 24px;
+      background-color: var(--color-bg);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--color-border);
+      margin-bottom: 16px;
+    }
+
+    .showcase--col {
+      flex-direction: column;
+    }
+
+    .showcase--mobile {
+      max-width: 390px;
+    }
+  </style>
+</head>
+<body>
+  <div class="system-container">
+    <h1 style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-black); margin-bottom: 8px;">🎨 Design System</h1>
+    <p style="color: var(--color-text-secondary); font-weight: var(--font-weight-semibold); margin-bottom: 48px;">DefyTON 디자인 토큰 + 컴포넌트 카탈로그. tokens.css 또는 components.css 변경 시 이 페이지에서 전체 영향을 확인합니다.</p>
+
+    <!-- COLORS -->
+    <div class="section">
+      <h2 class="section__title">Colors</h2>
+
+      <h3 class="section__subtitle">Primary</h3>
+      <div class="color-grid">
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-primary);"></div><div class="color-swatch__info"><div class="color-swatch__name">Primary</div><div class="color-swatch__value">#8b5cf6</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-primary-light);"></div><div class="color-swatch__info"><div class="color-swatch__name">Primary Light</div><div class="color-swatch__value">#a78bfa</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background: var(--color-primary-gradient);"></div><div class="color-swatch__info"><div class="color-swatch__name">Primary Gradient</div><div class="color-swatch__value">purple→indigo</div></div></div>
+      </div>
+
+      <h3 class="section__subtitle">Semantic</h3>
+      <div class="color-grid">
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-success);"></div><div class="color-swatch__info"><div class="color-swatch__name">Success</div><div class="color-swatch__value">#16a34a</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-danger);"></div><div class="color-swatch__info"><div class="color-swatch__name">Danger</div><div class="color-swatch__value">#dc2626</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-warning);"></div><div class="color-swatch__info"><div class="color-swatch__name">Warning</div><div class="color-swatch__value">#ca8a04</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-info);"></div><div class="color-swatch__info"><div class="color-swatch__name">Info</div><div class="color-swatch__value">#2563eb</div></div></div>
+      </div>
+
+      <h3 class="section__subtitle">Gradients</h3>
+      <div class="color-grid">
+        <div class="color-swatch"><div class="color-swatch__preview" style="background: var(--gradient-yellow);"></div><div class="color-swatch__info"><div class="color-swatch__name">Yellow (Streak)</div><div class="color-swatch__value">yellow→orange</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background: var(--gradient-blue);"></div><div class="color-swatch__info"><div class="color-swatch__name">Blue (Active)</div><div class="color-swatch__value">blue→purple</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background: var(--gradient-green);"></div><div class="color-swatch__info"><div class="color-swatch__name">Green (Success)</div><div class="color-swatch__value">green→emerald</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background: var(--gradient-red);"></div><div class="color-swatch__info"><div class="color-swatch__name">Red (Danger)</div><div class="color-swatch__value">red→pink</div></div></div>
+      </div>
+
+      <h3 class="section__subtitle">Neutral / Background</h3>
+      <div class="color-grid">
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-bg); border: 1px solid #eee;"></div><div class="color-swatch__info"><div class="color-swatch__name">BG</div><div class="color-swatch__value">#ffffff</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-bg-secondary);"></div><div class="color-swatch__info"><div class="color-swatch__name">BG Secondary</div><div class="color-swatch__value">#f9fafb</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-bg-elevated);"></div><div class="color-swatch__info"><div class="color-swatch__name">BG Elevated</div><div class="color-swatch__value">#f3f4f6</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-text);"></div><div class="color-swatch__info"><div class="color-swatch__name">Text</div><div class="color-swatch__value">#1f2937</div></div></div>
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-text-secondary);"></div><div class="color-swatch__info"><div class="color-swatch__name">Text Secondary</div><div class="color-swatch__value">#6b7280</div></div></div>
+      </div>
+
+      <h3 class="section__subtitle">Brand</h3>
+      <div class="color-grid">
+        <div class="color-swatch"><div class="color-swatch__preview" style="background-color: var(--color-ton);"></div><div class="color-swatch__info"><div class="color-swatch__name">TON</div><div class="color-swatch__value">#0098EA</div></div></div>
+      </div>
+    </div>
+
+    <!-- TYPOGRAPHY -->
+    <div class="section">
+      <h2 class="section__title">Typography</h2>
+      <div class="type-sample"><div class="type-sample__label">display (60px) / black</div><div style="font-size: var(--font-size-display); font-weight: var(--font-weight-black);">12</div></div>
+      <div class="type-sample"><div class="type-sample__label">2xl (30px) / black</div><div style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-black);">Challenge Complete!</div></div>
+      <div class="type-sample"><div class="type-sample__label">xl (24px) / black</div><div style="font-size: var(--font-size-xl); font-weight: var(--font-weight-black);">Your Wallet</div></div>
+      <div class="type-sample"><div class="type-sample__label">lg (20px) / black</div><div style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black);">Active Challenges</div></div>
+      <div class="type-sample"><div class="type-sample__label">base (16px) / semibold</div><div style="font-size: var(--font-size-base); font-weight: var(--font-weight-semibold);">Complete 3 verifications per week.</div></div>
+      <div class="type-sample"><div class="type-sample__label">sm (14px) / semibold</div><div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-text-secondary);">Last verified 2 hours ago</div></div>
+      <div class="type-sample"><div class="type-sample__label">xs (12px) / bold — UPPERCASE</div><div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); text-transform: uppercase;">Section Header</div></div>
+    </div>
+
+    <!-- SPACING -->
+    <div class="section">
+      <h2 class="section__title">Spacing (8pt Grid)</h2>
+      <div class="spacing-grid">
+        <div class="spacing-item"><div class="spacing-item__label">--space-2 (8px)</div><div class="spacing-item__bar" style="width: 8px;"></div></div>
+        <div class="spacing-item"><div class="spacing-item__label">--space-4 (16px)</div><div class="spacing-item__bar" style="width: 16px;"></div></div>
+        <div class="spacing-item"><div class="spacing-item__label">--space-6 (24px)</div><div class="spacing-item__bar" style="width: 24px;"></div></div>
+        <div class="spacing-item"><div class="spacing-item__label">--space-8 (32px)</div><div class="spacing-item__bar" style="width: 32px;"></div></div>
+        <div class="spacing-item"><div class="spacing-item__label">--space-10 (40px)</div><div class="spacing-item__bar" style="width: 40px;"></div></div>
+        <div class="spacing-item"><div class="spacing-item__label">--space-12 (48px)</div><div class="spacing-item__bar" style="width: 48px;"></div></div>
+      </div>
+    </div>
+
+    <!-- RADIUS -->
+    <div class="section">
+      <h2 class="section__title">Border Radius</h2>
+      <div class="showcase">
+        <div style="width: 80px; height: 80px; background: var(--color-bg-elevated); border: 2px solid var(--color-border); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary);">sm (12px)</div>
+        <div style="width: 80px; height: 80px; background: var(--color-bg-elevated); border: 2px solid var(--color-border); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary);">md (16px)</div>
+        <div style="width: 80px; height: 80px; background: var(--color-bg-elevated); border: 2px solid var(--color-border); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary);">lg (24px)</div>
+        <div style="width: 80px; height: 80px; background: var(--color-bg-elevated); border: 2px solid var(--color-border); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary);">full</div>
+      </div>
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="section">
+      <h2 class="section__title">Buttons</h2>
+      <h3 class="section__subtitle">Variants</h3>
+      <div class="showcase">
+        <button class="btn btn--primary">Primary</button>
+        <button class="btn btn--secondary">Secondary</button>
+        <button class="btn btn--danger">Danger</button>
+        <button class="btn btn--success">Success</button>
+        <button class="btn btn--ghost">Ghost</button>
+        <button class="btn btn--primary" disabled>Disabled</button>
+      </div>
+      <h3 class="section__subtitle">Full Width</h3>
+      <div class="showcase showcase--col showcase--mobile">
+        <button class="btn btn--primary btn--full">Start Challenge (3 TON)</button>
+        <button class="btn btn--secondary btn--full">Cancel</button>
+      </div>
+    </div>
+
+    <!-- CARDS -->
+    <div class="section">
+      <h2 class="section__title">Cards</h2>
+      <div class="showcase showcase--col showcase--mobile">
+        <div class="card"><div style="font-weight: var(--font-weight-black); margin-bottom: 8px;">Primary Card</div><div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-text-secondary);">White background, rounded-3xl, shadow-lg, border-2</div></div>
+        <div class="card card--compact"><div style="font-weight: var(--font-weight-bold); margin-bottom: 4px;">Compact Card</div><div style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">For list items. Smaller padding and radius.</div></div>
+        <div class="card card--success"><div style="font-weight: var(--font-weight-black); margin-bottom: 8px;">✅ Success Card</div><div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-success-text);">Challenge completed!</div></div>
+        <div class="card card--warning"><div style="font-weight: var(--font-weight-black); margin-bottom: 8px;">⚠️ Warning Card</div><div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-warning-text);">Streak at risk</div></div>
+        <div class="card card--error"><div style="font-weight: var(--font-weight-black); margin-bottom: 8px;">❌ Error Card</div><div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-danger-text);">Mission failed</div></div>
+      </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="section">
+      <h2 class="section__title">Header</h2>
+      <div class="showcase showcase--col showcase--mobile" style="padding: 0; overflow: hidden; border-radius: var(--radius-md);">
+        <div class="header">
+          <button class="header__back">← Back</button>
+          <div class="header__title">My Challenges</div>
+          <div class="header__spacer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BADGES -->
+    <div class="section">
+      <h2 class="section__title">Badges</h2>
+      <div class="showcase">
+        <span class="badge badge--success">Completed</span>
+        <span class="badge badge--danger">Failed</span>
+        <span class="badge badge--warning">Pending</span>
+        <span class="badge badge--info">Active</span>
+        <span class="badge badge--neutral">Easy</span>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="section">
+      <h2 class="section__title">Progress Bar</h2>
+      <div class="showcase showcase--col showcase--mobile">
+        <div><div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); margin-bottom: 6px; text-transform: uppercase;">100% — Success</div><div class="progress"><div class="progress__bar progress__bar--success" style="width: 100%;"></div></div></div>
+        <div><div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); margin-bottom: 6px; text-transform: uppercase;">72% — Default</div><div class="progress"><div class="progress__bar" style="width: 72%;"></div></div></div>
+        <div><div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); margin-bottom: 6px; text-transform: uppercase;">35% — Warning</div><div class="progress"><div class="progress__bar progress__bar--warning" style="width: 35%;"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ICON CONTAINERS -->
+    <div class="section">
+      <h2 class="section__title">Icon Containers</h2>
+      <div class="showcase">
+        <div class="icon-container icon-container--sm">💪</div>
+        <div class="icon-container icon-container--md">📚</div>
+        <div class="icon-container icon-container--lg">🔥</div>
+      </div>
+    </div>
+
+    <!-- NOTICE -->
+    <div class="section">
+      <h2 class="section__title">Notice / Alert</h2>
+      <div class="showcase showcase--col showcase--mobile">
+        <div class="notice notice--info">💡 Payments are processed via TON Connect</div>
+        <div class="notice notice--warning">⚠️ This action cannot be undone</div>
+        <div class="notice notice--error">❌ Insufficient balance</div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="section">
+      <h2 class="section__title">Input</h2>
+      <div class="showcase showcase--col showcase--mobile">
+        <input class="input" type="text" placeholder="Enter amount...">
+        <input class="input input--error" type="text" value="Invalid input">
+      </div>
+    </div>
+
+    <!-- ACTION GRID -->
+    <div class="section">
+      <h2 class="section__title">Action Grid (2×2)</h2>
+      <div class="showcase showcase--mobile" style="padding: var(--space-4);">
+        <div class="action-grid" style="width: 100%;">
+          <div class="action-grid__item"><div class="action-grid__item-icon">📋</div><div class="action-grid__item-title">My Challenges</div><div class="action-grid__item-subtitle">Track progress</div></div>
+          <div class="action-grid__item"><div class="action-grid__item-icon">✨</div><div class="action-grid__item-title">New Challenge</div><div class="action-grid__item-subtitle">Start today</div></div>
+          <div class="action-grid__item"><div class="action-grid__item-icon">💰</div><div class="action-grid__item-title">Wallet</div><div class="action-grid__item-subtitle">5.5 TON</div></div>
+          <div class="action-grid__item"><div class="action-grid__item-icon">🏆</div><div class="action-grid__item-title">Leaderboard</div><div class="action-grid__item-subtitle">Beat friends</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="section">
+      <h2 class="section__title">Empty State</h2>
+      <div class="showcase showcase--col showcase--mobile">
+        <div class="empty-state">
+          <div class="empty-state__icon">🎯</div>
+          <div class="empty-state__title">No Active Challenges</div>
+          <div class="empty-state__description">Start your first challenge and build a habit with TON deposit.</div>
+          <button class="btn btn--primary">Browse Challenges</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="section">
+      <h2 class="section__title">Modal</h2>
+      <div class="showcase">
+        <button class="btn btn--primary btn--sm" onclick="document.getElementById('demo-modal').hidden = false;">Open Modal</button>
+      </div>
+      <div class="modal" id="demo-modal" hidden>
+        <div class="modal__backdrop" onclick="document.getElementById('demo-modal').hidden = true;"></div>
+        <div class="modal__content">
+          <h3 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); margin-bottom: 12px;">Confirm Challenge</h3>
+          <p style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-text-secondary); margin-bottom: 20px;">Are you sure you want to start this challenge? 3 TON will be deposited.</p>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn--secondary" style="flex: 1;" onclick="document.getElementById('demo-modal').hidden = true;">Cancel</button>
+            <button class="btn btn--primary" style="flex: 1;">Start</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="section">
+      <h2 class="section__title">Toast</h2>
+      <div class="showcase">
+        <button class="btn btn--sm btn--secondary" onclick="showToast('success')">Success</button>
+        <button class="btn btn--sm btn--secondary" onclick="showToast('error')">Error</button>
+        <button class="btn btn--sm btn--secondary" onclick="showToast('warning')">Warning</button>
+      </div>
+      <div class="toast toast--success" id="toast-success" hidden>✅ Verification approved!</div>
+      <div class="toast toast--error" id="toast-error" hidden>❌ Insufficient balance</div>
+      <div class="toast toast--warning" id="toast-warning" hidden>⚠️ Challenge ends in 2 days</div>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="section">
+      <h2 class="section__title">Pagination</h2>
+      <div class="showcase showcase--col showcase--mobile">
+        <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); margin-bottom: 6px; text-transform: uppercase;">Page 2 of 3</div>
+        <div class="pagination">
+          <button class="pagination__btn">← Prev</button>
+          <button class="pagination__btn">1</button>
+          <button class="pagination__btn active">2</button>
+          <button class="pagination__btn">3</button>
+          <button class="pagination__btn">Next →</button>
+        </div>
+        <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); margin-bottom: 6px; margin-top: 16px; text-transform: uppercase;">First Page (Prev disabled)</div>
+        <div class="pagination">
+          <button class="pagination__btn" disabled>← Prev</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn">2</button>
+          <button class="pagination__btn">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIST ITEM -->
+    <div class="section">
+      <h2 class="section__title">List Item</h2>
+      <div class="showcase showcase--col showcase--mobile">
+        <div class="list">
+          <div class="list-item">
+            <span style="font-size: 20px;">🔔</span>
+            <div style="flex: 1;"><div style="font-weight: var(--font-weight-semibold);">Notifications</div><div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Manage your alerts</div></div>
+            <span style="color: var(--color-text-tertiary);">›</span>
+          </div>
+          <div class="list-item list-item--interactive">
+            <span style="font-size: 20px;">📖</span>
+            <div style="flex: 1;"><div style="font-weight: var(--font-weight-semibold);">FAQ</div><div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Frequently asked questions</div></div>
+            <span style="color: var(--color-text-tertiary);">›</span>
+          </div>
+          <div class="list-item">
+            <span style="font-size: 20px;">🔒</span>
+            <div style="flex: 1;"><div style="font-weight: var(--font-weight-semibold);">Privacy Policy</div></div>
+            <span style="color: var(--color-text-tertiary);">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAT BOX -->
+    <div class="section">
+      <h2 class="section__title">Stat Box</h2>
+      <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: 16px;">Used inside gradient hero sections (e.g., Home streak card). Designed for white-on-gradient context.</p>
+      <div class="showcase" style="background: var(--gradient-yellow); border: none; border-radius: var(--radius-lg);">
+        <div class="stat-box">
+          <span class="stat-box__value">💪 3</span>
+          <span class="stat-box__label">Active</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-box__value">🏆 5</span>
+          <span class="stat-box__label">Badges</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-box__value">⭐ 87%</span>
+          <span class="stat-box__label">Win</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function showToast(type) {
+      const toast = document.getElementById('toast-' + type);
+      toast.hidden = false;
+      setTimeout(() => { toast.hidden = true; }, 2500);
+    }
+  </script>
+</body>
+</html>

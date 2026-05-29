@@ -1,0 +1,428 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>활동 로그 - Admin</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/admin-layout.css">
+  <style>
+    /* 이 화면 전용 스타일 */
+    .al-detail-cell {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .al-ip {
+      font-family: monospace;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">목록 — 로그 있음</button>
+    <button data-case="2">빈 상태</button>
+  </nav>
+
+  <!-- ===== Case 1: 목록 — 로그 있음 ===== -->
+  <main class="screen active" id="case-1">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">✅</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">🏆</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💳</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="#">
+            <span class="admin-sidebar__item-icon">📋</span>
+            활동 로그
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">활동 로그</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">활동 로그</h1>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="admin-filter">
+          <select class="admin-filter__select">
+            <option value="" selected>행위 유형 (전체)</option>
+            <option value="APPROVE_WITHDRAWAL">APPROVE_WITHDRAWAL</option>
+            <option value="REJECT_WITHDRAWAL">REJECT_WITHDRAWAL</option>
+            <option value="BAN_USER">BAN_USER</option>
+            <option value="UNBAN_USER">UNBAN_USER</option>
+            <option value="CREATE">CREATE</option>
+            <option value="UPDATE">UPDATE</option>
+            <option value="APPROVE_OVERRIDE">APPROVE_OVERRIDE</option>
+            <option value="CANCEL">CANCEL</option>
+            <option value="SETTLE">SETTLE</option>
+          </select>
+          <select class="admin-filter__select">
+            <option value="" selected>대상 유형 (전체)</option>
+            <option value="USER">USER</option>
+            <option value="WITHDRAWAL_REQUEST">WITHDRAWAL_REQUEST</option>
+            <option value="VERIFICATION">VERIFICATION</option>
+            <option value="CHALLENGE">CHALLENGE</option>
+            <option value="NOTICE">NOTICE</option>
+          </select>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>어드민</th>
+                <th>행위</th>
+                <th>대상</th>
+                <th>대상 ID</th>
+                <th>상세</th>
+                <th>IP</th>
+                <th>시각</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#1</td>
+                <td>admin01</td>
+                <td><span class="badge badge--success">APPROVE_WITHDRAWAL</span></td>
+                <td>WITHDRAWAL_REQUEST</td>
+                <td>#5</td>
+                <td class="al-detail-cell" title="Approved withdrawal: 5.0 TON to UQBx...3kF2">Approved withdrawal: 5.0 TON...</td>
+                <td><span class="al-ip">192.168.1.1</span></td>
+                <td>2026-05-15 10:30</td>
+              </tr>
+              <tr>
+                <td>#2</td>
+                <td>admin01</td>
+                <td><span class="badge badge--danger">REJECT_WITHDRAWAL</span></td>
+                <td>WITHDRAWAL_REQUEST</td>
+                <td>#3</td>
+                <td class="al-detail-cell" title="Rejected withdrawal: Suspicious activity detected">Rejected withdrawal: Suspicious...</td>
+                <td><span class="al-ip">192.168.1.1</span></td>
+                <td>2026-05-15 09:15</td>
+              </tr>
+              <tr>
+                <td>#3</td>
+                <td>admin01</td>
+                <td><span class="badge badge--danger">BAN_USER</span></td>
+                <td>USER</td>
+                <td>#42</td>
+                <td class="al-detail-cell" title="Banned user. Reason: 부정 인증">Banned user. Reason: 부정 인증</td>
+                <td><span class="al-ip">192.168.1.1</span></td>
+                <td>2026-05-14 16:00</td>
+              </tr>
+              <tr>
+                <td>#4</td>
+                <td>admin01</td>
+                <td><span class="badge badge--info">CREATE</span></td>
+                <td>CHALLENGE</td>
+                <td>#10</td>
+                <td class="al-detail-cell" title="Created challenge: Morning Run">Created challenge: Morning Run</td>
+                <td><span class="al-ip">192.168.1.1</span></td>
+                <td>2026-05-14 14:30</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="admin-mobile-card">
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ID</span>
+              <span class="admin-mobile-card__value">#1</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">어드민</span>
+              <span class="admin-mobile-card__value">admin01</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">행위</span>
+              <span class="badge badge--success">APPROVE_WITHDRAWAL</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">대상</span>
+              <span class="admin-mobile-card__value">WITHDRAWAL_REQUEST #5</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상세</span>
+              <span class="admin-mobile-card__value">Approved withdrawal: 5.0 TON...</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">IP</span>
+              <span class="admin-mobile-card__value al-ip">192.168.1.1</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">시각</span>
+              <span class="admin-mobile-card__value">2026-05-15 10:30</span>
+            </div>
+          </div>
+
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ID</span>
+              <span class="admin-mobile-card__value">#2</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">어드민</span>
+              <span class="admin-mobile-card__value">admin01</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">행위</span>
+              <span class="badge badge--danger">REJECT_WITHDRAWAL</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">대상</span>
+              <span class="admin-mobile-card__value">WITHDRAWAL_REQUEST #3</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상세</span>
+              <span class="admin-mobile-card__value">Rejected withdrawal: Suspicious...</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">IP</span>
+              <span class="admin-mobile-card__value al-ip">192.168.1.1</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">시각</span>
+              <span class="admin-mobile-card__value">2026-05-15 09:15</span>
+            </div>
+          </div>
+
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ID</span>
+              <span class="admin-mobile-card__value">#3</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">어드민</span>
+              <span class="admin-mobile-card__value">admin01</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">행위</span>
+              <span class="badge badge--danger">BAN_USER</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">대상</span>
+              <span class="admin-mobile-card__value">USER #42</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상세</span>
+              <span class="admin-mobile-card__value">Banned user. Reason: 부정 인증</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">IP</span>
+              <span class="admin-mobile-card__value al-ip">192.168.1.1</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">시각</span>
+              <span class="admin-mobile-card__value">2026-05-14 16:00</span>
+            </div>
+          </div>
+
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ID</span>
+              <span class="admin-mobile-card__value">#4</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">어드민</span>
+              <span class="admin-mobile-card__value">admin01</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">행위</span>
+              <span class="badge badge--info">CREATE</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">대상</span>
+              <span class="admin-mobile-card__value">CHALLENGE #10</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">상세</span>
+              <span class="admin-mobile-card__value">Created challenge: Morning Run</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">IP</span>
+              <span class="admin-mobile-card__value al-ip">192.168.1.1</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">시각</span>
+              <span class="admin-mobile-card__value">2026-05-14 14:30</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" style="margin-top: var(--space-4);">
+          <button class="pagination__btn" disabled>‹</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn" disabled>›</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 2: 빈 상태 ===== -->
+  <main class="screen" id="case-2">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">✅</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">🏆</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💳</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="#">
+            <span class="admin-sidebar__item-icon">📋</span>
+            활동 로그
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">활동 로그</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">활동 로그</h1>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="admin-filter">
+          <select class="admin-filter__select">
+            <option value="" selected>행위 유형 (전체)</option>
+            <option value="APPROVE_WITHDRAWAL">APPROVE_WITHDRAWAL</option>
+            <option value="REJECT_WITHDRAWAL">REJECT_WITHDRAWAL</option>
+            <option value="BAN_USER">BAN_USER</option>
+            <option value="UNBAN_USER">UNBAN_USER</option>
+            <option value="CREATE">CREATE</option>
+            <option value="UPDATE">UPDATE</option>
+            <option value="APPROVE_OVERRIDE">APPROVE_OVERRIDE</option>
+            <option value="CANCEL">CANCEL</option>
+            <option value="SETTLE">SETTLE</option>
+          </select>
+          <select class="admin-filter__select">
+            <option value="" selected>대상 유형 (전체)</option>
+            <option value="USER">USER</option>
+            <option value="WITHDRAWAL_REQUEST">WITHDRAWAL_REQUEST</option>
+            <option value="VERIFICATION">VERIFICATION</option>
+            <option value="CHALLENGE">CHALLENGE</option>
+            <option value="NOTICE">NOTICE</option>
+          </select>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state">
+          <div class="empty-state__icon">📋</div>
+          <div class="empty-state__title">활동 로그 없음</div>
+          <div class="empty-state__description">활동 로그가 없습니다.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Mobile sidebar toggle
+    document.querySelectorAll('.admin-topbar__menu-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sidebar = btn.closest('.admin-layout').querySelector('.admin-sidebar');
+        sidebar.classList.toggle('admin-sidebar--open');
+      });
+    });
+  </script>
+</body>
+</html>

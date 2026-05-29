@@ -1,0 +1,153 @@
+/*
+ * 디자인 토큰 (Design Tokens)
+ * 
+ * 이 파일이 프로젝트 디자인의 source of truth입니다.
+ * 디자인 시스템에서 추출.
+ * 
+ * 디자인 방향: 라이트 모드 기반, 그라데이션 강조, 게이미피케이션 느낌
+ * 8pt 그리드 시스템 사용
+ * 
+ * 규칙:
+ * - 하드코딩 색상/크기 금지 → 반드시 여기 토큰 사용
+ * - 새 값이 필요하면 여기에 먼저 등록
+ * - 변경 시 영향받는 화면 목록 확인 필요
+ * - FE(Tailwind)와 동기화 필요
+ */
+
+:root {
+  /* ===== Colors: Primary ===== */
+  --color-primary: #8b5cf6;
+  --color-primary-light: #a78bfa;
+  --color-primary-lighter: #c4b5fd;
+  --color-primary-gradient: linear-gradient(to right, #9333ea, #4f46e5);
+  
+  /* ===== Colors: Accent Gradients ===== */
+  --gradient-yellow: linear-gradient(to right, #facc15, #f97316);
+  --gradient-blue: linear-gradient(to right, #3b82f6, #9333ea);
+  --gradient-green: linear-gradient(to right, #22c55e, #059669);
+  --gradient-red: linear-gradient(to right, #ef4444, #ec4899);
+
+  /* ===== Colors: Semantic — Success ===== */
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-success-bg-deep: #dcfce7;
+  --color-success-border: #86efac;
+  --color-success-text: #16a34a;
+
+  /* ===== Colors: Semantic — Warning ===== */
+  --color-warning: #ca8a04;
+  --color-warning-bg: #fefce8;
+  --color-warning-bg-deep: #fef9c3;
+  --color-warning-border: #fde047;
+  --color-warning-text: #ca8a04;
+
+  /* ===== Colors: Semantic — Error ===== */
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-danger-bg-deep: #fecaca;
+  --color-danger-border: #fca5a5;
+  --color-danger-text: #dc2626;
+
+  /* ===== Colors: Semantic — Info ===== */
+  --color-info: #2563eb;
+  --color-info-bg: #eff6ff;
+  --color-info-bg-deep: #dbeafe;
+  --color-info-border: #93c5fd;
+  --color-info-text: #2563eb;
+
+  /* ===== Colors: Semantic — Expert (난이도) ===== */
+  --color-expert: #7c3aed;
+  --color-expert-bg: #faf5ff;
+  --color-expert-bg-deep: #e0e7ff;
+  --color-expert-border: #c4b5fd;
+  --color-expert-text: #7c3aed;
+
+  /* ===== Colors: Semantic — Gold (챌린지 완료/축하) ===== */
+  --color-gold-bg: #fef9c3;
+  --color-gold-bg-mid: #fde68a;
+  --color-gold-bg-deep: #fef3c7;
+
+  /* ===== Colors: Neutral ===== */
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f9fafb;
+  --color-bg-card: #ffffff;
+  --color-bg-elevated: #f3f4f6;
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* ===== Colors: Text ===== */
+  --color-text: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  --color-text-disabled: #d1d5db;
+  --color-text-white: #ffffff;
+
+  /* ===== Colors: Border ===== */
+  --color-border: #e5e7eb;
+  --color-border-strong: #d1d5db;
+
+  /* ===== Colors: Brand ===== */
+  --color-ton: #0098EA;
+  --color-ton-light: #33ADEE;
+
+  /* ===== Typography ===== */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Font Sizes */
+  --font-size-display: 60px;
+  --font-size-2xl: 30px;
+  --font-size-xl: 24px;
+  --font-size-lg: 20px;
+  --font-size-md: 18px;
+  --font-size-base: 16px;
+  --font-size-sm: 14px;
+  --font-size-xs: 12px;
+  --font-size-2xs: 11px;
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
+
+  /* ===== Spacing (8pt Grid) ===== */
+  --space-1: 4px;   /* 예외: 미세 조정용 (badge padding 등) */
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ===== Border Radius ===== */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  /* ===== Shadows ===== */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+
+  /* ===== Transitions ===== */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* ===== Layout ===== */
+  --mobile-width: 390px;
+  --content-padding: 16px;
+  --page-padding-x: 16px;
+  --page-padding-y: 24px;
+  --section-gap: 24px;
+  --card-gap: 16px;
+}

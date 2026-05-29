@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>My Challenges - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== My Challenges Screen Styles ===== */
+
+    /* Status Tabs (3-column, icon + text) */
+    .status-tabs {
+      display: flex;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .status-tabs__btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-3);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      text-transform: uppercase;
+      border-radius: var(--radius-md);
+      background-color: var(--color-bg);
+      color: var(--color-text-secondary);
+      border: 2px solid var(--color-border);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      min-height: 44px;
+    }
+
+    .status-tabs__btn-icon {
+      font-size: 24px;
+    }
+
+    .status-tabs__btn--active-blue {
+      background: var(--gradient-blue);
+      color: var(--color-text-white);
+      border-color: transparent;
+      box-shadow: var(--shadow-md);
+    }
+
+    .status-tabs__btn--active-green {
+      background: var(--gradient-green);
+      color: var(--color-text-white);
+      border-color: transparent;
+      box-shadow: var(--shadow-md);
+    }
+
+    .status-tabs__btn--active-red {
+      background: var(--gradient-red);
+      color: var(--color-text-white);
+      border-color: transparent;
+      box-shadow: var(--shadow-md);
+    }
+
+    .status-tabs__btn:not([class*="--active"]):hover {
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text);
+    }
+
+    /* Hide Confirm Page Styles */
+    .hide-confirm {
+      padding: var(--space-6) var(--space-4);
+      text-align: center;
+    }
+
+    .hide-confirm__icon {
+      font-size: 64px;
+      margin-bottom: var(--space-4);
+    }
+
+    .hide-confirm__title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      text-transform: uppercase;
+      margin-bottom: var(--space-2);
+    }
+
+    .hide-confirm__desc {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-6);
+    }
+
+    .hide-confirm__cost-card {
+      background-color: var(--color-expert-bg);
+      border: 2px solid var(--color-expert-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      margin-bottom: var(--space-4);
+      text-align: center;
+    }
+
+    .hide-confirm__cost-label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      margin-bottom: var(--space-2);
+    }
+
+    .hide-confirm__cost-value {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-expert-text);
+      margin-bottom: var(--space-3);
+    }
+
+    .hide-confirm__balance {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">
+    <!-- Case Switcher -->
+    <nav class="case-switcher">
+      <button class="active" data-case="1">Active</button>
+      <button data-case="2">Done</button>
+      <button data-case="3">Failed</button>
+      <button data-case="4">Empty Active</button>
+      <button data-case="5">Empty Done</button>
+      <button data-case="6">Empty Failed</button>
+      <button data-case="7">Hide Confirm</button>
+      <button data-case="8">Hide No Balance</button>
+    </nav>
+
+    <!-- ===== Case 1: Active 탭 — 진행 중 챌린지 있음 ===== -->
+    <main class="screen active" id="case-1">
+      <!-- Status Tabs -->
+      <div class="status-tabs">
+        <button class="status-tabs__btn status-tabs__btn--active-blue">
+          <span class="status-tabs__btn-icon">💪</span>
+          <span>Active</span>
+        </button>
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">✅</span>
+          <span>Done</span>
+        </button>
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">❌</span>
+          <span>Failed</span>
+        </button>
+      </div>
+
+      <!-- Challenge List -->
+      <div style="padding: var(--space-4);">
+        <div class="list">
+          <!-- Active Challenge 1 -->
+          <div class="card card--info card--interactive">
+            <div class="flex items-center justify-between" style="margin-bottom: var(--space-3);">
+              <div class="flex items-center gap-3">
+                <div class="icon-container icon-container--md" style="background: var(--gradient-blue);">
+                  💪
+                </div>
+                <div>
+                  <div style="font-size: var(--font-size-base); font-weight: var(--font-weight-black); color: var(--color-text);">
+                    Workout Challenge
+                  </div>
+                  <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-text-secondary);">
+                    Day 12 of 30
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-tertiary); text-transform: uppercase;">Staked</div>
+                <div style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); color: var(--color-info-text);">
+                  5 TON
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress" style="height: 10px; margin-bottom: var(--space-2);">
+              <div class="progress__bar progress__bar--success" style="width: 40%;"></div>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-text-secondary);">
+                Next: 10:00 AM
+              </div>
+              <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-black); color: var(--color-success-text);">
+                40%
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Challenge 2 -->
+          <div class="card card--info card--interactive">
+            <div class="flex items-center justify-between" style="margin-bottom: var(--space-3);">
+              <div class="flex items-center gap-3">
+                <div class="icon-container icon-container--md" style="background: var(--gradient-blue);">
+                  📚
+                </div>
+                <div>
+                  <div style="font-size: var(--font-size-base); font-weight: var(--font-weight-black); color: var(--color-text);">
+                    Reading Challenge
+                  </div>
+                  <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-text-secondary);">
+                    Day 5 of 14
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-tertiary); text-transform: uppercase;">Staked</div>
+                <div style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); color: var(--color-info-text);">
+                  3 TON
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress" style="height: 10px; margin-bottom: var(--space-2);">
+              <div class="progress__bar progress__bar--success" style="width: 36%;"></div>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-success-text);">
+                Next: Done ✅
+              </div>
+              <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-black); color: var(--color-success-text);">
+                36%
+              </div>
+            </div>
+          </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="pagination__btn" disabled>← Prev</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn" disabled>Next →</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: Done 탭 — 완료 챌린지 있음 ===== -->
+    <main class="screen" id="case-2">
+      <!-- Status Tabs -->
+      <div class="status-tabs">
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">💪</span>
+          <span>Active</span>
+        </button>
+        <button class="status-tabs__btn status-tabs__btn--active-green">
+          <span class="status-tabs__btn-icon">✅</span>
+          <span>Done</span>
+        </button>
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">❌</span>
+          <span>Failed</span>
+        </button>
+      </div>
+
+      <!-- Challenge List -->
+      <div style="padding: var(--space-4);">
+        <div class="list">
+          <!-- Done Challenge 1 -->
+          <div class="card card--success">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="icon-container icon-container--md" style="background: var(--gradient-green);">
+                  🌅
+                </div>
+                <div>
+                  <div style="font-size: var(--font-size-base); font-weight: var(--font-weight-black); color: var(--color-text);">
+                    Wake Up Challenge
+                  </div>
+                  <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-success-text);">
+                    7 days completed! 🎉
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); text-transform: uppercase;">Earned</div>
+                <div style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); color: var(--color-success-text);">
+                  +1.1 TON
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Done Challenge 2 -->
+          <div class="card card--success">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="icon-container icon-container--md" style="background: var(--gradient-green);">
+                  🏃
+                </div>
+                <div>
+                  <div style="font-size: var(--font-size-base); font-weight: var(--font-weight-black); color: var(--color-text);">
+                    Morning Run
+                  </div>
+                  <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-success-text);">
+                    14 days completed! 🎉
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); text-transform: uppercase;">Earned</div>
+                <div style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); color: var(--color-success-text);">
+                  +2.5 TON
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="pagination__btn" disabled>← Prev</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn" disabled>Next →</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: Failed 탭 — 실패 챌린지 있음 ===== -->
+    <main class="screen" id="case-3">
+      <!-- Status Tabs -->
+      <div class="status-tabs">
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">💪</span>
+          <span>Active</span>
+        </button>
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">✅</span>
+          <span>Done</span>
+        </button>
+        <button class="status-tabs__btn status-tabs__btn--active-red">
+          <span class="status-tabs__btn-icon">❌</span>
+          <span>Failed</span>
+        </button>
+      </div>
+
+      <!-- Challenge List -->
+      <div style="padding: var(--space-4);">
+        <div class="list">
+          <!-- Failed Challenge 1 -->
+          <div class="card card--error">
+            <div class="flex items-center justify-between" style="margin-bottom: var(--space-3);">
+              <div class="flex items-center gap-3">
+                <div class="icon-container icon-container--md" style="background: var(--gradient-red); opacity: 0.6;">
+                  💪
+                </div>
+                <div>
+                  <div style="font-size: var(--font-size-base); font-weight: var(--font-weight-black); color: var(--color-text);">
+                    Workout Challenge
+                  </div>
+                  <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-danger-text);">
+                    Failed on day 3/14
+                  </div>
+                  <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); color: var(--color-text-secondary); margin-top: var(--space-1);">
+                    2026-05-05
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); text-transform: uppercase;">Lost</div>
+                <div style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); color: var(--color-danger-text);">
+                  -0.3 TON
+                </div>
+              </div>
+            </div>
+
+            <!-- Hide Button -->
+            <button class="btn btn--secondary btn--sm btn--full">
+              👻 Hide This Failure (1 TON)
+            </button>
+          </div>
+
+          <!-- Failed Challenge 2 -->
+          <div class="card card--error">
+            <div class="flex items-center justify-between" style="margin-bottom: var(--space-3);">
+              <div class="flex items-center gap-3">
+                <div class="icon-container icon-container--md" style="background: var(--gradient-red); opacity: 0.6;">
+                  📖
+                </div>
+                <div>
+                  <div style="font-size: var(--font-size-base); font-weight: var(--font-weight-black); color: var(--color-text);">
+                    Study Challenge
+                  </div>
+                  <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-danger-text);">
+                    Failed on day 8/30
+                  </div>
+                  <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); color: var(--color-text-secondary); margin-top: var(--space-1);">
+                    2026-04-28
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); text-transform: uppercase;">Lost</div>
+                <div style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); color: var(--color-danger-text);">
+                  -0.5 TON
+                </div>
+              </div>
+            </div>
+
+            <!-- Hide Button -->
+            <button class="btn btn--secondary btn--sm btn--full">
+              👻 Hide This Failure (1 TON)
+            </button>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="pagination__btn" disabled>← Prev</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn" disabled>Next →</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 4: Active 탭 — 빈 상태 ===== -->
+    <main class="screen" id="case-4">
+      <!-- Status Tabs -->
+      <div class="status-tabs">
+        <button class="status-tabs__btn status-tabs__btn--active-blue">
+          <span class="status-tabs__btn-icon">💪</span>
+          <span>Active</span>
+        </button>
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">✅</span>
+          <span>Done</span>
+        </button>
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">❌</span>
+          <span>Failed</span>
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state">
+        <div class="empty-state__icon">😴</div>
+        <div class="empty-state__title">No Active Challenges</div>
+        <div class="empty-state__description">Start a new challenge to get going!</div>
+      </div>
+    </main>
+
+    <!-- ===== Case 5: Done 탭 — 빈 상태 ===== -->
+    <main class="screen" id="case-5">
+      <!-- Status Tabs -->
+      <div class="status-tabs">
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">💪</span>
+          <span>Active</span>
+        </button>
+        <button class="status-tabs__btn status-tabs__btn--active-green">
+          <span class="status-tabs__btn-icon">✅</span>
+          <span>Done</span>
+        </button>
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">❌</span>
+          <span>Failed</span>
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state">
+        <div class="empty-state__icon">🏆</div>
+        <div class="empty-state__title">No Completed Challenges Yet</div>
+        <div class="empty-state__description">Finish your first challenge to see it here!</div>
+      </div>
+    </main>
+
+    <!-- ===== Case 6: Failed 탭 — 빈 상태 ===== -->
+    <main class="screen" id="case-6">
+      <!-- Status Tabs -->
+      <div class="status-tabs">
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">💪</span>
+          <span>Active</span>
+        </button>
+        <button class="status-tabs__btn">
+          <span class="status-tabs__btn-icon">✅</span>
+          <span>Done</span>
+        </button>
+        <button class="status-tabs__btn status-tabs__btn--active-red">
+          <span class="status-tabs__btn-icon">❌</span>
+          <span>Failed</span>
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state">
+        <div class="empty-state__icon">✨</div>
+        <div class="empty-state__title">No Failed Challenges</div>
+        <div class="empty-state__description">Keep up the good work!</div>
+      </div>
+    </main>
+
+    <!-- ===== Case 7: 숨기기 확인 페이지 — 잔액 충분 ===== -->
+    <main class="screen" id="case-7">
+      <div class="hide-confirm">
+        <!-- Icon -->
+        <div class="hide-confirm__icon">👻</div>
+        <div class="hide-confirm__title">Hide Failed Challenge?</div>
+        <div class="hide-confirm__desc">This will remove it from your visible history</div>
+
+        <!-- Challenge Info Card -->
+        <div class="card card--error card--compact" style="margin-bottom: var(--space-4); text-align: left;">
+          <div class="flex items-center gap-3" style="margin-bottom: var(--space-3);">
+            <div class="icon-container icon-container--md" style="background: var(--gradient-red); opacity: 0.6;">
+              💪
+            </div>
+            <div>
+              <div style="font-size: var(--font-size-base); font-weight: var(--font-weight-black); color: var(--color-text);">
+                Workout Challenge
+              </div>
+              <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-danger-text);">
+                Failed on day 3/14
+              </div>
+            </div>
+          </div>
+          <div class="text-center" style="padding-top: var(--space-3); border-top: 2px solid var(--color-danger-border);">
+            <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: var(--space-1);">Lost</div>
+            <div style="font-size: var(--font-size-xl); font-weight: var(--font-weight-black); color: var(--color-danger-text);">
+              -0.3 TON
+            </div>
+          </div>
+        </div>
+
+        <!-- Cost Info Card -->
+        <div class="hide-confirm__cost-card">
+          <div class="hide-confirm__cost-label">Cost to Hide</div>
+          <div class="hide-confirm__cost-value">1 TON</div>
+          <div class="hide-confirm__balance">
+            Deposit: <span style="color: var(--color-success-text); font-weight: var(--font-weight-black);">12.5 TON</span>
+          </div>
+        </div>
+
+        <!-- Notice -->
+        <div class="notice notice--info" style="margin-bottom: var(--space-6); text-align: left;">
+          <div class="flex gap-2" style="align-items: flex-start;">
+            <span style="font-size: var(--font-size-md);">💡</span>
+            <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold);">
+              This action cannot be undone. 1 TON will be deducted from your deposit balance.
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-4">
+          <button class="btn btn--danger btn--full">
+            Confirm Hide (1 TON)
+          </button>
+          <button class="btn btn--ghost btn--full">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 8: 숨기기 확인 페이지 — 잔액 부족 ===== -->
+    <main class="screen" id="case-8">
+      <div class="hide-confirm">
+        <!-- Icon -->
+        <div class="hide-confirm__icon">👻</div>
+        <div class="hide-confirm__title">Hide Failed Challenge?</div>
+        <div class="hide-confirm__desc">This will remove it from your visible history</div>
+
+        <!-- Challenge Info Card -->
+        <div class="card card--error card--compact" style="margin-bottom: var(--space-4); text-align: left;">
+          <div class="flex items-center gap-3" style="margin-bottom: var(--space-3);">
+            <div class="icon-container icon-container--md" style="background: var(--gradient-red); opacity: 0.6;">
+              💪
+            </div>
+            <div>
+              <div style="font-size: var(--font-size-base); font-weight: var(--font-weight-black); color: var(--color-text);">
+                Workout Challenge
+              </div>
+              <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-danger-text);">
+                Failed on day 3/14
+              </div>
+            </div>
+          </div>
+          <div class="text-center" style="padding-top: var(--space-3); border-top: 2px solid var(--color-danger-border);">
+            <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: var(--space-1);">Lost</div>
+            <div style="font-size: var(--font-size-xl); font-weight: var(--font-weight-black); color: var(--color-danger-text);">
+              -0.3 TON
+            </div>
+          </div>
+        </div>
+
+        <!-- Cost Info Card -->
+        <div class="hide-confirm__cost-card">
+          <div class="hide-confirm__cost-label">Cost to Hide</div>
+          <div class="hide-confirm__cost-value">1 TON</div>
+          <div class="hide-confirm__balance">
+            Deposit: <span style="color: var(--color-danger-text); font-weight: var(--font-weight-black);">0.3 TON</span>
+          </div>
+        </div>
+
+        <!-- Error Notice -->
+        <div class="notice notice--error" style="margin-bottom: var(--space-4); text-align: left;">
+          <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold);">
+            Insufficient deposit balance. You need at least 1 TON deposit.
+          </div>
+        </div>
+
+        <!-- Info Notice -->
+        <div class="notice notice--info" style="margin-bottom: var(--space-6); text-align: left;">
+          <div class="flex gap-2" style="align-items: flex-start;">
+            <span style="font-size: var(--font-size-md);">💡</span>
+            <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold);">
+              This action cannot be undone. 1 TON will be deducted from your deposit balance.
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-4">
+          <button class="btn btn--danger btn--full" disabled>
+            Confirm Hide (1 TON)
+          </button>
+          <button class="btn btn--ghost btn--full">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+  </script>
+</body>
+</html>

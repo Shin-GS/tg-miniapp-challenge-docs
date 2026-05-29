@@ -1,0 +1,1118 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>챌린지 관리 - Admin</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/admin-layout.css">
+  <style>
+    .admin-content .screen {
+      padding: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    .admin-content .screen.active {
+      display: block;
+    }
+
+    /* 폼 레이아웃 */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+
+    .form-grid--full {
+      grid-template-columns: 1fr;
+    }
+
+    .form-field {
+      margin-bottom: var(--space-4);
+    }
+
+    .form-field__label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+    }
+
+    .form-field__hint {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      margin-top: var(--space-1);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: var(--space-3);
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--color-border);
+      margin-top: var(--space-6);
+    }
+
+    /* 라디오 그룹 */
+    .radio-group {
+      display: flex;
+      gap: var(--space-4);
+    }
+
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+      cursor: pointer;
+    }
+
+    .radio-group input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary);
+    }
+
+    /* 토글 스위치 */
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+      border: 1px solid var(--color-border);
+    }
+
+    .toggle--active {
+      background-color: var(--color-success);
+      border-color: var(--color-success);
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background-color: var(--color-bg);
+      border-radius: var(--radius-full);
+      transition: transform var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .toggle--active::after {
+      transform: translateX(18px);
+    }
+
+    /* 경고 배너 */
+    .warning-banner {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-warning-bg);
+      border: 1px solid var(--color-warning-border);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-warning-text);
+    }
+
+    /* 테이블 행 클릭 */
+    .admin-table tr[data-clickable] {
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">목록</button>
+    <button data-case="2">생성 폼</button>
+    <button data-case="3">상세/수정 폼</button>
+    <button data-case="4">빈 상태</button>
+    <button data-case="5">카테고리 관리</button>
+  </nav>
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="sidebar">
+      <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">✅</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="#">
+            <span class="admin-sidebar__item-icon">🏆</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💳</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="#">
+            <span class="admin-sidebar__item-icon">📋</span>
+            활동 로그
+          </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="admin-content">
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn" id="menu-toggle">☰</button>
+        <span class="admin-topbar__title">챌린지 관리</span>
+        <span style="width: 44px;"></span>
+      </div>
+
+      <!-- ===== Case 1: 목록 ===== -->
+      <main class="screen active" id="case-1">
+        <!-- Page Header -->
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">챌린지 관리</h1>
+          <div class="admin-page-header__actions">
+            <button class="btn btn--primary btn--sm">챌린지 생성</button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="admin-filter">
+          <select class="admin-filter__select">
+            <option value="">카테고리: 전체</option>
+            <option value="fitness">Fitness</option>
+            <option value="education">Education</option>
+            <option value="health">Health</option>
+          </select>
+          <select class="admin-filter__select">
+            <option value="">유형: 전체</option>
+            <option value="REGULAR">REGULAR</option>
+            <option value="EVENT">EVENT</option>
+          </select>
+          <select class="admin-filter__select">
+            <option value="">활성 상태: 전체</option>
+            <option value="true">활성</option>
+            <option value="false">비활성</option>
+          </select>
+        </div>
+
+        <!-- Table (Desktop) -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>챌린지명</th>
+                <th>카테고리</th>
+                <th>유형</th>
+                <th>난이도</th>
+                <th>참여자</th>
+                <th>활성</th>
+                <th>생성일</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-clickable>
+                <td>#1</td>
+                <td>Morning Run</td>
+                <td>Fitness</td>
+                <td><span class="badge badge--info">REGULAR</span></td>
+                <td><span class="badge badge--success">EASY</span></td>
+                <td>25</td>
+                <td><span class="toggle toggle--active" title="활성"></span></td>
+                <td>2026-04-01</td>
+              </tr>
+              <tr data-clickable>
+                <td>#2</td>
+                <td>Daily Reading</td>
+                <td>Education</td>
+                <td><span class="badge badge--info">REGULAR</span></td>
+                <td><span class="badge badge--warning">MEDIUM</span></td>
+                <td>12</td>
+                <td><span class="toggle toggle--active" title="활성"></span></td>
+                <td>2026-04-05</td>
+              </tr>
+              <tr data-clickable>
+                <td>#3</td>
+                <td>New Year Event</td>
+                <td>Fitness</td>
+                <td><span class="badge badge--neutral">EVENT</span></td>
+                <td><span class="badge badge--danger">HARD</span></td>
+                <td>0</td>
+                <td><span class="toggle" title="비활성"></span></td>
+                <td>2026-05-01</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="admin-mobile-card">
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ID</span>
+              <span class="admin-mobile-card__value">#1</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">챌린지명</span>
+              <span class="admin-mobile-card__value">Morning Run</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">카테고리</span>
+              <span class="admin-mobile-card__value">Fitness</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span class="admin-mobile-card__value"><span class="badge badge--info">REGULAR</span></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">난이도</span>
+              <span class="admin-mobile-card__value"><span class="badge badge--success">EASY</span></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">참여자</span>
+              <span class="admin-mobile-card__value">25</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">활성</span>
+              <span class="admin-mobile-card__value"><span class="toggle toggle--active"></span></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">생성일</span>
+              <span class="admin-mobile-card__value">2026-04-01</span>
+            </div>
+          </div>
+
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ID</span>
+              <span class="admin-mobile-card__value">#2</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">챌린지명</span>
+              <span class="admin-mobile-card__value">Daily Reading</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">카테고리</span>
+              <span class="admin-mobile-card__value">Education</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span class="admin-mobile-card__value"><span class="badge badge--info">REGULAR</span></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">난이도</span>
+              <span class="admin-mobile-card__value"><span class="badge badge--warning">MEDIUM</span></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">참여자</span>
+              <span class="admin-mobile-card__value">12</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">활성</span>
+              <span class="admin-mobile-card__value"><span class="toggle toggle--active"></span></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">생성일</span>
+              <span class="admin-mobile-card__value">2026-04-05</span>
+            </div>
+          </div>
+
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ID</span>
+              <span class="admin-mobile-card__value">#3</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">챌린지명</span>
+              <span class="admin-mobile-card__value">New Year Event</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">카테고리</span>
+              <span class="admin-mobile-card__value">Fitness</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span class="admin-mobile-card__value"><span class="badge badge--neutral">EVENT</span></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">난이도</span>
+              <span class="admin-mobile-card__value"><span class="badge badge--danger">HARD</span></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">참여자</span>
+              <span class="admin-mobile-card__value">0</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">활성</span>
+              <span class="admin-mobile-card__value"><span class="toggle"></span></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">생성일</span>
+              <span class="admin-mobile-card__value">2026-05-01</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="pagination__btn" disabled>‹</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn">2</button>
+          <button class="pagination__btn">3</button>
+          <button class="pagination__btn">›</button>
+        </div>
+      </main>
+
+      <!-- ===== Case 2: 생성 폼 ===== -->
+      <main class="screen" id="case-2">
+        <!-- Page Header -->
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">챌린지 생성</h1>
+        </div>
+
+        <div class="admin-detail">
+          <!-- 기본 정보 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">기본 정보</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">제목 *</label>
+                <input type="text" class="input" placeholder="챌린지 제목을 입력하세요">
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">카테고리 *</label>
+                <select class="input">
+                  <option value="">선택하세요</option>
+                  <option value="1">Fitness</option>
+                  <option value="2">Education</option>
+                  <option value="3">Health</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">설명 *</label>
+              <textarea class="input" rows="3" placeholder="챌린지 설명을 입력하세요" style="min-height: 80px; resize: vertical;"></textarea>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">유형 *</label>
+                <select class="input">
+                  <option value="">선택하세요</option>
+                  <option value="REGULAR">REGULAR</option>
+                  <option value="EVENT">EVENT</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">난이도 *</label>
+                <select class="input">
+                  <option value="">선택하세요</option>
+                  <option value="EASY">EASY</option>
+                  <option value="MEDIUM">MEDIUM</option>
+                  <option value="HARD">HARD</option>
+                  <option value="EXPERT">EXPERT</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 일정 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">일정</div>
+            <div class="form-field">
+              <label class="form-field__label">일정 유형 *</label>
+              <div class="radio-group">
+                <label><input type="radio" name="schedule-create" value="FIXED_PERIOD"> FIXED_PERIOD (고정 기간)</label>
+                <label><input type="radio" name="schedule-create" value="RELATIVE_DAYS"> RELATIVE_DAYS (참여일 기준)</label>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">기간 (일수)</label>
+                <input type="number" class="input" placeholder="예: 30">
+                <span class="form-field__hint">RELATIVE_DAYS 선택 시 필수</span>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">시작일</label>
+                <input type="date" class="input">
+                <span class="form-field__hint">FIXED_PERIOD 선택 시 필수</span>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">종료일</label>
+                <input type="date" class="input">
+                <span class="form-field__hint">FIXED_PERIOD 선택 시 필수</span>
+              </div>
+              <div></div>
+            </div>
+          </div>
+
+          <!-- 인증 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">인증</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">인증 빈도 (회) *</label>
+                <input type="number" class="input" placeholder="예: 3">
+                <span class="form-field__hint">주기당 필요 인증 횟수</span>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">인증 주기 (일) *</label>
+                <input type="number" class="input" placeholder="예: 7">
+                <span class="form-field__hint">인증 주기 일수</span>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">인증 시작 시간</label>
+                <input type="time" class="input">
+                <span class="form-field__hint">미입력 시 24시간 가능</span>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">인증 종료 시간</label>
+                <input type="time" class="input">
+                <span class="form-field__hint">미입력 시 24시간 가능</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 예치금 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">예치금</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">최소 예치금 (TON) *</label>
+                <input type="number" class="input" placeholder="예: 1" step="0.1">
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">최대 예치금 (TON) *</label>
+                <input type="number" class="input" placeholder="예: 10" step="0.1">
+              </div>
+            </div>
+          </div>
+
+          <!-- 정산 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">정산</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">패널티 유형 *</label>
+                <select class="input">
+                  <option value="">선택하세요</option>
+                  <option value="FIXED">FIXED (고정 비율)</option>
+                  <option value="PROPORTIONAL">PROPORTIONAL (인증률 비례)</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">패널티율 *</label>
+                <input type="number" class="input" placeholder="예: 0.3" step="0.01" min="0" max="1">
+                <span class="form-field__hint">0~1 사이 값</span>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">리워드율 *</label>
+                <input type="number" class="input" placeholder="예: 0.1" step="0.01" min="0" max="1">
+                <span class="form-field__hint">0~1 사이 값</span>
+              </div>
+              <div></div>
+            </div>
+          </div>
+
+          <!-- 기타 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">기타</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">최대 참여자 수</label>
+                <input type="number" class="input" placeholder="미입력 시 무제한">
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">포기 제한 일수 *</label>
+                <input type="number" class="input" placeholder="기본: 3" value="3">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">타임존 정책 *</label>
+                <select class="input">
+                  <option value="">선택하세요</option>
+                  <option value="USER_LOCAL">USER_LOCAL (사용자 기준)</option>
+                  <option value="FIXED">FIXED (고정 타임존)</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">고정 타임존 *</label>
+                <select class="input">
+                  <option value="">선택하세요</option>
+                  <option value="Asia/Seoul">Seoul (UTC+9)</option>
+                  <option value="America/New_York">Eastern Time (UTC-5)</option>
+                  <option value="Europe/London">London (UTC+0)</option>
+                  <option value="Asia/Tokyo">Tokyo (UTC+9)</option>
+                </select>
+                <span class="form-field__hint">FIXED 선택 시만 표시 (API에서 전체 목록 조회)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 인증 가이드 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">인증 가이드</div>
+            <div class="form-field">
+              <label class="form-field__label">인증 안내 텍스트 *</label>
+              <textarea class="input" rows="3" placeholder="사용자에게 보이는 인증 가이드 (예: 러닝 앱 스크린샷 또는 야외 달리기 모습을 촬영해주세요)" style="min-height: 80px; resize: vertical;" maxlength="500"></textarea>
+              <span class="form-field__hint">최대 500자</span>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">가이드 이미지</label>
+              <div style="display: flex; gap: var(--space-3); align-items: center; margin-bottom: var(--space-2);">
+                <button class="btn btn--secondary btn--sm" type="button">이미지 업로드</button>
+                <span class="form-field__hint">업로드 시 자동 세팅됩니다</span>
+              </div>
+              <input type="text" class="input" placeholder="업로드 후 자동 입력됨" readonly style="background-color: var(--color-bg-elevated); color: var(--color-text-secondary);">
+              <!-- 미리보기 (URL 있을 때 표시) -->
+              <div style="margin-top: var(--space-3); display: none;">
+                <div style="width: 200px; height: 150px; border-radius: var(--radius-sm); background-color: var(--color-bg-elevated); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xs); color: var(--color-text-tertiary);">미리보기</div>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">AI 프롬프트</label>
+              <textarea class="input" rows="3" placeholder="AI 판정용 프롬프트 (선택)" style="min-height: 80px; resize: vertical;"></textarea>
+            </div>
+          </div>
+
+          <!-- 정렬 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">정렬</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">정렬 순서</label>
+                <input type="number" class="input" placeholder="기본: 0" value="0">
+                <span class="form-field__hint">목록 노출 순서 (낮을수록 먼저)</span>
+              </div>
+              <div></div>
+            </div>
+          </div>
+
+          <!-- 액션 버튼 -->
+          <div class="form-actions">
+            <button class="btn btn--primary btn--sm">저장</button>
+            <button class="btn btn--ghost btn--sm">취소</button>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Case 3: 상세/수정 폼 ===== -->
+      <main class="screen" id="case-3">
+        <!-- Page Header -->
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">챌린지 수정 — Morning Run</h1>
+        </div>
+
+        <div class="admin-detail">
+          <!-- 경고 배너 (활성 참여자 있을 때) -->
+          <div class="warning-banner">
+            ⚠️ 활성 참여자가 25명 있어 수정할 수 없습니다.
+          </div>
+
+          <!-- 기본 정보 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">기본 정보</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">제목 *</label>
+                <input type="text" class="input" value="Morning Run" disabled>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">카테고리 *</label>
+                <select class="input" disabled>
+                  <option value="1" selected>Fitness</option>
+                  <option value="2">Education</option>
+                  <option value="3">Health</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">설명 *</label>
+              <textarea class="input" rows="3" disabled style="min-height: 80px; resize: vertical;">매일 아침 30분 이상 달리기를 인증하세요. 사진으로 러닝 앱 스크린샷 또는 야외 달리기 모습을 촬영해주세요.</textarea>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">유형 *</label>
+                <select class="input" disabled>
+                  <option value="REGULAR" selected>REGULAR</option>
+                  <option value="EVENT">EVENT</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">난이도 *</label>
+                <select class="input" disabled>
+                  <option value="EASY" selected>EASY</option>
+                  <option value="MEDIUM">MEDIUM</option>
+                  <option value="HARD">HARD</option>
+                  <option value="EXPERT">EXPERT</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 일정 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">일정</div>
+            <div class="form-field">
+              <label class="form-field__label">일정 유형 *</label>
+              <div class="radio-group">
+                <label><input type="radio" name="schedule-edit" value="FIXED_PERIOD" checked disabled> FIXED_PERIOD (고정 기간)</label>
+                <label><input type="radio" name="schedule-edit" value="RELATIVE_DAYS" disabled> RELATIVE_DAYS (참여일 기준)</label>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">시작일</label>
+                <input type="date" class="input" value="2026-04-01" disabled>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">종료일</label>
+                <input type="date" class="input" value="2026-04-30" disabled>
+              </div>
+            </div>
+          </div>
+
+          <!-- 인증 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">인증</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">인증 빈도 (회) *</label>
+                <input type="number" class="input" value="5" disabled>
+                <span class="form-field__hint">주기당 필요 인증 횟수</span>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">인증 주기 (일) *</label>
+                <input type="number" class="input" value="7" disabled>
+                <span class="form-field__hint">인증 주기 일수</span>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">인증 시작 시간</label>
+                <input type="time" class="input" value="05:00" disabled>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">인증 종료 시간</label>
+                <input type="time" class="input" value="10:00" disabled>
+              </div>
+            </div>
+          </div>
+
+          <!-- 예치금 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">예치금</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">최소 예치금 (TON) *</label>
+                <input type="number" class="input" value="1" disabled>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">최대 예치금 (TON) *</label>
+                <input type="number" class="input" value="10" disabled>
+              </div>
+            </div>
+          </div>
+
+          <!-- 정산 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">정산</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">패널티 유형 *</label>
+                <select class="input" disabled>
+                  <option value="PROPORTIONAL" selected>PROPORTIONAL (인증률 비례)</option>
+                  <option value="FIXED">FIXED (고정 비율)</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">패널티율 *</label>
+                <input type="number" class="input" value="0.3" disabled>
+                <span class="form-field__hint">0~1 사이 값</span>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">리워드율 *</label>
+                <input type="number" class="input" value="0.1" disabled>
+                <span class="form-field__hint">0~1 사이 값</span>
+              </div>
+              <div></div>
+            </div>
+          </div>
+
+          <!-- 기타 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">기타</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">최대 참여자 수</label>
+                <input type="number" class="input" value="50" disabled>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">포기 제한 일수 *</label>
+                <input type="number" class="input" value="3" disabled>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">타임존 정책 *</label>
+                <select class="input" disabled>
+                  <option value="USER_LOCAL" selected>USER_LOCAL (사용자 기준)</option>
+                  <option value="FIXED">FIXED (고정 타임존)</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">고정 타임존 *</label>
+                <select class="input" disabled>
+                  <option value="">선택하세요</option>
+                  <option value="Asia/Seoul">Seoul (UTC+9)</option>
+                  <option value="America/New_York">Eastern Time (UTC-5)</option>
+                </select>
+                <span class="form-field__hint">FIXED 선택 시만 표시</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 인증 가이드 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">인증 가이드</div>
+            <div class="form-field">
+              <label class="form-field__label">인증 안내 텍스트 *</label>
+              <textarea class="input" rows="3" disabled style="min-height: 80px; resize: vertical;">러닝 앱 스크린샷 또는 야외 달리기 모습을 촬영해주세요. 거리 1km 이상이 확인되어야 합니다.</textarea>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">가이드 이미지</label>
+              <div style="display: flex; gap: var(--space-3); align-items: center; margin-bottom: var(--space-2);">
+                <button class="btn btn--secondary btn--sm" type="button" disabled>이미지 업로드</button>
+              </div>
+              <input type="text" class="input" value="https://s3.amazonaws.com/bucket/guides/morning-run-example.jpg" readonly style="background-color: var(--color-bg-elevated); color: var(--color-text-secondary);">
+              <!-- 미리보기 (URL 있으므로 표시) -->
+              <div style="margin-top: var(--space-3);">
+                <div style="width: 200px; height: 150px; border-radius: var(--radius-sm); background: var(--gradient-blue); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xs); color: var(--color-text-white); font-weight: var(--font-weight-bold);">🏃 예시 이미지</div>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">AI 프롬프트</label>
+              <textarea class="input" rows="3" disabled style="min-height: 80px; resize: vertical;">Verify that the photo shows a running activity. Look for running app screenshots showing distance >= 1km, or outdoor running scenes.</textarea>
+            </div>
+          </div>
+
+          <!-- 정렬 -->
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">정렬</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">정렬 순서</label>
+                <input type="number" class="input" value="1" disabled>
+              </div>
+              <div></div>
+            </div>
+          </div>
+
+          <!-- 액션 버튼 -->
+          <div class="form-actions">
+            <button class="btn btn--primary btn--sm" disabled>저장</button>
+            <button class="btn btn--ghost btn--sm">취소</button>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Case 4: 빈 상태 ===== -->
+      <main class="screen" id="case-4">
+        <!-- Page Header -->
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">챌린지 관리</h1>
+          <div class="admin-page-header__actions">
+            <button class="btn btn--primary btn--sm">챌린지 생성</button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="admin-filter">
+          <select class="admin-filter__select">
+            <option value="">카테고리: 전체</option>
+            <option value="fitness">Fitness</option>
+            <option value="education">Education</option>
+            <option value="health">Health</option>
+          </select>
+          <select class="admin-filter__select">
+            <option value="">유형: 전체</option>
+            <option value="REGULAR">REGULAR</option>
+            <option value="EVENT">EVENT</option>
+          </select>
+          <select class="admin-filter__select">
+            <option value="">활성 상태: 전체</option>
+            <option value="true">활성</option>
+            <option value="false">비활성</option>
+          </select>
+        </div>
+
+        <!-- Empty State -->
+        <div class="admin-table-wrapper">
+          <div class="empty-state">
+            <div class="empty-state__icon">🏆</div>
+            <div class="empty-state__title">등록된 챌린지가 없습니다.</div>
+            <div class="empty-state__description">새 챌린지를 생성하여 사용자에게 제공하세요.</div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Case 5: 카테고리 관리 ===== -->
+      <main class="screen" id="case-5">
+        <!-- Page Header -->
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">카테고리 관리</h1>
+          <div class="admin-page-header__actions">
+            <button class="btn btn--primary btn--sm">카테고리 추가</button>
+          </div>
+        </div>
+
+        <!-- Category Table -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>식별 키</th>
+                <th>노출명</th>
+                <th>아이콘</th>
+                <th>정렬 순서</th>
+                <th>챌린지 수</th>
+                <th>활성</th>
+                <th>액션</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#1</td>
+                <td>FITNESS</td>
+                <td>Fitness</td>
+                <td>🏃</td>
+                <td>1</td>
+                <td>8</td>
+                <td><span class="toggle toggle--active" title="활성"></span></td>
+                <td class="admin-table__actions">
+                  <button class="btn btn--secondary btn--sm">수정</button>
+                </td>
+              </tr>
+              <tr>
+                <td>#2</td>
+                <td>EDUCATION</td>
+                <td>Education</td>
+                <td>📚</td>
+                <td>2</td>
+                <td>5</td>
+                <td><span class="toggle toggle--active" title="활성"></span></td>
+                <td class="admin-table__actions">
+                  <button class="btn btn--secondary btn--sm">수정</button>
+                </td>
+              </tr>
+              <tr>
+                <td>#3</td>
+                <td>HEALTH</td>
+                <td>Health</td>
+                <td>💊</td>
+                <td>3</td>
+                <td>3</td>
+                <td><span class="toggle toggle--active" title="활성"></span></td>
+                <td class="admin-table__actions">
+                  <button class="btn btn--secondary btn--sm">수정</button>
+                </td>
+              </tr>
+              <tr>
+                <td>#4</td>
+                <td>LIFESTYLE</td>
+                <td>Lifestyle</td>
+                <td>🌱</td>
+                <td>4</td>
+                <td>0</td>
+                <td><span class="toggle" title="비활성"></span></td>
+                <td class="admin-table__actions">
+                  <button class="btn btn--secondary btn--sm">수정</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="admin-mobile-card">
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">식별 키</span>
+              <span class="admin-mobile-card__value">FITNESS</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">노출명</span>
+              <span class="admin-mobile-card__value">Fitness</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">아이콘</span>
+              <span class="admin-mobile-card__value">🏃</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">정렬 순서</span>
+              <span class="admin-mobile-card__value">1</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">챌린지 수</span>
+              <span class="admin-mobile-card__value">8</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">활성</span>
+              <span class="admin-mobile-card__value"><span class="toggle toggle--active"></span></span>
+            </div>
+            <div class="admin-mobile-card__actions">
+              <button class="btn btn--secondary btn--sm">수정</button>
+            </div>
+          </div>
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">식별 키</span>
+              <span class="admin-mobile-card__value">EDUCATION</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">노출명</span>
+              <span class="admin-mobile-card__value">Education</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">아이콘</span>
+              <span class="admin-mobile-card__value">📚</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">정렬 순서</span>
+              <span class="admin-mobile-card__value">2</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">챌린지 수</span>
+              <span class="admin-mobile-card__value">5</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">활성</span>
+              <span class="admin-mobile-card__value"><span class="toggle toggle--active"></span></span>
+            </div>
+            <div class="admin-mobile-card__actions">
+              <button class="btn btn--secondary btn--sm">수정</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 카테고리 추가/수정 인라인 폼 -->
+        <div class="admin-detail" style="margin-top: var(--space-6);">
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">카테고리 추가</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">식별 키 (name) *</label>
+                <input type="text" class="input" placeholder="영문 대문자 (예: FITNESS)">
+                <span class="form-field__hint">생성 후 변경 불가</span>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">노출명 (displayName) *</label>
+                <input type="text" class="input" placeholder="사용자에게 보이는 이름 (예: Fitness)">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-field__label">아이콘</label>
+                <input type="text" class="input" placeholder="이모지 (예: 🏃)">
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">정렬 순서 *</label>
+                <input type="number" class="input" placeholder="예: 5" min="1">
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">활성 상태</label>
+              <div class="radio-group">
+                <label><input type="radio" name="cat-active" value="true" checked> 활성</label>
+                <label><input type="radio" name="cat-active" value="false"> 비활성</label>
+              </div>
+            </div>
+            <div style="display: flex; gap: var(--space-3); margin-top: var(--space-4);">
+              <button class="btn btn--primary btn--sm">저장</button>
+              <button class="btn btn--ghost btn--sm">취소</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Mobile Sidebar Toggle
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+
+    if (menuToggle) {
+      menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('admin-sidebar--open');
+      });
+    }
+
+    // Close sidebar on backdrop click (mobile)
+    document.addEventListener('click', (e) => {
+      if (sidebar.classList.contains('admin-sidebar--open') &&
+          !sidebar.contains(e.target) &&
+          e.target !== menuToggle) {
+        sidebar.classList.remove('admin-sidebar--open');
+      }
+    });
+  </script>
+</body>
+</html>

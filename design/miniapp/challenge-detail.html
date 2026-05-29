@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Challenge Detail - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Challenge Detail Screen Styles ===== */
+
+    /* Challenge Summary */
+    .challenge-summary {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-4);
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .challenge-summary__icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-md);
+      background: var(--gradient-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: var(--shadow-md);
+      flex-shrink: 0;
+    }
+
+    .challenge-summary__icon--event {
+      background: var(--gradient-yellow);
+    }
+
+    .challenge-summary__info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .challenge-summary__name {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin-bottom: var(--space-1);
+    }
+
+    .challenge-summary__badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      margin-top: var(--space-2);
+    }
+
+    /* Detail List */
+    .detail-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .detail-list__item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-2) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .detail-list__item:last-child {
+      border-bottom: none;
+    }
+
+    .detail-list__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    .detail-list__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      text-align: right;
+    }
+
+    .detail-list__value--danger {
+      color: var(--color-danger);
+    }
+
+    /* Deposit Section */
+    .deposit-section {
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .deposit-section__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-3);
+    }
+
+    .deposit-section__title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      text-transform: uppercase;
+    }
+
+    .deposit-section__balance {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+
+    .deposit-section__balance--danger {
+      color: var(--color-danger);
+    }
+
+    /* Deposit Slider */
+    .deposit-slider {
+      margin: var(--space-4) 0;
+    }
+
+    .deposit-slider__input-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+
+    .deposit-slider__number {
+      width: 100px;
+      padding: var(--space-3);
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      text-align: center;
+      background-color: var(--color-bg);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text);
+      transition: border-color var(--transition-fast);
+    }
+
+    .deposit-slider__number:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .deposit-slider__number--error {
+      border-color: var(--color-danger);
+    }
+
+    .deposit-slider__unit {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+
+    .deposit-slider__range {
+      width: 100%;
+      height: 8px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--color-bg-elevated);
+      border-radius: var(--radius-full);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .deposit-slider__range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-primary-gradient);
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+    }
+
+    .deposit-slider__range:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .deposit-slider__range:disabled::-webkit-slider-thumb {
+      cursor: not-allowed;
+    }
+
+    .deposit-slider__labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--space-2);
+    }
+
+    .deposit-slider__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+    }
+
+    .deposit-slider__error {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-danger);
+      margin-top: var(--space-2);
+    }
+
+    /* Balance Warning */
+    .balance-warning {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3);
+      background-color: var(--color-danger-bg);
+      border: 1px solid var(--color-danger-border);
+      border-radius: var(--radius-md);
+      margin-top: var(--space-3);
+    }
+
+    .balance-warning__text {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-danger-text);
+    }
+
+    /* CTA Area */
+    .cta-area {
+      padding: var(--space-4) 0;
+      margin-top: var(--space-4);
+    }
+
+    /* Status Message */
+    .status-message {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-4);
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+    }
+
+    .status-message__text {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+
+    .status-message--info {
+      background-color: var(--color-info-bg);
+      border: 1px solid var(--color-info-border);
+    }
+
+    .status-message--info .status-message__text {
+      color: var(--color-info-text);
+    }
+
+    /* Difficulty Badges (same as challenge-list) */
+    .badge--easy {
+      background-color: var(--color-success-bg);
+      color: var(--color-success-text);
+      border: 1px solid var(--color-success-border);
+    }
+
+    .badge--medium {
+      background-color: var(--color-warning-bg);
+      color: var(--color-warning-text);
+      border: 1px solid var(--color-warning-border);
+    }
+
+    .badge--hard {
+      background-color: var(--color-danger-bg);
+      color: var(--color-danger-text);
+      border: 1px solid var(--color-danger-border);
+    }
+
+    .badge--expert {
+      background-color: var(--color-expert-bg);
+      color: var(--color-expert-text);
+      border: 1px solid var(--color-expert-border);
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">
+    <!-- Case Switcher -->
+    <nav class="case-switcher">
+      <button class="active" data-case="1">Joinable</button>
+      <button data-case="2">Low Balance</button>
+      <button data-case="3">Duplicate</button>
+      <button data-case="4">Full</button>
+      <button data-case="5">Rejoin</button>
+      <button data-case="6">Mid-Join</button>
+      <button data-case="7">Range Error</button>
+    </nav>
+
+    <!-- ===== Case 1: 참여 가능 (RELATIVE_DAYS, FIXED penalty 10%) ===== -->
+    <main class="screen active" id="case-1">
+
+      <div class="space-y-4" style="padding: var(--space-4);">
+        <!-- Challenge Summary -->
+        <div class="challenge-summary">
+          <div class="challenge-summary__icon">🏃</div>
+          <div class="challenge-summary__info">
+            <div class="challenge-summary__name">Morning Run</div>
+            <div class="challenge-summary__badges">
+              <span class="badge badge--easy">EASY</span>
+              <span class="badge badge--neutral">REGULAR</span>
+              <span class="badge badge--neutral">Fitness</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail List -->
+        <div class="detail-list">
+          <div class="detail-list__item">
+            <span class="detail-list__label">Duration</span>
+            <span class="detail-list__value">7 days</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Schedule</span>
+            <span class="detail-list__value">Starts when you join</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Frequency</span>
+            <span class="detail-list__value">1 time every 1 day</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Verification Time</span>
+            <span class="detail-list__value">Anytime</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Timezone</span>
+            <span class="detail-list__value">Your timezone</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Reward Rate</span>
+            <span class="detail-list__value">10%</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Penalty</span>
+            <span class="detail-list__value">FIXED (10%)</span>
+          </div>
+          <!-- Participants: maxParticipants 있으면 항상 표시, 없으면 totalParticipants < 50이면 숨김, 50+ → "50+ joined", 500+ → "500+ joined" -->
+          <div class="detail-list__item">
+            <span class="detail-list__label">Participants</span>
+            <span class="detail-list__value">12 / 50</span>
+          </div>
+        </div>
+
+        <!-- Rules -->
+        <div class="notice notice--info">
+          <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); margin-bottom: var(--space-2);">📋 Rules</div>
+          <ul style="font-size: var(--font-size-xs); color: var(--color-info-text); padding-left: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2);">
+            <li>Deposit will be locked during the challenge</li>
+            <li>100% verification rate required for full reward</li>
+            <li>Give up within 3 days: FIXED 10% penalty</li>
+            <li>Once joined, cancellation is not possible</li>
+          </ul>
+        </div>
+
+        <!-- Deposit Section -->
+        <div class="deposit-section">
+          <div class="deposit-section__header">
+            <span class="deposit-section__title">Deposit</span>
+            <span class="deposit-section__balance">Deposit: 7.5 TON</span>
+          </div>
+          <div class="deposit-slider">
+            <div class="deposit-slider__input-row">
+              <input type="number" class="deposit-slider__number" value="3" step="0.1" data-case-id="1">
+              <span class="deposit-slider__unit">TON</span>
+            </div>
+            <input type="range" class="deposit-slider__range" min="1" max="5" value="3" step="0.1" data-case-id="1">
+            <div class="deposit-slider__labels">
+              <span class="deposit-slider__label">1 TON</span>
+              <span class="deposit-slider__label">5 TON</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-area">
+          <button class="btn btn--primary btn--full btn--lg" data-cta="1">START CHALLENGE (3 TON)</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: 잔액 부족 (PROPORTIONAL penalty 15%) ===== -->
+    <main class="screen" id="case-2">
+
+      <div class="space-y-4" style="padding: var(--space-4);">
+        <!-- Challenge Summary -->
+        <div class="challenge-summary">
+          <div class="challenge-summary__icon">📚</div>
+          <div class="challenge-summary__info">
+            <div class="challenge-summary__name">Daily Reading</div>
+            <div class="challenge-summary__badges">
+              <span class="badge badge--medium">MEDIUM</span>
+              <span class="badge badge--neutral">REGULAR</span>
+              <span class="badge badge--neutral">Education</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail List -->
+        <div class="detail-list">
+          <div class="detail-list__item">
+            <span class="detail-list__label">Duration</span>
+            <span class="detail-list__value">14 days</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Schedule</span>
+            <span class="detail-list__value">Starts when you join</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Frequency</span>
+            <span class="detail-list__value">1 time every 1 day</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Verification Time</span>
+            <span class="detail-list__value">Anytime</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Timezone</span>
+            <span class="detail-list__value">Your timezone</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Reward Rate</span>
+            <span class="detail-list__value">8%</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Penalty</span>
+            <span class="detail-list__value">PROPORTIONAL (15%)</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Participants</span>
+            <span class="detail-list__value">8 / 30</span>
+          </div>
+        </div>
+
+        <!-- Deposit Section -->
+        <div class="deposit-section">
+          <div class="deposit-section__header">
+            <span class="deposit-section__title">Deposit</span>
+            <span class="deposit-section__balance deposit-section__balance--danger">Deposit: 0.5 TON</span>
+          </div>
+          <div class="deposit-slider">
+            <div class="deposit-slider__input-row">
+              <input type="number" class="deposit-slider__number" value="2" step="0.1" disabled data-case-id="2">
+              <span class="deposit-slider__unit">TON</span>
+            </div>
+            <input type="range" class="deposit-slider__range" min="2" max="10" value="2" step="0.1" disabled data-case-id="2">
+            <div class="deposit-slider__labels">
+              <span class="deposit-slider__label">2 TON</span>
+              <span class="deposit-slider__label">10 TON</span>
+            </div>
+          </div>
+          <div class="balance-warning">
+            <span>⚠️</span>
+            <span class="balance-warning__text">You need at least 1.5 TON more</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-area">
+          <button class="btn btn--danger btn--full btn--lg">INSUFFICIENT BALANCE — BUY TON</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: 중복 참여 ===== -->
+    <main class="screen" id="case-3">
+
+      <div class="space-y-4" style="padding: var(--space-4);">
+        <!-- Challenge Summary -->
+        <div class="challenge-summary">
+          <div class="challenge-summary__icon">🏃</div>
+          <div class="challenge-summary__info">
+            <div class="challenge-summary__name">Morning Run</div>
+            <div class="challenge-summary__badges">
+              <span class="badge badge--easy">EASY</span>
+              <span class="badge badge--neutral">REGULAR</span>
+              <span class="badge badge--neutral">Fitness</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail List -->
+        <div class="detail-list">
+          <div class="detail-list__item">
+            <span class="detail-list__label">Duration</span>
+            <span class="detail-list__value">7 days</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Schedule</span>
+            <span class="detail-list__value">Starts when you join</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Frequency</span>
+            <span class="detail-list__value">1 time every 1 day</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Verification Time</span>
+            <span class="detail-list__value">Anytime</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Timezone</span>
+            <span class="detail-list__value">Your timezone</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Reward Rate</span>
+            <span class="detail-list__value">10%</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Penalty</span>
+            <span class="detail-list__value">FIXED (10%)</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Participants</span>
+            <span class="detail-list__value">12 / 50</span>
+          </div>
+        </div>
+
+        <!-- Status Message -->
+        <div class="status-message">
+          <span>ℹ️</span>
+          <span class="status-message__text">You are already participating in this challenge</span>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-area">
+          <button class="btn btn--primary btn--full btn--lg" disabled>ALREADY JOINED</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 4: 인원 마감 (PROPORTIONAL penalty 25%) ===== -->
+    <main class="screen" id="case-4">
+
+      <div class="space-y-4" style="padding: var(--space-4);">
+        <!-- Challenge Summary -->
+        <div class="challenge-summary">
+          <div class="challenge-summary__icon">🧘</div>
+          <div class="challenge-summary__info">
+            <div class="challenge-summary__name">Meditation Practice</div>
+            <div class="challenge-summary__badges">
+              <span class="badge badge--hard">HARD</span>
+              <span class="badge badge--neutral">REGULAR</span>
+              <span class="badge badge--neutral">Wellness</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail List -->
+        <div class="detail-list">
+          <div class="detail-list__item">
+            <span class="detail-list__label">Duration</span>
+            <span class="detail-list__value">21 days</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Schedule</span>
+            <span class="detail-list__value">Starts when you join</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Frequency</span>
+            <span class="detail-list__value">3 times every 7 days</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Verification Time</span>
+            <span class="detail-list__value">6:00 AM — 10:00 PM</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Timezone</span>
+            <span class="detail-list__value">Your timezone</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Reward Rate</span>
+            <span class="detail-list__value">12%</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Penalty</span>
+            <span class="detail-list__value">PROPORTIONAL (25%)</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Participants</span>
+            <span class="detail-list__value detail-list__value--danger">20 / 20 (Full)</span>
+          </div>
+        </div>
+
+        <!-- Status Message -->
+        <div class="status-message">
+          <span>🚫</span>
+          <span class="status-message__text">This challenge is full</span>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-area">
+          <button class="btn btn--primary btn--full btn--lg" disabled>CHALLENGE FULL</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 5: 재참여 ===== -->
+    <main class="screen" id="case-5">
+
+      <div class="space-y-4" style="padding: var(--space-4);">
+        <!-- Challenge Summary -->
+        <div class="challenge-summary">
+          <div class="challenge-summary__icon">🏃</div>
+          <div class="challenge-summary__info">
+            <div class="challenge-summary__name">Morning Run</div>
+            <div class="challenge-summary__badges">
+              <span class="badge badge--easy">EASY</span>
+              <span class="badge badge--neutral">REGULAR</span>
+              <span class="badge badge--neutral">Fitness</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail List -->
+        <div class="detail-list">
+          <div class="detail-list__item">
+            <span class="detail-list__label">Duration</span>
+            <span class="detail-list__value">7 days</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Schedule</span>
+            <span class="detail-list__value">Starts when you join</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Frequency</span>
+            <span class="detail-list__value">1 time every 1 day</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Verification Time</span>
+            <span class="detail-list__value">Anytime</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Timezone</span>
+            <span class="detail-list__value">Your timezone</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Reward Rate</span>
+            <span class="detail-list__value">10%</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Penalty</span>
+            <span class="detail-list__value">FIXED (10%)</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Participants</span>
+            <span class="detail-list__value">12 / 50</span>
+          </div>
+        </div>
+
+        <!-- Previous Participation Info -->
+        <div class="status-message status-message--info">
+          <span>✅</span>
+          <span class="status-message__text">Previously participated (Completed)</span>
+        </div>
+
+        <!-- Deposit Section -->
+        <div class="deposit-section">
+          <div class="deposit-section__header">
+            <span class="deposit-section__title">Deposit</span>
+            <span class="deposit-section__balance">Deposit: 12.3 TON</span>
+          </div>
+          <div class="deposit-slider">
+            <div class="deposit-slider__input-row">
+              <input type="number" class="deposit-slider__number" value="5" step="0.1" data-case-id="5">
+              <span class="deposit-slider__unit">TON</span>
+            </div>
+            <input type="range" class="deposit-slider__range" min="1" max="5" value="5" step="0.1" data-case-id="5">
+            <div class="deposit-slider__labels">
+              <span class="deposit-slider__label">1 TON</span>
+              <span class="deposit-slider__label">5 TON</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-area">
+          <button class="btn btn--primary btn--full btn--lg" data-cta="5">START CHALLENGE (5 TON)</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 6: 중도 참여 (FIXED_PERIOD, PROPORTIONAL 30%, Fixed timezone) ===== -->
+    <main class="screen" id="case-6">
+
+      <div class="space-y-4" style="padding: var(--space-4);">
+        <!-- Challenge Summary -->
+        <div class="challenge-summary">
+          <div class="challenge-summary__icon challenge-summary__icon--event">🎯</div>
+          <div class="challenge-summary__info">
+            <div class="challenge-summary__name">New Year Resolution</div>
+            <div class="challenge-summary__badges">
+              <span class="badge badge--medium">MEDIUM</span>
+              <span class="badge badge--neutral">EVENT</span>
+              <span class="badge badge--neutral">Fitness</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail List -->
+        <div class="detail-list">
+          <div class="detail-list__item">
+            <span class="detail-list__label">Duration</span>
+            <span class="detail-list__value">30 days</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Schedule</span>
+            <span class="detail-list__value">Jan 1 — Jan 30, 2026</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Progress</span>
+            <span class="detail-list__value">Started 15 days ago • 15 days remaining</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Frequency</span>
+            <span class="detail-list__value">5 times every 7 days</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Verification Time</span>
+            <span class="detail-list__value">6:00 AM — 11:00 PM</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Timezone</span>
+            <span class="detail-list__value">UTC+9 (Fixed)</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Reward Rate</span>
+            <span class="detail-list__value">15%</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Penalty</span>
+            <span class="detail-list__value">PROPORTIONAL (30%)</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Participants</span>
+            <span class="detail-list__value">18 / 50</span>
+          </div>
+        </div>
+
+        <!-- Warning Notice -->
+        <div class="notice notice--warning">
+          <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); margin-bottom: var(--space-2);">⚠️ Challenge Already Started</div>
+          <ul style="font-size: var(--font-size-xs); color: var(--color-warning-text); padding-left: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2);">
+            <li>This challenge has already started</li>
+            <li>Missed periods will be marked as MISSED</li>
+            <li>15 days remaining to complete</li>
+          </ul>
+        </div>
+
+        <!-- Rules -->
+        <div class="notice notice--info">
+          <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); margin-bottom: var(--space-2);">📋 Rules</div>
+          <ul style="font-size: var(--font-size-xs); color: var(--color-info-text); padding-left: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2);">
+            <li>Deposit will be locked during the challenge</li>
+            <li>100% verification rate required for full reward</li>
+            <li>PROPORTIONAL penalty: 30% × (1 - verification rate)</li>
+            <li>Once joined, cancellation is not possible</li>
+          </ul>
+        </div>
+
+        <!-- Deposit Section -->
+        <div class="deposit-section">
+          <div class="deposit-section__header">
+            <span class="deposit-section__title">Deposit</span>
+            <span class="deposit-section__balance">Deposit: 20.0 TON</span>
+          </div>
+          <div class="deposit-slider">
+            <div class="deposit-slider__input-row">
+              <input type="number" class="deposit-slider__number" value="10" step="0.1" data-case-id="6">
+              <span class="deposit-slider__unit">TON</span>
+            </div>
+            <input type="range" class="deposit-slider__range" min="3" max="15" value="10" step="0.1" data-case-id="6">
+            <div class="deposit-slider__labels">
+              <span class="deposit-slider__label">3 TON</span>
+              <span class="deposit-slider__label">15 TON</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-area">
+          <button class="btn btn--primary btn--full btn--lg" data-cta="6">START CHALLENGE (10 TON)</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 7: 예치금 범위 에러 ===== -->
+    <main class="screen" id="case-7">
+
+      <div class="space-y-4" style="padding: var(--space-4);">
+        <!-- Challenge Summary -->
+        <div class="challenge-summary">
+          <div class="challenge-summary__icon">🧘</div>
+          <div class="challenge-summary__info">
+            <div class="challenge-summary__name">Meditation Practice</div>
+            <div class="challenge-summary__badges">
+              <span class="badge badge--hard">HARD</span>
+              <span class="badge badge--neutral">REGULAR</span>
+              <span class="badge badge--neutral">Wellness</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail List -->
+        <div class="detail-list">
+          <div class="detail-list__item">
+            <span class="detail-list__label">Duration</span>
+            <span class="detail-list__value">21 days</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Schedule</span>
+            <span class="detail-list__value">Starts when you join</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Frequency</span>
+            <span class="detail-list__value">3 times every 7 days</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Verification Time</span>
+            <span class="detail-list__value">6:00 AM — 10:00 PM</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Timezone</span>
+            <span class="detail-list__value">Your timezone</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Reward Rate</span>
+            <span class="detail-list__value">12%</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Penalty</span>
+            <span class="detail-list__value">PROPORTIONAL (25%)</span>
+          </div>
+          <div class="detail-list__item">
+            <span class="detail-list__label">Participants</span>
+            <span class="detail-list__value">5 / 20</span>
+          </div>
+        </div>
+
+        <!-- Deposit Section (Error State) -->
+        <div class="deposit-section">
+          <div class="deposit-section__header">
+            <span class="deposit-section__title">Deposit</span>
+            <span class="deposit-section__balance">Deposit: 30.0 TON</span>
+          </div>
+          <div class="deposit-slider">
+            <div class="deposit-slider__input-row">
+              <input type="number" class="deposit-slider__number deposit-slider__number--error" value="25" step="0.1" data-case-id="7">
+              <span class="deposit-slider__unit">TON</span>
+            </div>
+            <input type="range" class="deposit-slider__range" min="5" max="20" value="20" step="0.1" data-case-id="7">
+            <div class="deposit-slider__labels">
+              <span class="deposit-slider__label">5 TON</span>
+              <span class="deposit-slider__label">20 TON</span>
+            </div>
+            <div class="deposit-slider__error">Amount exceeds maximum (20 TON)</div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-area">
+          <button class="btn btn--primary btn--full btn--lg" disabled>INVALID AMOUNT</button>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Slider <-> Number Input Sync + CTA Update
+    document.querySelectorAll('.deposit-slider__range').forEach(slider => {
+      const caseId = slider.dataset.caseId;
+      const numberInput = document.querySelector('.deposit-slider__number[data-case-id="' + caseId + '"]');
+      const ctaBtn = document.querySelector('[data-cta="' + caseId + '"]');
+
+      if (!numberInput) return;
+
+      // Slider → Number + CTA
+      slider.addEventListener('input', () => {
+        const val = parseFloat(slider.value);
+        numberInput.value = val;
+        numberInput.classList.remove('deposit-slider__number--error');
+        if (ctaBtn) {
+          ctaBtn.textContent = 'START CHALLENGE (' + val + ' TON)';
+          ctaBtn.disabled = false;
+        }
+        // Remove error message if exists
+        const errorEl = slider.parentElement.querySelector('.deposit-slider__error');
+        if (errorEl) errorEl.remove();
+      });
+
+      // Number → Slider + CTA (validation in JS, no min/max on input)
+      numberInput.addEventListener('input', () => {
+        const val = parseFloat(numberInput.value);
+        const min = parseFloat(slider.min);
+        const max = parseFloat(slider.max);
+
+        // Remove existing error
+        const existingError = slider.parentElement.querySelector('.deposit-slider__error');
+        if (existingError) existingError.remove();
+
+        if (isNaN(val)) {
+          numberInput.classList.add('deposit-slider__number--error');
+          if (ctaBtn) {
+            ctaBtn.textContent = 'INVALID AMOUNT';
+            ctaBtn.disabled = true;
+          }
+          return;
+        }
+
+        if (val < min) {
+          numberInput.classList.add('deposit-slider__number--error');
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'deposit-slider__error';
+          errorDiv.textContent = 'Minimum deposit is ' + min + ' TON';
+          slider.parentElement.appendChild(errorDiv);
+          if (ctaBtn) {
+            ctaBtn.textContent = 'INVALID AMOUNT';
+            ctaBtn.disabled = true;
+          }
+        } else if (val > max) {
+          numberInput.classList.add('deposit-slider__number--error');
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'deposit-slider__error';
+          errorDiv.textContent = 'Amount exceeds maximum (' + max + ' TON)';
+          slider.parentElement.appendChild(errorDiv);
+          if (ctaBtn) {
+            ctaBtn.textContent = 'INVALID AMOUNT';
+            ctaBtn.disabled = true;
+          }
+        } else {
+          numberInput.classList.remove('deposit-slider__number--error');
+          slider.value = val;
+          if (ctaBtn) {
+            ctaBtn.textContent = 'START CHALLENGE (' + val + ' TON)';
+            ctaBtn.disabled = false;
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

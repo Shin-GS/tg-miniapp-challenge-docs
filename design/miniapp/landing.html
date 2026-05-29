@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DefyTON - Stake. Prove. Earn.</title>
+  <meta property="og:title" content="DefyTON - AI-Powered Habit Challenges" />
+  <meta property="og:description" content="Stake TON, prove your habits with AI verification, and earn rewards. Build real habits with real stakes." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://defyton.com/" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f14;
+      color: #e4e4e7;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== Layout ===== */
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    section {
+      padding: 64px 0;
+    }
+
+    /* ===== Hero Section ===== */
+    .hero {
+      text-align: center;
+      padding: 80px 0 64px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(147, 51, 234, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .logo {
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(to right, #9333ea, #4f46e5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 24px;
+      display: inline-block;
+    }
+
+    .tagline {
+      font-size: 36px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .sub-copy {
+      font-size: 16px;
+      color: #a1a1aa;
+      line-height: 1.7;
+      margin-bottom: 40px;
+      max-width: 440px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ===== CTA Button ===== */
+    .cta-button {
+      display: inline-block;
+      padding: 16px 40px;
+      background: linear-gradient(to right, #9333ea, #4f46e5);
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      transition: opacity 0.2s, transform 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .cta-button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .cta-button:active {
+      transform: translateY(0);
+    }
+
+    /* ===== Section Titles ===== */
+    .section-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    /* ===== How It Works ===== */
+    .how-it-works {
+      border-top: 1px solid #1c1c24;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .step-card {
+      background: #1c1c24;
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+    }
+
+    .step-number {
+      font-size: 12px;
+      font-weight: 700;
+      color: #71717a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .step-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    .step-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .step-desc {
+      font-size: 14px;
+      color: #a1a1aa;
+      line-height: 1.6;
+    }
+
+    /* ===== Features ===== */
+    .features {
+      border-top: 1px solid #1c1c24;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .feature-card {
+      background: #1c1c24;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .feature-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .feature-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .feature-desc {
+      font-size: 12px;
+      color: #a1a1aa;
+      line-height: 1.5;
+    }
+
+    /* ===== Bottom CTA ===== */
+    .bottom-cta {
+      text-align: center;
+      border-top: 1px solid #1c1c24;
+    }
+
+    .bottom-cta-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 24px;
+    }
+
+    .bottom-links {
+      margin-top: 32px;
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .bottom-links a {
+      font-size: 13px;
+      color: #71717a;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .bottom-links a:hover {
+      color: #a1a1aa;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      text-align: center;
+      padding: 24px 0 32px;
+      border-top: 1px solid #1c1c24;
+      color: #52525b;
+      font-size: 12px;
+    }
+
+    /* ===== Animation ===== */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeInUp 0.6s ease forwards;
+      opacity: 0;
+    }
+
+    .fade-in-delay-1 { animation-delay: 0.1s; }
+    .fade-in-delay-2 { animation-delay: 0.2s; }
+    .fade-in-delay-3 { animation-delay: 0.3s; }
+    .fade-in-delay-4 { animation-delay: 0.4s; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 480px) {
+      .hero {
+        padding: 60px 0 48px;
+      }
+
+      .tagline {
+        font-size: 28px;
+      }
+
+      .sub-copy {
+        font-size: 15px;
+      }
+
+      .cta-button {
+        padding: 14px 32px;
+        font-size: 16px;
+        width: 100%;
+      }
+
+      section {
+        padding: 48px 0;
+      }
+
+      .section-title {
+        font-size: 20px;
+        margin-bottom: 32px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bottom-cta-title {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="logo fade-in">DefyTON</div>
+      <h1 class="tagline fade-in fade-in-delay-1">Stake. Prove. Earn.</h1>
+      <p class="sub-copy fade-in fade-in-delay-2">
+        AI-powered habit challenges backed by TON deposits. Build real habits with real stakes.
+      </p>
+      <a href="https://t.me/BOT_USERNAME/app" class="cta-button fade-in fade-in-delay-3" aria-label="Open DefyTON in Telegram">
+        🚀 Open in Telegram
+      </a>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <div class="steps">
+        <div class="step-card fade-in">
+          <div class="step-number">Step 1</div>
+          <div class="step-icon">💰</div>
+          <div class="step-title">Deposit TON</div>
+          <p class="step-desc">Put your money where your habits are. Stake TON to join a challenge.</p>
+        </div>
+        <div class="step-card fade-in fade-in-delay-1">
+          <div class="step-number">Step 2</div>
+          <div class="step-icon">📸</div>
+          <div class="step-title">Verify Daily</div>
+          <p class="step-desc">Submit photo proof. Our AI verifies your progress instantly.</p>
+        </div>
+        <div class="step-card fade-in fade-in-delay-2">
+          <div class="step-number">Step 3</div>
+          <div class="step-icon">🏆</div>
+          <div class="step-title">Earn Rewards</div>
+          <p class="step-desc">Complete the challenge and get your deposit back + bonus rewards.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Features -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Key Features</h2>
+      <div class="features-grid">
+        <div class="feature-card fade-in">
+          <div class="feature-icon">🤖</div>
+          <div class="feature-title">AI Verification</div>
+          <p class="feature-desc">Smart photo verification powered by GPT-4o Vision</p>
+        </div>
+        <div class="feature-card fade-in fade-in-delay-1">
+          <div class="feature-icon">⛓️</div>
+          <div class="feature-title">TON Blockchain</div>
+          <p class="feature-desc">Secure deposits and transparent transactions on TON</p>
+        </div>
+        <div class="feature-card fade-in fade-in-delay-2">
+          <div class="feature-icon">🔥</div>
+          <div class="feature-title">Streak System</div>
+          <p class="feature-desc">Build momentum with daily streaks and level up</p>
+        </div>
+        <div class="feature-card fade-in fade-in-delay-3">
+          <div class="feature-icon">👥</div>
+          <div class="feature-title">Community</div>
+          <p class="feature-desc">Join challenges with others and stay accountable</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="bottom-cta">
+    <div class="container">
+      <h2 class="bottom-cta-title">Ready to build better habits?</h2>
+      <a href="https://t.me/BOT_USERNAME/app" class="cta-button" aria-label="Start your challenge in Telegram">
+        🚀 Start Your Challenge
+      </a>
+      <nav class="bottom-links" aria-label="Legal links">
+        <a href="/terms">Terms of Service</a>
+        <a href="/privacy">Privacy Policy</a>
+      </nav>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      &copy; 2026 DefyTON. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    // Intersection Observer for fade-in animations
+    (function() {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.style.animationPlayState = 'running';
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      // Pause animations until visible (except hero which should animate immediately)
+      document.querySelectorAll('.how-it-works .fade-in, .features .fade-in, .bottom-cta .fade-in').forEach(function(el) {
+        el.style.animationPlayState = 'paused';
+        observer.observe(el);
+      });
+    })();
+  </script>
+</body>
+</html>

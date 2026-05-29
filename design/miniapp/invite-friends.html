@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Invite Friends - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Invite Friends Screen Styles ===== */
+
+    /* Hero Card */
+    .invite-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-8) var(--space-6);
+      border-radius: var(--radius-lg);
+      background: var(--gradient-blue);
+      color: var(--color-text-white);
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .invite-hero__icon {
+      font-size: 64px;
+      margin-bottom: var(--space-4);
+    }
+
+    .invite-hero__title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-black);
+      line-height: var(--line-height-tight);
+      margin-bottom: var(--space-2);
+    }
+
+    .invite-hero__desc {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      opacity: 0.9;
+    }
+
+    /* Invite Link Card */
+    .invite-link-card {
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .invite-link-card__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-3);
+    }
+
+    .invite-link-card__url {
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      word-break: break-all;
+      font-family: monospace;
+      margin-bottom: var(--space-4);
+    }
+
+    /* Share Options */
+    .share-options {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">
+    <!-- Case Switcher -->
+    <nav class="case-switcher">
+      <button class="active" data-case="1">Default</button>
+      <button data-case="2">Copied</button>
+    </nav>
+
+    <!-- ===== Case 1: Default (기본 상태) ===== -->
+    <main class="screen active" id="case-1">
+      <div class="space-y-6">
+        <!-- Hero Card -->
+        <div class="invite-hero">
+          <span class="invite-hero__icon">👥</span>
+          <div class="invite-hero__title">Invite Friends to DefyTON</div>
+          <div class="invite-hero__desc">Share your invite link and build habits together!</div>
+        </div>
+
+        <!-- Invite Link Card -->
+        <div class="invite-link-card">
+          <div class="invite-link-card__label">Your Invite Link</div>
+          <div class="invite-link-card__url">https://t.me/DefyTONBot?start=ABC123</div>
+          <button class="btn btn--primary btn--full" id="copy-link-btn">
+            📋 Copy Link
+          </button>
+        </div>
+
+        <!-- Share Options -->
+        <div class="share-options">
+          <button class="btn btn--primary btn--full">
+            ✈️ Share on Telegram
+          </button>
+          <button class="btn btn--secondary btn--full" id="copy-msg-btn">
+            💬 Copy Full Message
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: Copied (복사 완료 상태) ===== -->
+    <main class="screen" id="case-2">
+      <div class="space-y-6">
+        <!-- Hero Card -->
+        <div class="invite-hero">
+          <span class="invite-hero__icon">👥</span>
+          <div class="invite-hero__title">Invite Friends to DefyTON</div>
+          <div class="invite-hero__desc">Share your invite link and build habits together!</div>
+        </div>
+
+        <!-- Invite Link Card -->
+        <div class="invite-link-card">
+          <div class="invite-link-card__label">Your Invite Link</div>
+          <div class="invite-link-card__url">https://t.me/DefyTONBot?start=ABC123</div>
+          <button class="btn btn--success btn--full" id="copy-link-btn-copied">
+            ✓ Copied!
+          </button>
+        </div>
+
+        <!-- Share Options -->
+        <div class="share-options">
+          <button class="btn btn--primary btn--full">
+            ✈️ Share on Telegram
+          </button>
+          <button class="btn btn--secondary btn--full">
+            💬 Copy Full Message
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Copy Link Interaction (Case 1)
+    const copyLinkBtn = document.getElementById('copy-link-btn');
+    if (copyLinkBtn) {
+      copyLinkBtn.addEventListener('click', () => {
+        copyLinkBtn.textContent = '✓ Copied!';
+        copyLinkBtn.classList.remove('btn--primary');
+        copyLinkBtn.classList.add('btn--success');
+        setTimeout(() => {
+          copyLinkBtn.textContent = '📋 Copy Link';
+          copyLinkBtn.classList.remove('btn--success');
+          copyLinkBtn.classList.add('btn--primary');
+        }, 2500);
+      });
+    }
+
+    // Copy Full Message Interaction (Case 1)
+    const copyMsgBtn = document.getElementById('copy-msg-btn');
+    if (copyMsgBtn) {
+      copyMsgBtn.addEventListener('click', () => {
+        const originalText = copyMsgBtn.textContent;
+        copyMsgBtn.textContent = '✓ Copied!';
+        copyMsgBtn.classList.remove('btn--secondary');
+        copyMsgBtn.classList.add('btn--success');
+        setTimeout(() => {
+          copyMsgBtn.textContent = originalText;
+          copyMsgBtn.classList.remove('btn--success');
+          copyMsgBtn.classList.add('btn--secondary');
+        }, 2500);
+      });
+    }
+  </script>
+</body>
+</html>

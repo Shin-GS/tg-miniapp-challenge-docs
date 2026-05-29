@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Leaderboard - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Leaderboard Screen Styles ===== */
+
+    /* Your Rank Section */
+    .rank-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-8) var(--space-6);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+
+    .rank-section__number {
+      font-size: var(--font-size-display);
+      font-weight: var(--font-weight-black);
+      color: var(--color-primary);
+      line-height: var(--line-height-tight);
+    }
+
+    .rank-section__number--muted {
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-xl);
+    }
+
+    .rank-section__percent {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      margin-top: var(--space-2);
+    }
+
+    .rank-section__streak {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-top: var(--space-4);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      background: var(--gradient-yellow);
+      color: var(--color-text-white);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+
+    .stats-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-5);
+      border-radius: var(--radius-lg);
+      color: var(--color-text-white);
+      box-shadow: var(--shadow-md);
+      text-align: center;
+    }
+
+    .stats-card--blue {
+      background: var(--gradient-blue);
+    }
+
+    .stats-card--green {
+      background: var(--gradient-green);
+    }
+
+    .stats-card__value {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-black);
+      line-height: var(--line-height-tight);
+    }
+
+    .stats-card__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      text-transform: uppercase;
+      margin-top: var(--space-2);
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">
+    <!-- Case Switcher -->
+    <nav class="case-switcher">
+      <button class="active" data-case="1">Top 100</button>
+      <button data-case="2">Outside Top 100</button>
+      <button data-case="3">Unranked</button>
+    </nav>
+
+    <!-- ===== Case 1: Top 100 안 (랭킹 보유) ===== -->
+    <main class="screen active" id="case-1">
+      <div class="space-y-6">
+        <!-- Your Rank -->
+        <section>
+          <div class="section-header">Your Rank</div>
+          <div class="rank-section">
+            <span class="rank-section__number">#42</span>
+            <span class="rank-section__percent">Top 100 🏆</span>
+            <span class="rank-section__streak">🔥 7 day streak</span>
+          </div>
+        </section>
+
+        <!-- Top Players -->
+        <section>
+          <div class="section-header">Top Players</div>
+          <div class="card">
+            <div class="empty-state">
+              <span class="empty-state__icon">🏆</span>
+              <div class="empty-state__title">Coming Soon</div>
+              <div class="empty-state__description">Rankings will be available when more users join!</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Your Stats -->
+        <section>
+          <div class="section-header">Your Stats</div>
+          <div class="stats-grid">
+            <div class="stats-card stats-card--blue">
+              <span class="stats-card__value">87%</span>
+              <span class="stats-card__label">Weekly Success</span>
+            </div>
+            <div class="stats-card stats-card--green">
+              <span class="stats-card__value">1,240</span>
+              <span class="stats-card__label">Total Points</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Invite Friends Button -->
+        <button class="btn btn--primary btn--full">
+          👥 Invite Friends
+        </button>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: Top 100 밖 (참여 이력 있으나 순위 밖) ===== -->
+    <main class="screen" id="case-2">
+      <div class="space-y-6">
+        <!-- Your Rank -->
+        <section>
+          <div class="section-header">Your Rank</div>
+          <div class="rank-section">
+            <span class="rank-section__number rank-section__number--muted">Outside Top 100</span>
+            <span class="rank-section__percent">Complete more challenges to climb the ranks!</span>
+          </div>
+        </section>
+
+        <!-- Top Players -->
+        <section>
+          <div class="section-header">Top Players</div>
+          <div class="card">
+            <div class="empty-state">
+              <span class="empty-state__icon">🏆</span>
+              <div class="empty-state__title">Coming Soon</div>
+              <div class="empty-state__description">Rankings will be available when more users join!</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Your Stats -->
+        <section>
+          <div class="section-header">Your Stats</div>
+          <div class="stats-grid">
+            <div class="stats-card stats-card--blue">
+              <span class="stats-card__value">45%</span>
+              <span class="stats-card__label">Weekly Success</span>
+            </div>
+            <div class="stats-card stats-card--green">
+              <span class="stats-card__value">28</span>
+              <span class="stats-card__label">Total Points</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Invite Friends Button -->
+        <button class="btn btn--primary btn--full">
+          👥 Invite Friends
+        </button>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: 신규 사용자 (참여 이력 없음) ===== -->
+    <main class="screen" id="case-3">
+      <div class="space-y-6">
+        <!-- Your Rank -->
+        <section>
+          <div class="section-header">Your Rank</div>
+          <div class="rank-section">
+            <span class="rank-section__number rank-section__number--muted">Unranked</span>
+            <span class="rank-section__percent">Start a challenge to get ranked!</span>
+          </div>
+        </section>
+
+        <!-- Top Players -->
+        <section>
+          <div class="section-header">Top Players</div>
+          <div class="card">
+            <div class="empty-state">
+              <span class="empty-state__icon">🏆</span>
+              <div class="empty-state__title">Coming Soon</div>
+              <div class="empty-state__description">Rankings will be available when more users join!</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Your Stats -->
+        <section>
+          <div class="section-header">Your Stats</div>
+          <div class="stats-grid">
+            <div class="stats-card stats-card--blue">
+              <span class="stats-card__value">0%</span>
+              <span class="stats-card__label">Weekly Success</span>
+            </div>
+            <div class="stats-card stats-card--green">
+              <span class="stats-card__value">0</span>
+              <span class="stats-card__label">Total Points</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Invite Friends Button -->
+        <button class="btn btn--primary btn--full">
+          👥 Invite Friends
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+  </script>
+</body>
+</html>
