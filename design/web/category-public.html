@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Public Page - Design Spec</title>
+    <style>
+        /* 
+         * Category Public Page Design Spec
+         * 
+         * BE-rendered public page (no login required)
+         * URL: /categories/{slug}
+         * Purpose: SEO hub page, category-specific challenge entry
+         * 
+         * Cases:
+         * - Case 1: Normal — active category (has challenges)
+         * - Case 2: Empty category (0 challenges, noindex)
+         * - Case 3: 404 — inactive or non-existent
+         */
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f14;
+            color: #e4e4e7;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ===== Common Header ===== */
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(15, 15, 20, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #1c1c24;
+            padding: 14px 0;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 32px;
+        }
+
+        .header-logo {
+            font-size: 22px;
+            font-weight: 900;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .nav-item {
+            font-size: 14px;
+            font-weight: 500;
+            color: #a1a1aa;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-item:hover { color: #ffffff; }
+
+        .nav-dropdown { position: relative; }
+
+        .nav-dropdown-trigger {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #a1a1aa;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            transition: color 0.2s;
+        }
+
+        .nav-dropdown-trigger:hover { color: #ffffff; }
+
+        .nav-dropdown-arrow { font-size: 10px; transition: transform 0.2s; }
+
+        .nav-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1c1c24;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 200px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-dropdown:hover .nav-dropdown-menu { display: block; }
+        .nav-dropdown:hover .nav-dropdown-arrow { transform: rotate(180deg); }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #e4e4e7;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.15s;
+        }
+
+        .dropdown-item:hover { background: #27272a; }
+        .dropdown-item-icon { font-size: 16px; width: 20px; text-align: center; }
+
+        .header-cta {
+            display: inline-block;
+            padding: 8px 18px;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+
+        .header-cta:hover { opacity: 0.9; }
+
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #e4e4e7;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 53px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0f0f14;
+            padding: 24px 20px;
+            z-index: 999;
+            overflow-y: auto;
+        }
+
+        .mobile-menu.open { display: block; }
+
+        .mobile-menu-item {
+            display: block;
+            padding: 14px 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: #e4e4e7;
+            text-decoration: none;
+            border-bottom: 1px solid #1c1c24;
+        }
+
+        .mobile-submenu { display: none; padding-left: 16px; }
+        .mobile-submenu.open { display: block; }
+
+        .mobile-submenu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            color: #a1a1aa;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .mobile-menu-cta {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            padding: 14px 24px;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* ===== Mini Header (for 404) ===== */
+        .mini-header {
+            padding: 14px 0;
+            border-bottom: 1px solid #1c1c24;
+        }
+
+        .mini-header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* ===== Breadcrumb ===== */
+        .breadcrumb {
+            padding: 16px 0 0;
+            font-size: 13px;
+        }
+
+        .breadcrumb a {
+            color: #71717a;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover { color: #a1a1aa; }
+
+        .breadcrumb span { color: #52525b; margin: 0 8px; }
+        .breadcrumb-current { color: #a1a1aa; }
+
+        /* ===== Category Header ===== */
+        .category-header {
+            text-align: center;
+            padding: 32px 0;
+        }
+
+        .category-icon { font-size: 40px; margin-bottom: 12px; }
+
+        .category-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .category-description {
+            font-size: 14px;
+            color: #a1a1aa;
+            line-height: 1.7;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        /* ===== Section ===== */
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #27272a;
+        }
+
+        /* ===== Challenge Grid ===== */
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .challenge-card {
+            background: #1c1c24;
+            border-radius: 12px;
+            padding: 16px;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s, transform 0.1s;
+            display: block;
+        }
+
+        .challenge-card:hover {
+            background: #24242e;
+            transform: translateY(-2px);
+        }
+
+        .challenge-card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .challenge-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .challenge-card-deposit {
+            font-size: 12px;
+            color: #a1a1aa;
+            margin-top: 8px;
+        }
+
+        .challenge-card-reward {
+            font-size: 12px;
+            color: #4ade80;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+        .badge-green { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .badge-orange { background: rgba(249,115,22,0.15); color: #fb923c; }
+        .badge-red { background: rgba(239,68,68,0.15); color: #f87171; }
+        .badge-gray { background: rgba(113,113,122,0.15); color: #a1a1aa; }
+
+        /* ===== CTA ===== */
+        .cta-wrapper {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            transition: opacity 0.2s;
+        }
+
+        .cta-button:hover { opacity: 0.9; }
+
+        /* ===== Common Footer ===== */
+        .site-footer {
+            border-top: 1px solid #1c1c24;
+            padding: 40px 0 32px;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 20px;
+            font-weight: 900;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .footer-nav a {
+            font-size: 13px;
+            color: #71717a;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-nav a:hover { color: #a1a1aa; }
+        .footer-copyright { font-size: 12px; color: #52525b; }
+
+        /* ===== Coming Soon ===== */
+        .coming-soon {
+            text-align: center;
+            padding: 48px 20px;
+        }
+
+        .coming-soon-icon { font-size: 48px; margin-bottom: 16px; }
+        .coming-soon-title { font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
+        .coming-soon-desc { font-size: 14px; color: #71717a; }
+
+        /* ===== Error ===== */
+        .error-container {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .error-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .error-message {
+            font-size: 14px;
+            color: #71717a;
+            margin-bottom: 32px;
+        }
+
+        /* ===== Case tabs ===== */
+        .case-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            background: #1a1a2e;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2000;
+            overflow-x: auto;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .case-tab {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            background: #27272a;
+            color: #a1a1aa;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        .case-tab.active { background: #9333ea; color: #ffffff; }
+
+        .case-content { display: none; padding-top: 52px; }
+        .case-content.active { display: block; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .header-nav { display: none; }
+            .header-cta { display: none; }
+            .mobile-menu-toggle { display: block; }
+
+            .challenges-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .challenges-grid {
+                grid-template-columns: 1fr;
+            }
+            .cta-button {
+                width: 100%;
+                padding: 14px 20px;
+            }
+        }
+    </style>
+  <link rel="stylesheet" href="../shared/web-nav.css">
+</head>
+<body>
+  <!-- Page Navigation -->
+  <nav class="page-nav">
+    <a href="landing.html">랜딩</a>
+    <a href="challenge-public.html">챌린지 상세</a>
+    <a class="active" href="category-public.html">카테고리</a>
+    <a href="events.html">이벤트</a>
+    <a href="leaderboard.html">리더보드</a>
+    <a href="challenge-completion-share.html">완료 공유</a>
+    <a href="public-pages.html">공개 페이지</a>
+  </nav>
+
+    <!-- Case Tabs -->
+    <div class="case-tabs">
+        <button class="case-tab active" onclick="showCase('case1')">정상</button>
+        <button class="case-tab" onclick="showCase('case2')">빈 카테고리</button>
+        <button class="case-tab" onclick="showCase('case3')">404</button>
+    </div>
+
+    <!-- Case 1: Normal — active category with challenges -->
+    <div id="case1" class="case-content active">
+        <!-- Full Header -->
+        <header class="site-header">
+            <div class="container">
+                <div class="header-inner">
+                    <a href="/" class="header-logo">DefyTON</a>
+                    <nav class="header-nav">
+                        <div class="nav-dropdown">
+                            <button class="nav-dropdown-trigger">Categories <span class="nav-dropdown-arrow">▾</span></button>
+                            <div class="nav-dropdown-menu">
+                                <a href="/categories/morning-routine" class="dropdown-item"><span class="dropdown-item-icon">🏃</span> Morning Routine</a>
+                                <a href="/categories/reading" class="dropdown-item"><span class="dropdown-item-icon">📚</span> Reading</a>
+                                <a href="/categories/wellness" class="dropdown-item"><span class="dropdown-item-icon">🧘</span> Wellness</a>
+                                <a href="/categories/fitness" class="dropdown-item"><span class="dropdown-item-icon">💪</span> Fitness</a>
+                            </div>
+                        </div>
+                        <a href="/events" class="nav-item">Events</a>
+                        <a href="/leaderboard" class="nav-item">Leaderboard</a>
+                    </nav>
+                    <a href="https://t.me/DefyTONBot/app?startapp=cat_3" class="header-cta">Open in Telegram</a>
+                    <button class="mobile-menu-toggle" onclick="toggleMobileMenu('mobileMenu1')" aria-label="Menu">☰</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="mobile-menu" id="mobileMenu1">
+            <a href="#" class="mobile-menu-item" onclick="toggleSubmenu(event, 'mobileCat1')">Categories ▾</a>
+            <div class="mobile-submenu" id="mobileCat1">
+                <a href="/categories/morning-routine" class="mobile-submenu-item"><span>🏃</span> Morning Routine</a>
+                <a href="/categories/reading" class="mobile-submenu-item"><span>📚</span> Reading</a>
+                <a href="/categories/wellness" class="mobile-submenu-item"><span>🧘</span> Wellness</a>
+                <a href="/categories/fitness" class="mobile-submenu-item"><span>💪</span> Fitness</a>
+            </div>
+            <a href="/events" class="mobile-menu-item">Events</a>
+            <a href="/leaderboard" class="mobile-menu-item">Leaderboard</a>
+            <a href="https://t.me/DefyTONBot/app?startapp=cat_3" class="mobile-menu-cta">Open in Telegram</a>
+        </div>
+
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="/">Home</a><span>›</span>
+                <span class="breadcrumb-current">Morning Routine</span>
+            </nav>
+
+            <div class="category-header">
+                <div class="category-icon">🏃</div>
+                <h1 class="category-title">Morning Routine</h1>
+                <p class="category-description">
+                    Build your Morning Routine habit with AI-verified daily challenges. 
+                    Stake GRAM, stay consistent, and earn rewards.
+                </p>
+            </div>
+
+            <!-- Available Now -->
+            <div class="section">
+                <h2 class="section-title">Available Now</h2>
+                <p style="font-size: 12px; color: #4ade80; margin-top: -8px; margin-bottom: 16px;">✅ Available — Updated Jun 16, 2025</p>
+                <div class="challenges-grid">
+                    <a href="/challenges/aB3xK9" class="challenge-card">
+                        <div class="challenge-card-title">30-Day Morning Jog</div>
+                        <div class="challenge-card-meta">
+                            <span class="badge badge-green">EASY</span>
+                            <span class="badge badge-blue">30 days</span>
+                        </div>
+                        <div class="challenge-card-deposit">1 ~ 5 GRAM</div>
+                        <div class="challenge-card-reward">+5% reward</div>
+                    </a>
+                    <a href="/challenges/xY7pQ2" class="challenge-card">
+                        <div class="challenge-card-title">5AM Wake Up Challenge</div>
+                        <div class="challenge-card-meta">
+                            <span class="badge badge-orange">HARD</span>
+                            <span class="badge badge-blue">14 days</span>
+                        </div>
+                        <div class="challenge-card-deposit">5 ~ 15 GRAM</div>
+                        <div class="challenge-card-reward">+15% reward</div>
+                    </a>
+                    <a href="/challenges/mN4wR8" class="challenge-card">
+                        <div class="challenge-card-title">Morning Yoga Flow</div>
+                        <div class="challenge-card-meta">
+                            <span class="badge badge-blue">MEDIUM</span>
+                            <span class="badge badge-blue">21 days</span>
+                        </div>
+                        <div class="challenge-card-deposit">1 ~ 10 GRAM</div>
+                        <div class="challenge-card-reward">+8% reward</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Past Challenges -->
+            <div class="section">
+                <h2 class="section-title">Past Challenges</h2>
+                <div class="challenges-grid">
+                    <a href="/challenges/kL9tU5" class="challenge-card">
+                        <div class="challenge-card-title">Early Bird January</div>
+                        <div class="challenge-card-meta">
+                            <span class="badge badge-green">EASY</span>
+                            <span class="badge badge-gray">Ended</span>
+                        </div>
+                        <div class="challenge-card-deposit">31 days · 1 ~ 5 GRAM</div>
+                    </a>
+                    <a href="/challenges/hJ2vX6" class="challenge-card">
+                        <div class="challenge-card-title">Morning Meditation Sprint</div>
+                        <div class="challenge-card-meta">
+                            <span class="badge badge-blue">MEDIUM</span>
+                            <span class="badge badge-gray">Ended</span>
+                        </div>
+                        <div class="challenge-card-deposit">7 days · 1 ~ 3 GRAM</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Other Categories -->
+            <section class="section" style="margin-top:32px;">
+                <h2 class="section-title">🧭 Other Categories</h2>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <a href="/categories/morning-routine" style="background:#1c1c24; border-radius:12px; padding:16px; text-decoration:none; display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:28px;">🏃</span>
+                        <div>
+                            <div style="font-size:14px; font-weight:700; color:#fff;">Morning Routine</div>
+                            <div style="font-size:12px; color:#a1a1aa;">4 challenges</div>
+                        </div>
+                    </a>
+                    <a href="/categories/reading" style="background:#1c1c24; border-radius:12px; padding:16px; text-decoration:none; display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:28px;">📚</span>
+                        <div>
+                            <div style="font-size:14px; font-weight:700; color:#fff;">Daily Reading</div>
+                            <div style="font-size:12px; color:#a1a1aa;">3 challenges</div>
+                        </div>
+                    </a>
+                    <a href="/categories/meditation" style="background:#1c1c24; border-radius:12px; padding:16px; text-decoration:none; display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:28px;">🧘</span>
+                        <div>
+                            <div style="font-size:14px; font-weight:700; color:#fff;">Meditation</div>
+                            <div style="font-size:12px; color:#a1a1aa;">2 challenges</div>
+                        </div>
+                    </a>
+                    <a href="/categories/fitness" style="background:#1c1c24; border-radius:12px; padding:16px; text-decoration:none; display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:28px;">💪</span>
+                        <div>
+                            <div style="font-size:14px; font-weight:700; color:#fff;">Fitness</div>
+                            <div style="font-size:12px; color:#a1a1aa;">5 challenges</div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- CTA -->
+            <div class="cta-wrapper">
+                <a href="https://t.me/DefyTONBot/app?startapp=cat_3" class="cta-button">🚀 Try DefyTON in Telegram</a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="container">
+                <div class="footer-logo">DefyTON</div>
+                <div style="margin:12px 0; text-align:center;">
+                    <span style="font-size:11px; font-weight:600; color:#71717a; text-transform:uppercase; letter-spacing:1px;">Popular Categories</span>
+                    <div style="margin-top:6px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px 16px;">
+                        <a href="/categories/morning-routine" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Morning Routine</a>
+                        <a href="/categories/fitness" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Fitness</a>
+                        <a href="/categories/reading" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Reading</a>
+                        <a href="/categories/meditation" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Meditation</a>
+                        <a href="/categories/language" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Language</a>
+                    </div>
+                </div>
+                <nav class="footer-nav">
+                    <a href="/">Challenges</a>
+                    <a href="/events">Events</a>
+                    <a href="/leaderboard">Leaderboard</a>
+                    <a href="/terms">Terms</a>
+                    <a href="/privacy">Privacy</a>
+                </nav>
+                <div class="footer-copyright">&copy; 2026 DefyTON. All rights reserved.</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Case 2: Empty category -->
+    <div id="case2" class="case-content">
+        <!-- Full Header -->
+        <header class="site-header">
+            <div class="container">
+                <div class="header-inner">
+                    <a href="/" class="header-logo">DefyTON</a>
+                    <nav class="header-nav">
+                        <div class="nav-dropdown">
+                            <button class="nav-dropdown-trigger">Categories <span class="nav-dropdown-arrow">▾</span></button>
+                            <div class="nav-dropdown-menu">
+                                <a href="/categories/morning-routine" class="dropdown-item"><span class="dropdown-item-icon">🏃</span> Morning Routine</a>
+                                <a href="/categories/creative" class="dropdown-item"><span class="dropdown-item-icon">🎨</span> Creative</a>
+                            </div>
+                        </div>
+                        <a href="/events" class="nav-item">Events</a>
+                        <a href="/leaderboard" class="nav-item">Leaderboard</a>
+                    </nav>
+                    <a href="https://t.me/DefyTONBot/app" class="header-cta">Open in Telegram</a>
+                    <button class="mobile-menu-toggle" onclick="toggleMobileMenu('mobileMenu2')" aria-label="Menu">☰</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="mobile-menu" id="mobileMenu2">
+            <a href="#" class="mobile-menu-item" onclick="toggleSubmenu(event, 'mobileCat2')">Categories ▾</a>
+            <div class="mobile-submenu" id="mobileCat2">
+                <a href="/categories/morning-routine" class="mobile-submenu-item"><span>🏃</span> Morning Routine</a>
+                <a href="/categories/creative" class="mobile-submenu-item"><span>🎨</span> Creative</a>
+            </div>
+            <a href="/events" class="mobile-menu-item">Events</a>
+            <a href="/leaderboard" class="mobile-menu-item">Leaderboard</a>
+            <a href="https://t.me/DefyTONBot/app" class="mobile-menu-cta">Open in Telegram</a>
+        </div>
+
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="/">Home</a><span>›</span>
+                <span class="breadcrumb-current">Creative</span>
+            </nav>
+
+            <div class="category-header">
+                <div class="category-icon">🎨</div>
+                <h1 class="category-title">Creative</h1>
+                <p class="category-description">
+                    Build your Creative habit with AI-verified daily challenges. 
+                    Stake GRAM, stay consistent, and earn rewards.
+                </p>
+            </div>
+
+            <div class="coming-soon">
+                <div class="coming-soon-icon">🚧</div>
+                <div class="coming-soon-title">Coming Soon</div>
+                <p class="coming-soon-desc">New challenges in this category are being prepared. Check back soon!</p>
+            </div>
+
+            <div class="cta-wrapper">
+                <a href="https://t.me/DefyTONBot/app" class="cta-button">🚀 Try DefyTON in Telegram</a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="container">
+                <div class="footer-logo">DefyTON</div>
+                <div style="margin:12px 0; text-align:center;">
+                    <span style="font-size:11px; font-weight:600; color:#71717a; text-transform:uppercase; letter-spacing:1px;">Popular Categories</span>
+                    <div style="margin-top:6px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px 16px;">
+                        <a href="/categories/morning-routine" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Morning Routine</a>
+                        <a href="/categories/fitness" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Fitness</a>
+                        <a href="/categories/reading" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Reading</a>
+                        <a href="/categories/meditation" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Meditation</a>
+                        <a href="/categories/language" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Language</a>
+                    </div>
+                </div>
+                <nav class="footer-nav">
+                    <a href="/">Challenges</a>
+                    <a href="/events">Events</a>
+                    <a href="/leaderboard">Leaderboard</a>
+                    <a href="/terms">Terms</a>
+                    <a href="/privacy">Privacy</a>
+                </nav>
+                <div class="footer-copyright">&copy; 2026 DefyTON. All rights reserved.</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Case 3: 404 -->
+    <div id="case3" class="case-content">
+        <!-- Mini Header -->
+        <header class="mini-header">
+            <div class="container">
+                <div class="mini-header-inner">
+                    <a href="/" class="header-logo">DefyTON</a>
+                    <a href="https://t.me/DefyTONBot/app" class="header-cta">Open in Telegram</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <div class="error-container">
+                <div class="error-title">Category Not Found</div>
+                <p class="error-message">The category you're looking for doesn't exist.</p>
+                <a href="https://t.me/DefyTONBot/app" class="cta-button">Open in Telegram</a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="container">
+                <div class="footer-logo">DefyTON</div>
+                <div style="margin:12px 0; text-align:center;">
+                    <span style="font-size:11px; font-weight:600; color:#71717a; text-transform:uppercase; letter-spacing:1px;">Popular Categories</span>
+                    <div style="margin-top:6px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px 16px;">
+                        <a href="/categories/morning-routine" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Morning Routine</a>
+                        <a href="/categories/fitness" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Fitness</a>
+                        <a href="/categories/reading" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Reading</a>
+                        <a href="/categories/meditation" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Meditation</a>
+                        <a href="/categories/language" style="font-size:13px; color:#a1a1aa; text-decoration:none;">Language</a>
+                    </div>
+                </div>
+                <nav class="footer-nav">
+                    <a href="/">Challenges</a>
+                    <a href="/events">Events</a>
+                    <a href="/leaderboard">Leaderboard</a>
+                    <a href="/terms">Terms</a>
+                    <a href="/privacy">Privacy</a>
+                </nav>
+                <div class="footer-copyright">&copy; 2026 DefyTON. All rights reserved.</div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function showCase(caseId) {
+            document.querySelectorAll('.case-content').forEach(function(el) { el.classList.remove('active'); });
+            document.querySelectorAll('.case-tab').forEach(function(el) { el.classList.remove('active'); });
+            document.getElementById(caseId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function toggleMobileMenu(id) {
+            document.getElementById(id).classList.toggle('open');
+        }
+
+        function toggleSubmenu(e, id) {
+            e.preventDefault();
+            document.getElementById(id).classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

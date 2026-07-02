@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>메시지 발송 - Admin</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/admin-layout.css">
+  <style>
+    /* 메시지 발송 전용 스타일 */
+
+    .ms-tabs {
+      display: flex;
+      gap: var(--space-1);
+      margin-bottom: var(--space-6);
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .ms-tab {
+      padding: var(--space-3) var(--space-5);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all var(--transition-fast);
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+
+    .ms-tab:hover {
+      color: var(--color-text);
+    }
+
+    .ms-tab--active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+      font-weight: var(--font-weight-bold);
+    }
+
+    .ms-target-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background-color: var(--color-info-bg, #eff6ff);
+      border: 1px solid var(--color-info-border, #bfdbfe);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--space-5);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+    }
+
+    .ms-form-field {
+      margin-bottom: var(--space-4);
+    }
+
+    .ms-form-label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+    }
+
+    .ms-form-hint {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      margin-top: var(--space-1);
+      display: block;
+    }
+
+    .ms-form-textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-normal);
+      background-color: var(--color-bg);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      resize: vertical;
+      transition: border-color var(--transition-fast);
+      font-family: var(--font-family);
+    }
+
+    .ms-form-textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .ms-form-textarea::placeholder {
+      color: var(--color-text-tertiary);
+    }
+
+    .ms-form-input {
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-normal);
+      background-color: var(--color-bg);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      transition: border-color var(--transition-fast);
+      min-height: 40px;
+    }
+
+    .ms-form-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .ms-form-input::placeholder {
+      color: var(--color-text-tertiary);
+    }
+
+    .ms-form-input:disabled {
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-tertiary);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .ms-html-guide {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      padding: var(--space-2) var(--space-3);
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-sm);
+      margin-top: var(--space-2);
+      font-family: monospace;
+    }
+
+    .ms-button-section {
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--space-4);
+    }
+
+    .ms-button-section__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      margin-bottom: var(--space-3);
+    }
+
+    .ms-button-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+
+    .ms-button-option__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+    }
+
+    .ms-button-preview {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background-color: var(--color-primary);
+      color: var(--color-text-white);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      margin-top: var(--space-2);
+    }
+
+    .ms-actions {
+      display: flex;
+      gap: var(--space-3);
+      margin-top: var(--space-5);
+    }
+
+    /* 선택 발송: 수신자 chip */
+    .ms-recipients {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      padding: var(--space-3);
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      min-height: 48px;
+      align-items: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .ms-recipients--empty {
+      justify-content: center;
+      color: var(--color-text-tertiary);
+      font-size: var(--font-size-sm);
+    }
+
+    .ms-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-1) var(--space-3);
+      background-color: var(--color-primary-bg, #eff6ff);
+      border: 1px solid var(--color-primary);
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-primary);
+    }
+
+    .ms-chip__remove {
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      opacity: 0.7;
+    }
+
+    .ms-chip__remove:hover {
+      opacity: 1;
+    }
+
+    .ms-clear-btn {
+      font-size: var(--font-size-xs);
+      color: var(--color-danger);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: var(--space-1) var(--space-2);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* 검색 결과 테이블 체크박스 */
+    .ms-checkbox {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary);
+      cursor: pointer;
+    }
+
+    .ms-checkbox:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+
+    .ms-dm-blocked {
+      font-size: var(--font-size-xs);
+      color: var(--color-danger);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* 발송 이력 */
+    .ms-history-section {
+      margin-top: var(--space-8);
+      padding-top: var(--space-6);
+      border-top: 2px solid var(--color-border);
+    }
+
+    .ms-history-title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      margin-bottom: var(--space-4);
+    }
+
+    .ms-message-preview {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+    }
+
+    /* 모달 확인 입력 */
+    .ms-confirm-input {
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      text-align: center;
+      letter-spacing: 2px;
+      background-color: var(--color-bg);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      margin-top: var(--space-3);
+      transition: border-color var(--transition-fast);
+    }
+
+    .ms-confirm-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .ms-confirm-warning {
+      text-align: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .ms-confirm-warning__icon {
+      font-size: var(--font-size-2xl);
+      margin-bottom: var(--space-2);
+    }
+
+    .ms-confirm-warning__text {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+    }
+
+    .ms-confirm-warning__sub {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .ms-modal-actions {
+      display: flex;
+      gap: var(--space-3);
+      margin-top: var(--space-5);
+      justify-content: flex-end;
+    }
+
+    .ms-form-disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .ms-or-divider {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin: var(--space-3) 0;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .ms-or-divider::before,
+    .ms-or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background-color: var(--color-border);
+    }
+
+    @media (max-width: 768px) {
+      .ms-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">전체 발송</button>
+    <button data-case="2">선택 발송</button>
+    <button data-case="3">미리보기 모달</button>
+    <button data-case="4">발송 확정 (전체)</button>
+    <button data-case="5">발송 확정 (선택)</button>
+  </nav>
+
+  <!-- ===== Case 1: 전체 발송 — 기본 상태 ===== -->
+  <main class="screen active" id="case-1">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <!-- Mobile Top Bar -->
+        <div class="admin-topbar">
+          <button class="admin-topbar__menu-btn">☰</button>
+          <span class="admin-topbar__title">메시지 발송</span>
+          <span style="width: 44px;"></span>
+        </div>
+
+        <!-- Page Header -->
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">메시지 발송</h1>
+        </div>
+
+        <!-- Tabs -->
+        <div class="ms-tabs">
+          <button class="ms-tab ms-tab--active">전체 발송</button>
+          <button class="ms-tab">선택 발송</button>
+        </div>
+
+        <!-- Target Info -->
+        <div class="ms-target-info">
+          📨 발송 대상: <strong>142명</strong> (Bot DM 허용 사용자)
+        </div>
+
+        <!-- Message Form -->
+        <div class="admin-detail">
+          <div class="ms-form-field">
+            <label class="ms-form-label">메시지 본문</label>
+            <textarea class="ms-form-textarea" placeholder="메시지 내용을 입력하세요 (Telegram HTML 지원)"></textarea>
+            <span class="ms-html-guide">&lt;b&gt;볼드&lt;/b&gt; &lt;i&gt;이탤릭&lt;/i&gt; &lt;a href="url"&gt;링크&lt;/a&gt; &lt;code&gt;코드&lt;/code&gt;</span>
+          </div>
+
+          <!-- Button Settings -->
+          <div class="ms-button-section">
+            <div class="ms-button-section__title">버튼 설정 (선택)</div>
+
+            <!-- Option 1: 챌린지 연결 -->
+            <div class="ms-button-option">
+              <span class="ms-button-option__label">챌린지 연결:</span>
+              <select class="ms-form-input" style="flex: 1; max-width: 300px;">
+                <option value="">— 선택 안 함 —</option>
+                <option value="1">Morning Running (7d, FREE)</option>
+                <option value="2">Daily Reading (14d, 5~15 GRAM)</option>
+                <option value="3">Meditation (30d, 10~30 GRAM)</option>
+              </select>
+            </div>
+
+            <div class="ms-or-divider">또는</div>
+
+            <!-- Option 2: 수동 입력 -->
+            <div class="ms-button-option" style="flex-wrap: wrap; gap: var(--space-2);">
+              <span class="ms-button-option__label">수동 입력:</span>
+              <input type="text" class="ms-form-input" placeholder="버튼 텍스트" style="flex: 1; min-width: 120px; max-width: 200px;">
+              <input type="text" class="ms-form-input" placeholder="버튼 URL" style="flex: 2; min-width: 200px;">
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="ms-actions">
+            <button class="btn btn--secondary btn--sm" disabled>📱 미리보기</button>
+            <button class="btn btn--primary btn--sm" disabled>📨 발송하기</button>
+          </div>
+        </div>
+
+        <!-- 발송 이력 -->
+        <div class="ms-history-section">
+          <div class="ms-history-title">발송 이력</div>
+          <div class="admin-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>발송일시</th>
+                  <th>유형</th>
+                  <th>대상</th>
+                  <th>성공/실패</th>
+                  <th>메시지</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2026-06-10 14:32</td>
+                  <td><span class="badge badge--info">전체</span></td>
+                  <td>138명</td>
+                  <td><span style="color: var(--color-success); font-weight: var(--font-weight-bold);">135</span> / <span style="color: var(--color-danger);">3</span></td>
+                  <td><span class="ms-message-preview">새로운 이벤트 챌린지가 시작되었습니다!</span></td>
+                </tr>
+                <tr>
+                  <td>2026-06-08 10:15</td>
+                  <td><span class="badge badge--neutral">선택</span></td>
+                  <td>5명</td>
+                  <td><span style="color: var(--color-success); font-weight: var(--font-weight-bold);">5</span> / <span style="color: var(--color-danger);">0</span></td>
+                  <td><span class="ms-message-preview">VIP 사용자 전용 안내 메시지</span></td>
+                </tr>
+                <tr>
+                  <td>2026-06-05 09:00</td>
+                  <td><span class="badge badge--info">전체</span></td>
+                  <td>130명</td>
+                  <td><span style="color: var(--color-success); font-weight: var(--font-weight-bold);">128</span> / <span style="color: var(--color-danger);">2</span></td>
+                  <td><span class="ms-message-preview">서비스 업데이트 안내</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination -->
+          <div class="pagination" style="margin-top: var(--space-4);">
+            <button class="pagination__btn" disabled>‹</button>
+            <button class="pagination__btn active">1</button>
+            <button class="pagination__btn">2</button>
+            <button class="pagination__btn">›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 2: 선택 발송 — 사용자 검색 및 선택 ===== -->
+  <main class="screen" id="case-2">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <!-- Mobile Top Bar -->
+        <div class="admin-topbar">
+          <button class="admin-topbar__menu-btn">☰</button>
+          <span class="admin-topbar__title">메시지 발송</span>
+          <span style="width: 44px;"></span>
+        </div>
+
+        <!-- Page Header -->
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">메시지 발송</h1>
+        </div>
+
+        <!-- Tabs -->
+        <div class="ms-tabs">
+          <button class="ms-tab">전체 발송</button>
+          <button class="ms-tab ms-tab--active">선택 발송</button>
+        </div>
+
+        <!-- Search -->
+        <div class="admin-filter" style="margin-bottom: var(--space-4);">
+          <input type="text" class="admin-filter__search" placeholder="🔍 사용자 검색 (serviceName / ID)" value="Challenger" style="min-width: 300px;">
+        </div>
+
+        <!-- Search Results Table -->
+        <div class="admin-table-wrapper" style="margin-bottom: var(--space-4);">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width: 40px;"></th>
+                <th>serviceName</th>
+                <th>Level</th>
+                <th>최근접속</th>
+                <th>Bot DM</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox" class="ms-checkbox" checked></td>
+                <td style="font-weight: var(--font-weight-bold);">Challenger_xK9m2P</td>
+                <td>Lv.5</td>
+                <td>2026-06-10</td>
+                <td><span class="badge badge--success" style="font-size: var(--font-size-2xs);">허용</span></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="ms-checkbox" checked></td>
+                <td style="font-weight: var(--font-weight-bold);">Challenger_aB3xK9</td>
+                <td>Lv.3</td>
+                <td>2026-06-09</td>
+                <td><span class="badge badge--success" style="font-size: var(--font-size-2xs);">허용</span></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="ms-checkbox"></td>
+                <td style="font-weight: var(--font-weight-bold);">Challenger_7mN2qR</td>
+                <td>Lv.2</td>
+                <td>2026-06-08</td>
+                <td><span class="badge badge--success" style="font-size: var(--font-size-2xs);">허용</span></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="ms-checkbox" disabled></td>
+                <td style="font-weight: var(--font-weight-bold); opacity: 0.5;">Challenger_pQ4wE8</td>
+                <td style="opacity: 0.5;">Lv.1</td>
+                <td style="opacity: 0.5;">2026-06-01</td>
+                <td><span class="ms-dm-blocked">봇 차단</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Selected Recipients -->
+        <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+          <span class="ms-form-label" style="margin-bottom: 0;">선택된 수신자 (2명)</span>
+          <button class="ms-clear-btn">✕ 전체 해제</button>
+        </div>
+        <div class="ms-recipients">
+          <span class="ms-chip">Challenger_xK9m2P <span class="ms-chip__remove">✕</span></span>
+          <span class="ms-chip">Challenger_aB3xK9 <span class="ms-chip__remove">✕</span></span>
+        </div>
+
+        <!-- Message Form -->
+        <div class="admin-detail">
+          <div class="ms-form-field">
+            <label class="ms-form-label">메시지 본문</label>
+            <textarea class="ms-form-textarea" placeholder="메시지 내용을 입력하세요 (Telegram HTML 지원)">VIP 사용자 여러분! 새로운 &lt;b&gt;프리미엄 챌린지&lt;/b&gt;가 시작되었습니다!</textarea>
+            <span class="ms-html-guide">&lt;b&gt;볼드&lt;/b&gt; &lt;i&gt;이탤릭&lt;/i&gt; &lt;a href="url"&gt;링크&lt;/a&gt; &lt;code&gt;코드&lt;/code&gt;</span>
+          </div>
+
+          <!-- Button Settings -->
+          <div class="ms-button-section">
+            <div class="ms-button-section__title">버튼 설정 (선택)</div>
+            <div class="ms-button-option">
+              <span class="ms-button-option__label">챌린지 연결:</span>
+              <select class="ms-form-input" style="flex: 1; max-width: 300px;">
+                <option value="">— 선택 안 함 —</option>
+                <option value="1">Morning Running (7d, FREE)</option>
+                <option value="2" selected>Daily Reading (14d, 5~15 GRAM)</option>
+                <option value="3">Meditation (30d, 10~30 GRAM)</option>
+              </select>
+            </div>
+            <!-- Auto-generated button preview -->
+            <div class="ms-button-preview">🚀 Join Challenge</div>
+            <span class="ms-form-hint">→ t.me/.../app?startapp=c_AbCdEf12</span>
+
+            <div class="ms-or-divider">또는</div>
+
+            <div class="ms-button-option ms-form-disabled" style="flex-wrap: wrap; gap: var(--space-2);">
+              <span class="ms-button-option__label">수동 입력:</span>
+              <input type="text" class="ms-form-input" placeholder="버튼 텍스트" disabled style="flex: 1; min-width: 120px; max-width: 200px;">
+              <input type="text" class="ms-form-input" placeholder="버튼 URL" disabled style="flex: 2; min-width: 200px;">
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="ms-actions">
+            <button class="btn btn--secondary btn--sm">📱 미리보기</button>
+            <button class="btn btn--primary btn--sm">📨 발송하기</button>
+          </div>
+        </div>
+
+        <!-- 발송 이력 -->
+        <div class="ms-history-section">
+          <div class="ms-history-title">발송 이력</div>
+          <div class="admin-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>발송일시</th>
+                  <th>유형</th>
+                  <th>대상</th>
+                  <th>성공/실패</th>
+                  <th>메시지</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2026-06-10 14:32</td>
+                  <td><span class="badge badge--info">전체</span></td>
+                  <td>138명</td>
+                  <td><span style="color: var(--color-success); font-weight: var(--font-weight-bold);">135</span> / <span style="color: var(--color-danger);">3</span></td>
+                  <td><span class="ms-message-preview">새로운 이벤트 챌린지가 시작되었습니다!</span></td>
+                </tr>
+                <tr>
+                  <td>2026-06-08 10:15</td>
+                  <td><span class="badge badge--neutral">선택</span></td>
+                  <td>5명</td>
+                  <td><span style="color: var(--color-success); font-weight: var(--font-weight-bold);">5</span> / <span style="color: var(--color-danger);">0</span></td>
+                  <td><span class="ms-message-preview">VIP 사용자 전용 안내 메시지</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" style="margin-top: var(--space-4);">
+            <button class="pagination__btn" disabled>‹</button>
+            <button class="pagination__btn active">1</button>
+            <button class="pagination__btn" disabled>›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 3: 미리보기 모달 ===== -->
+  <main class="screen" id="case-3">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Content (dimmed) -->
+      <div class="admin-content" style="opacity: 0.3;">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">메시지 발송</h1>
+        </div>
+      </div>
+
+      <!-- Preview Modal -->
+      <div class="modal">
+        <div class="modal__backdrop"></div>
+        <div class="modal__content" style="max-width: 420px;">
+          <h2 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); color: var(--color-text); margin-bottom: var(--space-4);">📱 미리보기 발송</h2>
+
+          <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--space-4);">
+            이벤트 채널로 테스트 메시지를 발송합니다.<br>
+            실제 사용자에게는 전송되지 않습니다.
+          </p>
+
+          <!-- Message Preview -->
+          <div style="background-color: var(--color-bg-elevated); border-radius: var(--radius-sm); padding: var(--space-4); margin-bottom: var(--space-4); border: 1px solid var(--color-border);">
+            <div style="font-size: var(--font-size-sm); color: var(--color-text); line-height: 1.6;">
+              새로운 <b>이벤트 챌린지</b>가 시작되었습니다!<br><br>
+              지금 참여하면 <i>0.3 GRAM</i> 리워드를 받을 수 있습니다.
+            </div>
+            <div style="margin-top: var(--space-3);">
+              <span class="ms-button-preview">🚀 Join Challenge</span>
+            </div>
+          </div>
+
+          <div class="ms-modal-actions">
+            <button class="btn btn--ghost btn--sm">취소</button>
+            <button class="btn btn--secondary btn--sm">📱 발송</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 4: 발송 확정 모달 (전체 — SEND 입력 필요) ===== -->
+  <main class="screen" id="case-4">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Content (dimmed) -->
+      <div class="admin-content" style="opacity: 0.3;">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">메시지 발송</h1>
+        </div>
+      </div>
+
+      <!-- Broadcast Confirm Modal -->
+      <div class="modal">
+        <div class="modal__backdrop"></div>
+        <div class="modal__content" style="max-width: 420px;">
+          <div class="ms-confirm-warning">
+            <div class="ms-confirm-warning__icon">⚠️</div>
+            <div class="ms-confirm-warning__text">142명에게 메시지를 발송합니다.</div>
+            <div class="ms-confirm-warning__sub">이 작업은 취소할 수 없습니다.</div>
+          </div>
+
+          <div style="text-align: center; margin-bottom: var(--space-3);">
+            <span style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">확인하려면 'SEND'를 입력하세요.</span>
+          </div>
+
+          <input type="text" class="ms-confirm-input" placeholder="SEND" value="SEND">
+
+          <div class="ms-modal-actions">
+            <button class="btn btn--ghost btn--sm">취소</button>
+            <button class="btn btn--primary btn--sm">발송</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 5: 발송 확정 모달 (선택 — 간단 확인) ===== -->
+  <main class="screen" id="case-5">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Content (dimmed) -->
+      <div class="admin-content" style="opacity: 0.3;">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">메시지 발송</h1>
+        </div>
+      </div>
+
+      <!-- Selected Send Confirm Modal -->
+      <div class="modal">
+        <div class="modal__backdrop"></div>
+        <div class="modal__content" style="max-width: 380px;">
+          <div class="ms-confirm-warning">
+            <div class="ms-confirm-warning__icon">⚠️</div>
+            <div class="ms-confirm-warning__text">2명에게 메시지를 발송합니다.</div>
+          </div>
+
+          <div style="text-align: center; margin-bottom: var(--space-2);">
+            <span style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">발송하시겠습니까?</span>
+          </div>
+
+          <div class="ms-modal-actions">
+            <button class="btn btn--ghost btn--sm">취소</button>
+            <button class="btn btn--primary btn--sm">발송</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Mobile sidebar toggle
+    document.querySelectorAll('.admin-topbar__menu-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sidebar = btn.closest('.admin-layout').querySelector('.admin-sidebar');
+        sidebar.classList.toggle('admin-sidebar--open');
+      });
+    });
+
+    // Tab switching simulation (within cases)
+    document.querySelectorAll('.ms-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // In the design spec, tabs just visually switch
+        const parent = tab.closest('.ms-tabs');
+        parent.querySelectorAll('.ms-tab').forEach(t => t.classList.remove('ms-tab--active'));
+        tab.classList.add('ms-tab--active');
+      });
+    });
+
+    // Checkbox interaction
+    document.querySelectorAll('.ms-checkbox:not(:disabled)').forEach(cb => {
+      cb.addEventListener('change', () => {
+        // Visual feedback only for design spec
+      });
+    });
+
+    // Chip remove interaction
+    document.querySelectorAll('.ms-chip__remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.ms-chip').style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>

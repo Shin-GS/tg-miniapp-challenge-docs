@@ -1,0 +1,77 @@
+/*
+ * Mini App 페이지 네비게이션
+ *
+ * 어드민의 사이드바 역할 — 디자인 문서 간 이동용 상위 메뉴.
+ * base.css의 .case-switcher 위에 위치.
+ */
+
+:root {
+  --page-nav-height: 36px;
+  --case-switcher-top: var(--page-nav-height);
+}
+
+/* 상위 메뉴 (페이지 간 이동) */
+.page-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background-color: var(--color-bg-elevated);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  height: var(--page-nav-height);
+  align-items: center;
+}
+
+.page-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.page-nav a {
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.page-nav a:hover {
+  color: var(--color-text);
+  background-color: var(--color-bg-secondary);
+}
+
+.page-nav a.active {
+  color: var(--color-primary);
+  background-color: var(--color-primary-bg, #f3e8ff);
+  font-weight: var(--font-weight-bold);
+}
+
+/* miniapp에서 case-switcher를 page-nav 아래에 전체 너비로 고정 */
+.mobile-container .case-switcher {
+  position: sticky;
+  top: 0;
+  left: auto;
+  right: auto;
+}
+
+/* mobile-container를 상위 메뉴 + 케이스 피커 아래로 배치 */
+@media (min-width: 420px) {
+  body {
+    padding-top: calc(var(--page-nav-height) + 44px + 20px);
+  }
+}
+
+@media (max-width: 419px) {
+  .mobile-container {
+    margin-top: calc(var(--page-nav-height) + 44px);
+  }
+}

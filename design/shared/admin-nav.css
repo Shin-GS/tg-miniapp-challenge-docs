@@ -1,0 +1,9 @@
+/*
+ * Admin Dashboard 페이지 네비게이션
+ *
+ * Admin은 사이드바(admin-layout.css)가 페이지 간 이동을 담당하므로
+ * 별도의 상단 page-nav 바를 사용하지 않음.
+ *
+ * 이 파일은 miniapp-nav.css, web-nav.css와의 규칙성 유지를 위해 존재.
+ * 실제 네비게이션 스타일은 admin-layout.css를 참조.
+ */

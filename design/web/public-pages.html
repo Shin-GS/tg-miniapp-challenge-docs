@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Pages - Design Reference</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #e4e4e7;
+            padding: 20px;
+        }
+
+        /* 케이스 탭 */
+        .case-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #16213e;
+            border-radius: 12px;
+        }
+        .case-tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #27272a;
+            background: transparent;
+            color: #a1a1aa;
+            transition: all 0.2s;
+        }
+        .case-tab:hover { border-color: #9333ea; color: #e4e4e7; }
+        .case-tab.active {
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            color: #fff;
+            border-color: transparent;
+        }
+        .case-content { display: none; }
+        .case-content.active { display: block; }
+
+        /* 페이지 프레임 (모바일 시뮬레이션) */
+        .page-frame {
+            max-width: 640px;
+            margin: 0 auto;
+            background: #0f0f14;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        /* 공통 페이지 스타일 (PublicPageHtmlBuilder 동일) */
+        .page-container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 32px 20px;
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .page-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-top: 8px;
+        }
+        .cta-wrapper { text-align: center; margin: 32px 0; }
+        .cta-button {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            transition: opacity 0.2s;
+        }
+        .cta-button:hover { opacity: 0.9; }
+        .page-footer {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid #27272a;
+            color: #52525b;
+            font-size: 12px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+        .badge-purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+        .badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .badge-green { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .badge-orange { background: rgba(249,115,22,0.15); color: #fb923c; }
+        .badge-red { background: rgba(239,68,68,0.15); color: #f87171; }
+        .info-card {
+            background: #1c1c24;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #27272a;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-size: 13px; color: #71717a; }
+        .info-value { font-size: 14px; font-weight: 600; color: #e4e4e7; }
+        .challenge-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+        .challenge-desc {
+            font-size: 14px;
+            color: #a1a1aa;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        /* 인증 공유 페이지 전용 */
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(34,197,94,0.15);
+            border: 1px solid rgba(34,197,94,0.3);
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #4ade80;
+            margin-bottom: 24px;
+        }
+        .photo-container {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid #27272a;
+        }
+        .photo-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .photo-placeholder {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #1c1c24, #27272a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+        .share-meta {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .share-meta .challenge-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+        .share-meta .verified-date {
+            font-size: 13px;
+            color: #71717a;
+            margin-bottom: 4px;
+        }
+        .share-meta .user-name {
+            font-size: 13px;
+            color: #a1a1aa;
+            font-weight: 600;
+        }
+
+        /* 404 페이지 */
+        .not-found {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .not-found-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        .not-found-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+        .not-found-desc {
+            font-size: 14px;
+            color: #71717a;
+            margin-bottom: 32px;
+        }
+    </style>
+  <link rel="stylesheet" href="../shared/web-nav.css">
+</head>
+<body>
+  <!-- Page Navigation -->
+  <nav class="page-nav">
+    <a href="landing.html">랜딩</a>
+    <a href="challenge-public.html">챌린지 상세</a>
+    <a href="category-public.html">카테고리</a>
+    <a href="events.html">이벤트</a>
+    <a href="leaderboard.html">리더보드</a>
+    <a href="challenge-completion-share.html">완료 공유</a>
+    <a class="active" href="public-pages.html">공개 페이지</a>
+  </nav>
+
+<!-- 케이스 탭 -->
+<div class="case-tabs">
+    <button class="case-tab active" onclick="showCase('share-normal')">인증 공유</button>
+    <button class="case-tab" onclick="showCase('share-404')">인증 공유 404</button>
+    <button class="case-tab" onclick="showCase('challenge-normal')">챌린지 상세</button>
+    <button class="case-tab" onclick="showCase('challenge-404')">챌린지 상세 404</button>
+    <button class="case-tab" onclick="showCase('general-404')">일반 404</button>
+</div>
+
+<!-- Case 1: 인증 공유 — 정상 -->
+<div id="share-normal" class="case-content active">
+    <div class="page-frame">
+        <div class="page-container">
+            <div class="page-header">
+                <div class="logo">DefyTON</div>
+            </div>
+
+            <!-- Verified Badge -->
+            <div style="text-align: center;">
+                <div class="verified-badge">✅ Verified!</div>
+            </div>
+
+            <!-- 인증 사진 -->
+            <div class="photo-container">
+                <div class="photo-placeholder">📸</div>
+            </div>
+
+            <!-- 챌린지 정보 + 사용자 -->
+            <div class="share-meta">
+                <div class="challenge-name">30-Day Morning Run</div>
+                <div class="verified-date">May 26, 2026</div>
+                <div class="user-name">by Challenger_aB3xK9</div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-wrapper">
+                <a href="#" class="cta-button">🚀 Try DefyTON in Telegram</a>
+            </div>
+
+            <!-- Footer -->
+            <div class="page-footer">
+                <p>Stake GRAM. Build habits. Earn rewards.</p>
+                <p style="margin-top: 8px;">© 2026 DefyTON. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Case 2: 인증 공유 — 404 -->
+<div id="share-404" class="case-content">
+    <div class="page-frame">
+        <div class="page-container">
+            <div class="page-header">
+                <div class="logo">DefyTON</div>
+            </div>
+
+            <div class="not-found">
+                <div class="not-found-icon">🔍</div>
+                <div class="not-found-title">Verification Not Found</div>
+                <div class="not-found-desc">This shared verification is no longer available.</div>
+                <a href="#" class="cta-button">🚀 Try DefyTON in Telegram</a>
+            </div>
+
+            <div class="page-footer">
+                <p>© 2026 DefyTON. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Case 3: 챌린지 상세 — 정상 -->
+<div id="challenge-normal" class="case-content">
+    <div class="page-frame">
+        <div class="page-container">
+            <div class="page-header">
+                <div class="logo">DefyTON</div>
+            </div>
+
+            <!-- 챌린지 정보 (카테고리 뱃지 = 카테고리 페이지 링크) -->
+            <div style="text-align: center; margin-bottom: 20px;">
+                <a href="/categories/fitness" style="text-decoration:none;">
+                    <span class="badge badge-purple">Fitness</span>
+                </a>
+                <span class="badge badge-orange">HARD</span>
+            </div>
+
+            <div class="challenge-title" style="text-align: center;">30-Day Morning Run</div>
+            <div class="challenge-desc" style="text-align: center;">
+                Wake up early and run at least 2km every morning for 30 consecutive days.
+            </div>
+
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">Duration</span>
+                    <span class="info-value">Jun 1 – Jun 30, 2026</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Frequency</span>
+                    <span class="info-value">1 time per day</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Deposit</span>
+                    <span class="info-value">5 ~ 30 GRAM</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Reward</span>
+                    <span class="info-value" style="color: #4ade80;">+15%</span>
+                </div>
+            </div>
+
+            <div class="cta-wrapper">
+                <a href="#" class="cta-button">🚀 Join Challenge in Telegram</a>
+            </div>
+
+            <div class="page-footer">
+                <p>Stake GRAM. Build habits. Earn rewards.</p>
+                <p style="margin-top: 8px;">© 2026 DefyTON. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Case 4: 챌린지 상세 — 404 -->
+<div id="challenge-404" class="case-content">
+    <div class="page-frame">
+        <div class="page-container">
+            <div class="page-header">
+                <div class="logo">DefyTON</div>
+            </div>
+
+            <div class="not-found">
+                <div class="not-found-icon">🔍</div>
+                <div class="not-found-title">Challenge Not Found</div>
+                <div class="not-found-desc">This challenge doesn't exist or is no longer available.</div>
+                <a href="#" class="cta-button">🚀 Try DefyTON in Telegram</a>
+            </div>
+
+            <div class="page-footer">
+                <p>© 2026 DefyTON. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Case 5: 일반 404 페이지 (존재하지 않는 경로) -->
+<div id="general-404" class="case-content">
+    <div class="page-frame">
+        <div class="page-container" style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center;">
+                <div class="logo" style="margin-bottom: 24px;">DefyTON</div>
+                <div class="not-found-title">Page Not Found</div>
+                <div class="not-found-desc">The page you're looking for doesn't exist or has been moved.</div>
+                <a href="#" class="cta-button">Open in Telegram</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showCase(caseId) {
+    document.querySelectorAll('.case-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.case-tab').forEach(el => el.classList.remove('active'));
+    document.getElementById(caseId).classList.add('active');
+    event.target.classList.add('active');
+}
+</script>
+
+</body>
+</html>
+
+

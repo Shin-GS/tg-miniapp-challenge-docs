@@ -1,0 +1,192 @@
+/*
+ * Base Styles
+ * 
+ * 리셋, 모바일 컨테이너, 케이스 전환 UI 등 모든 화면에 공통 적용되는 기본 스타일.
+ */
+
+/* ===== Reset ===== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+  background-color: var(--color-bg-elevated);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* ===== Mobile Container ===== */
+
+.mobile-container {
+  width: var(--mobile-width);
+  max-width: 100%;
+  min-height: 100vh;
+  margin: 0 auto;
+  background-color: var(--color-bg-secondary);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 데스크톱에서 볼 때 모바일 프레임 표시 */
+@media (min-width: 420px) {
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  
+  .mobile-container {
+    border-radius: 20px;
+    border: 2px solid var(--color-border);
+    min-height: 844px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-xl);
+  }
+}
+
+/* ===== Case Switcher ===== */
+
+.case-switcher {
+  position: fixed;
+  top: var(--case-switcher-top, 0);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-bg);
+  border-bottom: 2px solid var(--color-border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.case-switcher::-webkit-scrollbar {
+  display: none;
+}
+
+.case-switcher button {
+  flex-shrink: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-elevated);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  border: none;
+  cursor: pointer;
+}
+
+.case-switcher button.active {
+  color: var(--color-text-white);
+  background: var(--color-primary-gradient);
+}
+
+.case-switcher button:hover:not(.active) {
+  color: var(--color-text);
+  background-color: var(--color-border);
+}
+
+/* ===== Screen (Case Content) ===== */
+
+.screen {
+  display: none;
+  padding: var(--space-4);
+}
+
+.screen.active {
+  display: block;
+}
+
+/* ===== Utility Classes ===== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-6 { gap: var(--space-6); }
+
+.w-full { width: 100%; }
+.mt-2 { margin-top: var(--space-2); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-6 { margin-top: var(--space-6); }
+.mt-8 { margin-top: var(--space-8); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-6 { margin-bottom: var(--space-6); }
+
+/* Section spacing */
+.space-y-4 > * + * { margin-top: var(--space-4); }
+.space-y-6 > * + * { margin-top: var(--space-6); }
+
+/* ===== Case Switcher JS ===== */
+/* 
+ * 아래 스크립트를 각 HTML 파일 하단에 포함:
+ *
+ * <script>
+ *   document.querySelector('.case-switcher').addEventListener('click', (e) => {
+ *     const btn = e.target.closest('button');
+ *     if (!btn) return;
+ *     const caseId = btn.dataset.case;
+ *     document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+ *     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+ *     btn.classList.add('active');
+ *     document.getElementById('case-' + caseId).classList.add('active');
+ *   });
+ * </script>
+ */

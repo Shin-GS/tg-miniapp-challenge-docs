@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>설정 관리 - Admin</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/admin-layout.css">
+  <style>
+    /* 이 화면 전용 스타일 */
+    .settings-section {
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: var(--space-6);
+      overflow: hidden;
+    }
+
+    .settings-section__header {
+      padding: var(--space-4) var(--space-5);
+      background-color: var(--color-bg-elevated);
+      border-bottom: 1px solid var(--color-border);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      text-transform: uppercase;
+    }
+
+    .settings-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+
+    .settings-item__info {
+      flex: 1;
+    }
+
+    .settings-item__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      margin-bottom: var(--space-1);
+    }
+
+    .settings-item__key {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+      font-family: monospace;
+      margin-bottom: var(--space-1);
+    }
+
+    .settings-item__meta {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+    }
+
+    .settings-item__value {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .settings-item__current {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .settings-item__edit-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: var(--space-2);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+      min-width: 36px;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .settings-item__edit-btn:hover {
+      background-color: var(--color-bg-elevated);
+    }
+
+    /* JSON 테이블 (읽기 모드) */
+    .settings-json-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-size-sm);
+      margin-top: var(--space-2);
+    }
+
+    .settings-json-table th {
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      background-color: var(--color-bg-elevated);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .settings-json-table td {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text);
+    }
+
+    .settings-json-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .settings-json-table__total {
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    /* 인라인 수정 모드 */
+    .settings-edit {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .settings-edit__input {
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--font-size-sm);
+      border: 2px solid var(--color-primary);
+      border-radius: var(--radius-sm);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      min-width: 120px;
+      min-height: 36px;
+      font-weight: var(--font-weight-bold);
+    }
+
+    .settings-edit__input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    }
+
+    .settings-edit__btn {
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      min-height: 36px;
+      border: none;
+      transition: all var(--transition-fast);
+    }
+
+    .settings-edit__btn--save {
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+    }
+
+    .settings-edit__btn--cancel {
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+
+    /* JSON 수정 모드 */
+    .settings-edit__textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: var(--space-3);
+      font-size: var(--font-size-sm);
+      font-family: monospace;
+      border: 2px solid var(--color-primary);
+      border-radius: var(--radius-sm);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      resize: vertical;
+      line-height: var(--line-height-relaxed);
+    }
+
+    .settings-edit__textarea:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    }
+
+    .settings-edit__hint {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      margin-top: var(--space-2);
+    }
+
+    .settings-edit__actions {
+      display: flex;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+    }
+
+    /* 인라인 에러 */
+    .settings-edit__error {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-danger-text);
+      margin-top: var(--space-1);
+    }
+
+    .settings-edit__input--error {
+      border-color: var(--color-danger);
+    }
+
+    .settings-edit__textarea--error {
+      border-color: var(--color-danger);
+    }
+  </style>
+</head>
+<body>
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">기본 상태</button>
+    <button data-case="2">인라인 수정</button>
+    <button data-case="3">JSON 수정</button>
+    <button data-case="4">저장 실패</button>
+  </nav>
+
+  <!-- ===== Case 1: 기본 상태 (설정값 조회) ===== -->
+  <main class="screen active" id="case-1">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">설정 관리</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">설정 관리</h1>
+        </div>
+
+        <!-- 환율 설정 섹션 -->
+        <div class="settings-section">
+          <div class="settings-section__header">환율 설정</div>
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">GRAM/USD</div>
+              <div class="settings-item__key">TON_TO_USD</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-28 14:30 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">$1.90</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">GRAM/KRW</div>
+              <div class="settings-item__key">EXCHANGE_TON_TO_KRW</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-28 14:30 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">\3,038</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">USD/KRW</div>
+              <div class="settings-item__key">EXCHANGE_USD_TO_KRW</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-27 09:15 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">\1,497</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 운영 비용 섹션 -->
+        <div class="settings-section">
+          <div class="settings-section__header">운영 비용</div>
+          <div class="settings-item" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3);">
+              <div class="settings-item__info">
+                <div class="settings-item__label">AWS 월 비용</div>
+                <div class="settings-item__key">MONTHLY_AWS_COSTS</div>
+                <div class="settings-item__meta">마지막 수정: 2026-05-25 10:00 (admin)</div>
+              </div>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+            <table class="settings-json-table">
+              <thead>
+                <tr><th>항목</th><th>금액 (USD)</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>EC2</td><td>$25</td></tr>
+                <tr><td>RDS</td><td>$35</td></tr>
+                <tr><td>S3</td><td>$3</td></tr>
+                <tr><td>CloudFront</td><td>$5</td></tr>
+                <tr>
+                  <td class="settings-json-table__total">합계</td>
+                  <td class="settings-json-table__total">$68</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="settings-item" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3);">
+              <div class="settings-item__info">
+                <div class="settings-item__label">AI 월 비용</div>
+                <div class="settings-item__key">MONTHLY_AI_COSTS</div>
+                <div class="settings-item__meta">마지막 수정: 2026-05-25 10:00 (admin)</div>
+              </div>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+            <table class="settings-json-table">
+              <thead>
+                <tr><th>항목</th><th>금액 (USD)</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>GPT-4o</td><td>$30</td></tr>
+                <tr>
+                  <td class="settings-json-table__total">합계</td>
+                  <td class="settings-json-table__total">$30</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 기타 설정 섹션 -->
+        <div class="settings-section">
+          <div class="settings-section__header">기타 설정</div>
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">네트워크 수수료</div>
+              <div class="settings-item__key">REVENUE_NETWORK_FEE</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-20 16:00 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">0.01 GRAM</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 2: 인라인 수정 모드 (단일 값) ===== -->
+  <main class="screen" id="case-2">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">설정 관리</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">설정 관리</h1>
+        </div>
+
+        <!-- 환율 설정 섹션 (GRAM/USD 수정 모드) -->
+        <div class="settings-section">
+          <div class="settings-section__header">환율 설정</div>
+          <!-- GRAM/USD: 인라인 수정 모드 -->
+          <div class="settings-item" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div class="settings-item__info">
+                <div class="settings-item__label">GRAM/USD</div>
+                <div class="settings-item__key">TON_TO_USD</div>
+              </div>
+            </div>
+            <div class="settings-edit" style="margin-top:var(--space-2);">
+              <input type="number" class="settings-edit__input" value="1.90" step="0.01">
+              <button class="settings-edit__btn settings-edit__btn--save">저장</button>
+              <button class="settings-edit__btn settings-edit__btn--cancel">취소</button>
+            </div>
+          </div>
+          <!-- GRAM/KRW: 읽기 모드 유지 -->
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">GRAM/KRW</div>
+              <div class="settings-item__key">EXCHANGE_TON_TO_KRW</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-28 14:30 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">\3,038</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+          <!-- USD/KRW: 읽기 모드 유지 -->
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">USD/KRW</div>
+              <div class="settings-item__key">EXCHANGE_USD_TO_KRW</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-27 09:15 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">\1,497</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 운영 비용 섹션 (읽기 모드) -->
+        <div class="settings-section">
+          <div class="settings-section__header">운영 비용</div>
+          <div class="settings-item" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3);">
+              <div class="settings-item__info">
+                <div class="settings-item__label">AWS 월 비용</div>
+                <div class="settings-item__key">MONTHLY_AWS_COSTS</div>
+                <div class="settings-item__meta">마지막 수정: 2026-05-25 10:00 (admin)</div>
+              </div>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+            <table class="settings-json-table">
+              <thead><tr><th>항목</th><th>금액 (USD)</th></tr></thead>
+              <tbody>
+                <tr><td>EC2</td><td>$25</td></tr>
+                <tr><td>RDS</td><td>$35</td></tr>
+                <tr><td>S3</td><td>$3</td></tr>
+                <tr><td>CloudFront</td><td>$5</td></tr>
+                <tr><td class="settings-json-table__total">합계</td><td class="settings-json-table__total">$68</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="settings-item" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3);">
+              <div class="settings-item__info">
+                <div class="settings-item__label">AI 월 비용</div>
+                <div class="settings-item__key">MONTHLY_AI_COSTS</div>
+                <div class="settings-item__meta">마지막 수정: 2026-05-25 10:00 (admin)</div>
+              </div>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+            <table class="settings-json-table">
+              <thead><tr><th>항목</th><th>금액 (USD)</th></tr></thead>
+              <tbody>
+                <tr><td>GPT-4o</td><td>$30</td></tr>
+                <tr><td class="settings-json-table__total">합계</td><td class="settings-json-table__total">$30</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 기타 설정 섹션 (읽기 모드) -->
+        <div class="settings-section">
+          <div class="settings-section__header">기타 설정</div>
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">네트워크 수수료</div>
+              <div class="settings-item__key">REVENUE_NETWORK_FEE</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-20 16:00 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">0.01 GRAM</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 3: JSON 수정 모드 (운영 비용) ===== -->
+  <main class="screen" id="case-3">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">설정 관리</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">설정 관리</h1>
+        </div>
+
+        <!-- 환율 설정 섹션 (읽기 모드) -->
+        <div class="settings-section">
+          <div class="settings-section__header">환율 설정</div>
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">GRAM/USD</div>
+              <div class="settings-item__key">TON_TO_USD</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-28 14:30 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">$1.90</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">GRAM/KRW</div>
+              <div class="settings-item__key">EXCHANGE_TON_TO_KRW</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-28 14:30 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">\3,038</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">USD/KRW</div>
+              <div class="settings-item__key">EXCHANGE_USD_TO_KRW</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-27 09:15 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">\1,497</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 운영 비용 섹션 (AWS JSON 수정 모드) -->
+        <div class="settings-section">
+          <div class="settings-section__header">운영 비용</div>
+          <!-- AWS: JSON 수정 모드 -->
+          <div class="settings-item" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div class="settings-item__info">
+                <div class="settings-item__label">AWS 월 비용</div>
+                <div class="settings-item__key">MONTHLY_AWS_COSTS</div>
+              </div>
+            </div>
+            <div style="margin-top:var(--space-3);">
+              <textarea class="settings-edit__textarea">{
+  "EC2": 25,
+  "RDS": 35,
+  "S3": 3,
+  "CloudFront": 5
+}</textarea>
+              <div class="settings-edit__hint">형식: {"항목명": USD금액, ...} 예: {"EC2": 25, "RDS": 35}</div>
+              <div class="settings-edit__actions">
+                <button class="settings-edit__btn settings-edit__btn--save">저장</button>
+                <button class="settings-edit__btn settings-edit__btn--cancel">취소</button>
+              </div>
+            </div>
+          </div>
+          <!-- AI: 읽기 모드 유지 -->
+          <div class="settings-item" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3);">
+              <div class="settings-item__info">
+                <div class="settings-item__label">AI 월 비용</div>
+                <div class="settings-item__key">MONTHLY_AI_COSTS</div>
+                <div class="settings-item__meta">마지막 수정: 2026-05-25 10:00 (admin)</div>
+              </div>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+            <table class="settings-json-table">
+              <thead><tr><th>항목</th><th>금액 (USD)</th></tr></thead>
+              <tbody>
+                <tr><td>GPT-4o</td><td>$30</td></tr>
+                <tr><td class="settings-json-table__total">합계</td><td class="settings-json-table__total">$30</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 기타 설정 섹션 (읽기 모드) -->
+        <div class="settings-section">
+          <div class="settings-section__header">기타 설정</div>
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">네트워크 수수료</div>
+              <div class="settings-item__key">REVENUE_NETWORK_FEE</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-20 16:00 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">0.01 GRAM</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 4: 저장 실패 ===== -->
+  <main class="screen" id="case-4">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">설정 관리</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">설정 관리</h1>
+        </div>
+
+        <!-- 환율 설정 섹션 (GRAM/USD 수정 모드 + 에러) -->
+        <div class="settings-section">
+          <div class="settings-section__header">환율 설정</div>
+          <!-- GRAM/USD: 저장 실패 상태 -->
+          <div class="settings-item" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div class="settings-item__info">
+                <div class="settings-item__label">GRAM/USD</div>
+                <div class="settings-item__key">TON_TO_USD</div>
+              </div>
+            </div>
+            <div class="settings-edit" style="margin-top:var(--space-2);">
+              <input type="number" class="settings-edit__input settings-edit__input--error" value="2.10" step="0.01">
+              <button class="settings-edit__btn settings-edit__btn--save">저장</button>
+              <button class="settings-edit__btn settings-edit__btn--cancel">취소</button>
+            </div>
+            <div class="settings-edit__error">설정 저장에 실패했습니다. 다시 시도해주세요.</div>
+          </div>
+          <!-- GRAM/KRW: 읽기 모드 유지 -->
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">GRAM/KRW</div>
+              <div class="settings-item__key">EXCHANGE_TON_TO_KRW</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-28 14:30 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">\3,038</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+          <!-- USD/KRW: 읽기 모드 유지 -->
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">USD/KRW</div>
+              <div class="settings-item__key">EXCHANGE_USD_TO_KRW</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-27 09:15 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">\1,497</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 운영 비용 섹션 (읽기 모드) -->
+        <div class="settings-section">
+          <div class="settings-section__header">운영 비용</div>
+          <div class="settings-item" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3);">
+              <div class="settings-item__info">
+                <div class="settings-item__label">AWS 월 비용</div>
+                <div class="settings-item__key">MONTHLY_AWS_COSTS</div>
+                <div class="settings-item__meta">마지막 수정: 2026-05-25 10:00 (admin)</div>
+              </div>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+            <table class="settings-json-table">
+              <thead><tr><th>항목</th><th>금액 (USD)</th></tr></thead>
+              <tbody>
+                <tr><td>EC2</td><td>$25</td></tr>
+                <tr><td>RDS</td><td>$35</td></tr>
+                <tr><td>S3</td><td>$3</td></tr>
+                <tr><td>CloudFront</td><td>$5</td></tr>
+                <tr><td class="settings-json-table__total">합계</td><td class="settings-json-table__total">$68</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="settings-item" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3);">
+              <div class="settings-item__info">
+                <div class="settings-item__label">AI 월 비용</div>
+                <div class="settings-item__key">MONTHLY_AI_COSTS</div>
+                <div class="settings-item__meta">마지막 수정: 2026-05-25 10:00 (admin)</div>
+              </div>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+            <table class="settings-json-table">
+              <thead><tr><th>항목</th><th>금액 (USD)</th></tr></thead>
+              <tbody>
+                <tr><td>GPT-4o</td><td>$30</td></tr>
+                <tr><td class="settings-json-table__total">합계</td><td class="settings-json-table__total">$30</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 기타 설정 섹션 (읽기 모드) -->
+        <div class="settings-section">
+          <div class="settings-section__header">기타 설정</div>
+          <div class="settings-item">
+            <div class="settings-item__info">
+              <div class="settings-item__label">네트워크 수수료</div>
+              <div class="settings-item__key">REVENUE_NETWORK_FEE</div>
+              <div class="settings-item__meta">마지막 수정: 2026-05-20 16:00 (admin)</div>
+            </div>
+            <div class="settings-item__value">
+              <span class="settings-item__current">0.01 GRAM</span>
+              <button class="settings-item__edit-btn" title="수정">✏️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Toast -->
+    <div class="toast toast--error">설정 저장에 실패했습니다. 다시 시도해주세요.</div>
+  </main>
+
+  <!-- Toast (성공) -->
+  <div class="toast toast--success" id="settings-toast" hidden>설정이 저장되었습니다</div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Mobile sidebar toggle
+    document.querySelectorAll('.admin-topbar__menu-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sidebar = btn.closest('.admin-layout').querySelector('.admin-sidebar');
+        sidebar.classList.toggle('admin-sidebar--open');
+      });
+    });
+
+    // Edit button click → simulate inline edit mode
+    document.querySelectorAll('.settings-item__edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Switch to Case 2 for demo
+        document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelector('[data-case="2"]').classList.add('active');
+        document.getElementById('case-2').classList.add('active');
+      });
+    });
+
+    // Save button click → show success toast
+    document.querySelectorAll('.settings-edit__btn--save').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const toast = document.getElementById('settings-toast');
+        if (toast) {
+          toast.removeAttribute('hidden');
+          setTimeout(() => toast.setAttribute('hidden', ''), 2000);
+        }
+      });
+    });
+
+    // Cancel button click → back to Case 1
+    document.querySelectorAll('.settings-edit__btn--cancel').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelector('[data-case="1"]').classList.add('active');
+        document.getElementById('case-1').classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

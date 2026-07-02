@@ -1,0 +1,169 @@
+/*
+ * Web 공개 페이지 네비게이션
+ *
+ * 디자인 문서 간 이동용 상위 메뉴 + 케이스 피커.
+ * web HTML은 base.css를 쓰지 않으므로 독립적으로 정의.
+ */
+
+.page-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10001;
+  display: flex;
+  gap: 4px;
+  padding: 4px 12px;
+  background-color: #fafafa;
+  border-bottom: 1px solid #e5e5e5;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  height: 36px;
+  align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.page-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.page-nav a {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #999;
+  text-decoration: none;
+  border-radius: 4px;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.page-nav a:hover {
+  color: #333;
+  background-color: #f0f0f0;
+}
+
+.page-nav a.active {
+  color: #7c3aed;
+  background-color: #f3e8ff;
+  font-weight: 700;
+}
+
+.case-switcher {
+  position: fixed;
+  top: 36px;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  display: flex;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #fff;
+  border-bottom: 2px solid #e5e5e5;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.case-switcher::-webkit-scrollbar {
+  display: none;
+}
+
+.case-switcher button {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  background-color: #f5f5f5;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: all 0.15s;
+  border: none;
+  cursor: pointer;
+}
+
+.case-switcher button.active {
+  color: #fff;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+}
+
+.case-switcher button:hover:not(.active) {
+  color: #333;
+  background-color: #e5e5e5;
+}
+
+/* 콘텐츠를 메뉴 + 케이스 피커 아래로 밀기 */
+.design-content {
+  margin-top: 80px; /* 36px (page-nav) + 44px (case-switcher) */
+}
+
+/* 케이스 화면 전환 */
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+/* web 기존 case-tabs도 동일 위치에 고정 */
+.case-tabs {
+  position: fixed;
+  top: 36px;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  display: flex;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #fff;
+  border-bottom: 2px solid #e5e5e5;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.case-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.case-tab {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  background-color: #f5f5f5;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: all 0.15s;
+  border: none;
+  cursor: pointer;
+}
+
+.case-tab.active {
+  color: #fff;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+}
+
+.case-tab:hover:not(.active) {
+  color: #333;
+  background-color: #e5e5e5;
+}
+
+/* case-content (web 기존 패턴) */
+.case-content {
+  display: none;
+  margin-top: 80px;
+}
+
+.case-content.active {
+  display: block;
+}
+
+/* landing/leaderboard (케이스 탭 없는 페이지) — page-nav만 사용 */
+.no-cases {
+  margin-top: 40px; /* page-nav 높이만 */
+}

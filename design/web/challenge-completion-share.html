@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Challenge Completion Share - Design Spec</title>
+    <link rel="stylesheet" href="../shared/tokens.css">
+    <style>
+        /* 
+         * Challenge Completion Share Page Design Spec
+         * 
+         * BE-rendered public page (no login required)
+         * Same dark theme as verification share page (/verifications/shared/)
+         * 
+         * Cases:
+         * - Case 1: COMPLETED (100% success)
+         * - Case 2: FAILED (incomplete)
+         * - Case 3: 404 (invalid participation)
+         */
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f14;
+            color: #e4e4e7;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 32px 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 900;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Achievement Header */
+        .achievement-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .achievement-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .achievement-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .achievement-subtitle {
+            font-size: 14px;
+            color: #a1a1aa;
+            font-weight: 500;
+        }
+
+        /* Challenge Info */
+        .challenge-info {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .challenge-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .challenge-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+        .badge-neutral { background: rgba(161,161,170,0.15); color: #a1a1aa; }
+
+        /* Calendar */
+        .calendar-section {
+            margin-bottom: 24px;
+        }
+
+        .calendar {
+            background: #1c1c24;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 8px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #71717a;
+            padding: 4px 0;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 0;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .calendar-day--inactive {
+            color: #3f3f46;
+        }
+
+        .calendar-day--success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            font-weight: 700;
+        }
+
+        .calendar-day--missed {
+            background: rgba(161, 161, 170, 0.1);
+            color: #71717a;
+        }
+
+        .calendar-day--empty {
+            /* placeholder for alignment */
+        }
+
+        /* Progress Bar (short challenges < 15 days) */
+        .progress-section {
+            margin-bottom: 24px;
+        }
+
+        .progress-card {
+            background: #1c1c24;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .progress-text {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .progress-text--completed { color: #4ade80; }
+        .progress-text--failed { color: #fb923c; }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #27272a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar__fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-bar__fill--completed {
+            background: linear-gradient(to right, #22c55e, #4ade80);
+        }
+
+        .progress-bar__fill--failed {
+            background: linear-gradient(to right, #f97316, #fb923c);
+        }
+
+        /* Stats */
+        .stats-card {
+            background: #1c1c24;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+        }
+
+        .stat-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-icon {
+            font-size: 16px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e4e4e7;
+        }
+
+        .stat-label--green { color: #4ade80; }
+        .stat-label--orange { color: #fb923c; }
+
+        /* Reward indicator (COMPLETED only) */
+        .reward-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 0;
+        }
+
+        .reward-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(34, 197, 94, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .reward-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4ade80;
+        }
+
+        /* User Info */
+        .user-card {
+            background: #1c1c24;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .user-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .user-date {
+            font-size: 12px;
+            color: #71717a;
+        }
+
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: rgba(139, 92, 246, 0.15);
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #a78bfa;
+        }
+
+        /* CTA */
+        .cta-wrapper {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            width: 100%;
+            max-width: 320px;
+            padding: 14px 32px;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            transition: opacity 0.2s;
+        }
+
+        .cta-button:hover { opacity: 0.9; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #27272a;
+            color: #52525b;
+            font-size: 12px;
+        }
+
+        /* Case tabs for design spec */
+        .case-tabs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a2e;
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+            overflow-x: auto;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .case-tab {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            background: #27272a;
+            color: #a1a1aa;
+            border: none;
+        }
+
+        .case-tab.active {
+            background: #9333ea;
+            color: #ffffff;
+        }
+
+        .case-content {
+            display: none;
+            padding-top: 60px;
+        }
+
+        .case-content.active {
+            display: block;
+        }
+    </style>
+  <link rel="stylesheet" href="../shared/web-nav.css">
+</head>
+<body>
+  <!-- Page Navigation -->
+  <nav class="page-nav">
+    <a href="landing.html">랜딩</a>
+    <a href="challenge-public.html">챌린지 상세</a>
+    <a href="category-public.html">카테고리</a>
+    <a href="events.html">이벤트</a>
+    <a href="leaderboard.html">리더보드</a>
+    <a class="active" href="challenge-completion-share.html">완료 공유</a>
+    <a href="public-pages.html">공개 페이지</a>
+  </nav>
+
+    <!-- Design Spec Case Tabs -->
+    <div class="case-tabs">
+        <button class="case-tab active" onclick="showCase('completed')">완료</button>
+        <button class="case-tab" onclick="showCase('failed')">실패</button>
+        <button class="case-tab" onclick="showCase('notfound')">404</button>
+    </div>
+
+    <!-- Case 1: COMPLETED -->
+    <div id="case-completed" class="case-content active">
+        <div class="container">
+            <div class="header">
+                <div class="logo">DefyTON</div>
+            </div>
+
+            <div class="achievement-header">
+                <div class="achievement-icon">🏆</div>
+                <div class="achievement-title">Challenge Completed!</div>
+            </div>
+
+            <div class="challenge-info">
+                <div class="challenge-name">30-Day Morning Running</div>
+                <div class="challenge-meta">
+                    <span class="badge badge-purple">Running</span>
+                    <span class="badge badge-neutral">30 days</span>
+                </div>
+            </div>
+
+            <!-- Calendar (15일 이상) -->
+            <div class="calendar-section">
+                <div class="calendar">
+                    <div class="calendar-header">June 2026</div>
+                    <div class="calendar-weekdays">
+                        <div class="calendar-weekday">Mo</div>
+                        <div class="calendar-weekday">Tu</div>
+                        <div class="calendar-weekday">We</div>
+                        <div class="calendar-weekday">Th</div>
+                        <div class="calendar-weekday">Fr</div>
+                        <div class="calendar-weekday">Sa</div>
+                        <div class="calendar-weekday">Su</div>
+                    </div>
+                    <div class="calendar-days">
+                        <div class="calendar-day calendar-day--success">1</div>
+                        <div class="calendar-day calendar-day--success">2</div>
+                        <div class="calendar-day calendar-day--success">3</div>
+                        <div class="calendar-day calendar-day--success">4</div>
+                        <div class="calendar-day calendar-day--success">5</div>
+                        <div class="calendar-day calendar-day--success">6</div>
+                        <div class="calendar-day calendar-day--success">7</div>
+                        <div class="calendar-day calendar-day--success">8</div>
+                        <div class="calendar-day calendar-day--success">9</div>
+                        <div class="calendar-day calendar-day--success">10</div>
+                        <div class="calendar-day calendar-day--success">11</div>
+                        <div class="calendar-day calendar-day--success">12</div>
+                        <div class="calendar-day calendar-day--success">13</div>
+                        <div class="calendar-day calendar-day--success">14</div>
+                        <div class="calendar-day calendar-day--success">15</div>
+                        <div class="calendar-day calendar-day--success">16</div>
+                        <div class="calendar-day calendar-day--success">17</div>
+                        <div class="calendar-day calendar-day--success">18</div>
+                        <div class="calendar-day calendar-day--success">19</div>
+                        <div class="calendar-day calendar-day--success">20</div>
+                        <div class="calendar-day calendar-day--success">21</div>
+                        <div class="calendar-day calendar-day--success">22</div>
+                        <div class="calendar-day calendar-day--success">23</div>
+                        <div class="calendar-day calendar-day--success">24</div>
+                        <div class="calendar-day calendar-day--success">25</div>
+                        <div class="calendar-day calendar-day--success">26</div>
+                        <div class="calendar-day calendar-day--success">27</div>
+                        <div class="calendar-day calendar-day--success">28</div>
+                        <div class="calendar-day calendar-day--success">29</div>
+                        <div class="calendar-day calendar-day--success">30</div>
+                        <div class="calendar-day calendar-day--inactive"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-card">
+                <div class="stat-row">
+                    <span class="stat-icon">✅</span>
+                    <span class="stat-label stat-label--green">100% Completion</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-icon">🔥</span>
+                    <span class="stat-label">28-day Best Streak</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-icon">📸</span>
+                    <span class="stat-label">32 Verifications</span>
+                </div>
+                <div class="reward-indicator">
+                    <span class="reward-check">✓</span>
+                    <span class="reward-text">Earned Reward</span>
+                </div>
+            </div>
+
+            <!-- User Info -->
+            <div class="user-card">
+                <div class="user-info">
+                    <span class="user-name">Challenger_aB3xK9</span>
+                    <span class="user-date">Completed Jun 30, 2026</span>
+                </div>
+                <span class="level-badge">⭐ Level 5</span>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-wrapper">
+                <a href="#" class="cta-button">🚀 Try DefyTON in Telegram</a>
+            </div>
+
+            <div class="footer">
+                <p style="margin-bottom: 12px;">
+                    <a href="/" style="color:#71717a; text-decoration:none; margin:0 8px;">Challenges</a>
+                    <a href="/events" style="color:#71717a; text-decoration:none; margin:0 8px;">Events</a>
+                    <a href="/leaderboard" style="color:#71717a; text-decoration:none; margin:0 8px;">Leaderboard</a>
+                </p>
+                &copy; 2026 DefyTON. All rights reserved.
+            </div>
+        </div>
+    </div>
+
+    <!-- Case 2: FAILED -->
+    <div id="case-failed" class="case-content">
+        <div class="container">
+            <div class="header">
+                <div class="logo">DefyTON</div>
+            </div>
+
+            <div class="achievement-header">
+                <div class="achievement-icon">💪</div>
+                <div class="achievement-title">Challenge Attempted!</div>
+                <div class="achievement-subtitle">Every attempt makes you stronger</div>
+            </div>
+
+            <div class="challenge-info">
+                <div class="challenge-name">30-Day Morning Running</div>
+                <div class="challenge-meta">
+                    <span class="badge badge-purple">Running</span>
+                    <span class="badge badge-neutral">30 days</span>
+                </div>
+            </div>
+
+            <!-- Calendar (FAILED - 부분 달성) -->
+            <div class="calendar-section">
+                <div class="calendar">
+                    <div class="calendar-header">June 2026</div>
+                    <div class="calendar-weekdays">
+                        <div class="calendar-weekday">Mo</div>
+                        <div class="calendar-weekday">Tu</div>
+                        <div class="calendar-weekday">We</div>
+                        <div class="calendar-weekday">Th</div>
+                        <div class="calendar-weekday">Fr</div>
+                        <div class="calendar-weekday">Sa</div>
+                        <div class="calendar-weekday">Su</div>
+                    </div>
+                    <div class="calendar-days">
+                        <div class="calendar-day calendar-day--success">1</div>
+                        <div class="calendar-day calendar-day--success">2</div>
+                        <div class="calendar-day calendar-day--success">3</div>
+                        <div class="calendar-day calendar-day--success">4</div>
+                        <div class="calendar-day calendar-day--success">5</div>
+                        <div class="calendar-day calendar-day--missed">6</div>
+                        <div class="calendar-day calendar-day--success">7</div>
+                        <div class="calendar-day calendar-day--success">8</div>
+                        <div class="calendar-day calendar-day--success">9</div>
+                        <div class="calendar-day calendar-day--success">10</div>
+                        <div class="calendar-day calendar-day--success">11</div>
+                        <div class="calendar-day calendar-day--success">12</div>
+                        <div class="calendar-day calendar-day--missed">13</div>
+                        <div class="calendar-day calendar-day--missed">14</div>
+                        <div class="calendar-day calendar-day--success">15</div>
+                        <div class="calendar-day calendar-day--success">16</div>
+                        <div class="calendar-day calendar-day--success">17</div>
+                        <div class="calendar-day calendar-day--missed">18</div>
+                        <div class="calendar-day calendar-day--success">19</div>
+                        <div class="calendar-day calendar-day--success">20</div>
+                        <div class="calendar-day calendar-day--missed">21</div>
+                        <div class="calendar-day calendar-day--missed">22</div>
+                        <div class="calendar-day calendar-day--success">23</div>
+                        <div class="calendar-day calendar-day--success">24</div>
+                        <div class="calendar-day calendar-day--missed">25</div>
+                        <div class="calendar-day calendar-day--missed">26</div>
+                        <div class="calendar-day calendar-day--missed">27</div>
+                        <div class="calendar-day calendar-day--success">28</div>
+                        <div class="calendar-day calendar-day--success">29</div>
+                        <div class="calendar-day calendar-day--missed">30</div>
+                        <div class="calendar-day calendar-day--inactive"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats (FAILED) -->
+            <div class="stats-card">
+                <div class="stat-row">
+                    <span class="stat-icon">📊</span>
+                    <span class="stat-label stat-label--orange">73% Completion</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-icon">🔥</span>
+                    <span class="stat-label">12-day Best Streak</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-icon">📸</span>
+                    <span class="stat-label">22 Verifications</span>
+                </div>
+                <!-- No reward indicator for FAILED -->
+            </div>
+
+            <!-- User Info -->
+            <div class="user-card">
+                <div class="user-info">
+                    <span class="user-name">Challenger_aB3xK9</span>
+                    <span class="user-date">Finished Jun 30, 2026</span>
+                </div>
+                <span class="level-badge">⭐ Level 5</span>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-wrapper">
+                <a href="#" class="cta-button">🚀 Try DefyTON in Telegram</a>
+            </div>
+
+            <div class="footer">
+                <p style="margin-bottom: 12px;">
+                    <a href="/" style="color:#71717a; text-decoration:none; margin:0 8px;">Challenges</a>
+                    <a href="/events" style="color:#71717a; text-decoration:none; margin:0 8px;">Events</a>
+                    <a href="/leaderboard" style="color:#71717a; text-decoration:none; margin:0 8px;">Leaderboard</a>
+                </p>
+                &copy; 2026 DefyTON. All rights reserved.
+            </div>
+        </div>
+    </div>
+
+    <!-- Case 3: 404 Not Found -->
+    <div id="case-notfound" class="case-content">
+        <div class="container">
+            <div class="header">
+                <div class="logo">DefyTON</div>
+            </div>
+
+            <div class="achievement-header">
+                <div class="achievement-icon">🔍</div>
+                <div class="achievement-title">Page Not Found</div>
+                <div class="achievement-subtitle">The shared challenge you're looking for doesn't exist.</div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-wrapper" style="margin-top: 48px;">
+                <a href="#" class="cta-button">🚀 Try DefyTON in Telegram</a>
+            </div>
+
+            <div class="footer">
+                <p style="margin-bottom: 12px;">
+                    <a href="/" style="color:#71717a; text-decoration:none; margin:0 8px;">Challenges</a>
+                    <a href="/events" style="color:#71717a; text-decoration:none; margin:0 8px;">Events</a>
+                    <a href="/leaderboard" style="color:#71717a; text-decoration:none; margin:0 8px;">Leaderboard</a>
+                </p>
+                &copy; 2026 DefyTON. All rights reserved.
+            </div>
+        </div>
+    </div>
+
+    <!-- Short Challenge Example (Progress Bar instead of Calendar) -->
+    <!-- This is a sub-variant reference, not a separate case tab -->
+    <!-- When challenge duration < 15 days, replace calendar-section with progress-section -->
+    <!--
+    <div class="progress-section">
+        <div class="progress-card">
+            <div class="progress-text progress-text--completed">7/7 days ✓</div>
+            <div class="progress-bar">
+                <div class="progress-bar__fill progress-bar__fill--completed" style="width: 100%"></div>
+            </div>
+        </div>
+    </div>
+    -->
+
+    <script>
+        function showCase(caseId) {
+            document.querySelectorAll('.case-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.case-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('case-' + caseId).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

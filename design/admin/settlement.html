@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>정산 - Admin</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/admin-layout.css">
+  <style>
+    /* 이 화면 전용 스타일 */
+    .stl-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3);
+      margin-bottom: var(--space-6);
+    }
+
+    .stl-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .stl-info-item__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    .stl-info-item__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .stl-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      margin-top: var(--space-4);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stl-action-bar__count {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .stl-result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: var(--space-3);
+      margin-bottom: var(--space-6);
+    }
+
+    .stl-result-card {
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stl-result-card__value {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin-bottom: var(--space-1);
+    }
+
+    .stl-result-card__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    .admin-table td.text-right,
+    .admin-table th.text-right {
+      text-align: right;
+    }
+
+    .admin-table tr.interactive {
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+    }
+
+    .admin-table tr.interactive:hover td {
+      background-color: var(--color-bg-elevated);
+    }
+  </style>
+</head>
+<body>
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">미정산 목록</button>
+    <button data-case="2">미리보기</button>
+    <button data-case="3">정산 결과</button>
+    <button data-case="4">빈 상태</button>
+  </nav>
+
+  <!-- ===== Case 1: 미정산 챌린지 목록 ===== -->
+  <main class="screen active" id="case-1">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">정산</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">정산</h1>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>챌린지명</th>
+                <th>카테고리</th>
+                <th class="text-right">ACTIVE 참여자</th>
+                <th>종료일</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="interactive">
+                <td>Morning Run</td>
+                <td>Fitness</td>
+                <td class="text-right">25명</td>
+                <td>2026-05-10</td>
+              </tr>
+              <tr class="interactive">
+                <td>Daily Reading</td>
+                <td>Education</td>
+                <td class="text-right">12명</td>
+                <td>2026-05-08</td>
+              </tr>
+              <tr class="interactive">
+                <td>Meditation</td>
+                <td>Wellness</td>
+                <td class="text-right">8명</td>
+                <td>2026-05-05</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="admin-mobile-card">
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">챌린지명</span>
+              <span class="admin-mobile-card__value">Morning Run</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">카테고리</span>
+              <span class="admin-mobile-card__value">Fitness</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ACTIVE 참여자</span>
+              <span class="admin-mobile-card__value">25명</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">종료일</span>
+              <span class="admin-mobile-card__value">2026-05-10</span>
+            </div>
+          </div>
+
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">챌린지명</span>
+              <span class="admin-mobile-card__value">Daily Reading</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">카테고리</span>
+              <span class="admin-mobile-card__value">Education</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ACTIVE 참여자</span>
+              <span class="admin-mobile-card__value">12명</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">종료일</span>
+              <span class="admin-mobile-card__value">2026-05-08</span>
+            </div>
+          </div>
+
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">챌린지명</span>
+              <span class="admin-mobile-card__value">Meditation</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">카테고리</span>
+              <span class="admin-mobile-card__value">Wellness</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ACTIVE 참여자</span>
+              <span class="admin-mobile-card__value">8명</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">종료일</span>
+              <span class="admin-mobile-card__value">2026-05-05</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" style="margin-top: var(--space-4);">
+          <button class="pagination__btn" disabled>‹</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn">2</button>
+          <button class="pagination__btn">›</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 2: 정산 미리보기 (참여자 선택) ===== -->
+  <main class="screen" id="case-2">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">정산</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">정산 — Morning Run</h1>
+        </div>
+
+        <!-- 챌린지 산보 카드 -->
+        <div class="admin-detail" style="margin-bottom: var(--space-6);">
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">챌린지 산보</div>
+            <div class="stl-info-grid">
+              <div class="stl-info-item">
+                <span class="stl-info-item__label">카테고리</span>
+                <span class="stl-info-item__value">Fitness</span>
+              </div>
+              <div class="stl-info-item">
+                <span class="stl-info-item__label">종료일</span>
+                <span class="stl-info-item__value">2026-05-10</span>
+              </div>
+              <div class="stl-info-item">
+                <span class="stl-info-item__label">패널티</span>
+                <span class="stl-info-item__value">PROPORTIONAL 10%</span>
+              </div>
+              <div class="stl-info-item">
+                <span class="stl-info-item__label">리워드율</span>
+                <span class="stl-info-item__value">10%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 참여자 테이블 -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="select-all" checked></th>
+                <th>참여자</th>
+                <th class="text-right">예치금</th>
+                <th class="text-right">인증률</th>
+                <th>예상 결과</th>
+                <th class="text-right">예상 환급</th>
+                <th class="text-right">예상 리워드/패널티</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox" class="participant-cb" checked></td>
+                <td>JohnD</td>
+                <td class="text-right">5 GRAM</td>
+                <td class="text-right">100%</td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+                <td class="text-right">5.0 GRAM</td>
+                <td class="text-right" style="color: var(--color-success);">+0.5 GRAM</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="participant-cb" checked></td>
+                <td>JaneK</td>
+                <td class="text-right">3 GRAM</td>
+                <td class="text-right">100%</td>
+                <td><span class="badge badge--success">COMPLETED</span></td>
+                <td class="text-right">3.0 GRAM</td>
+                <td class="text-right" style="color: var(--color-success);">+0.3 GRAM</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="participant-cb" checked></td>
+                <td>FitM</td>
+                <td class="text-right">5 GRAM</td>
+                <td class="text-right">72%</td>
+                <td><span class="badge badge--danger">FAILED</span></td>
+                <td class="text-right">3.6 GRAM</td>
+                <td class="text-right" style="color: var(--color-danger);">-1.4 GRAM</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="participant-cb"></td>
+                <td>StudyK</td>
+                <td class="text-right">2 GRAM</td>
+                <td class="text-right">85%</td>
+                <td><span class="badge badge--danger">FAILED</span></td>
+                <td class="text-right">1.7 GRAM</td>
+                <td class="text-right" style="color: var(--color-danger);">-0.3 GRAM</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards (Case 2) -->
+        <div class="admin-mobile-card">
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">참여자</span>
+              <span class="admin-mobile-card__value">JohnD</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">예치금</span>
+              <span class="admin-mobile-card__value">5 GRAM</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">인증률</span>
+              <span class="admin-mobile-card__value">100%</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">예상 결과</span>
+              <span class="badge badge--success">COMPLETED</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">예상 환급</span>
+              <span class="admin-mobile-card__value">5.0 GRAM</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">리워드</span>
+              <span class="admin-mobile-card__value" style="color: var(--color-success);">+0.5 GRAM</span>
+            </div>
+          </div>
+
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">참여자</span>
+              <span class="admin-mobile-card__value">FitM</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">예치금</span>
+              <span class="admin-mobile-card__value">5 GRAM</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">인증률</span>
+              <span class="admin-mobile-card__value">72%</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">예상 결과</span>
+              <span class="badge badge--danger">FAILED</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">예상 환급</span>
+              <span class="admin-mobile-card__value">3.6 GRAM</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">패널티</span>
+              <span class="admin-mobile-card__value" style="color: var(--color-danger);">-1.4 GRAM</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 이벤트 리워드 경고 배너 (EVENT 챌린지 정산 시만 표시) -->
+        <div style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); background-color: var(--color-warning-bg); border: 1px solid var(--color-warning-border); border-radius: var(--radius-sm); margin-top: var(--space-4); font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-warning-text);">
+          ⚡ 이벤트 리워드 총 지급 예산: 0.8 GRAM
+        </div>
+
+        <!-- 하단 액션 바 -->
+        <div class="stl-action-bar">
+          <span class="stl-action-bar__count">3건 선택됨</span>
+          <button class="btn btn--primary btn--sm">정산 실행</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 3: 정산 결과 ===== -->
+  <main class="screen" id="case-3">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">정산</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">정산 결과</h1>
+        </div>
+
+        <!-- 결과 카드 -->
+        <div class="admin-detail">
+          <div class="admin-detail__section">
+            <div class="admin-detail__section-title">결과 요약</div>
+            <div class="stl-result-grid">
+              <div class="stl-result-card">
+                <div class="stl-result-card__value">3</div>
+                <div class="stl-result-card__label">정산 완료</div>
+              </div>
+              <div class="stl-result-card">
+                <div class="stl-result-card__value" style="color: var(--color-success);">2</div>
+                <div class="stl-result-card__label">
+                  <span class="badge badge--success">COMPLETED</span>
+                </div>
+              </div>
+              <div class="stl-result-card">
+                <div class="stl-result-card__value" style="color: var(--color-danger);">1</div>
+                <div class="stl-result-card__label">
+                  <span class="badge badge--danger">FAILED</span>
+                </div>
+              </div>
+              <div class="stl-result-card">
+                <div class="stl-result-card__value" style="color: var(--color-text-secondary);">0</div>
+                <div class="stl-result-card__label">스킵</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 액션 -->
+        <div style="margin-top: var(--space-6);">
+          <button class="btn btn--secondary btn--sm">목록으로 돌아가기</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 4: 빈 상태 ===== -->
+  <main class="screen" id="case-4">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">DefyTON</div>
+        <nav class="admin-sidebar__nav">
+          <a class="admin-sidebar__item" href="dashboard.html">
+            <span class="admin-sidebar__item-icon">📊</span>
+            대시보드
+          </a>
+          <a class="admin-sidebar__item" href="verification-review.html">
+            <span class="admin-sidebar__item-icon">🔍</span>
+            인증 검수
+          </a>
+          <a class="admin-sidebar__item" href="withdrawal-management.html">
+            <span class="admin-sidebar__item-icon">💸</span>
+            출금 관리
+          </a>
+          <a class="admin-sidebar__item" href="challenge-management.html">
+            <span class="admin-sidebar__item-icon">🎯</span>
+            챌린지 관리
+          </a>
+          <a class="admin-sidebar__item" href="user-management.html">
+            <span class="admin-sidebar__item-icon">👥</span>
+            사용자 관리
+          </a>
+          <a class="admin-sidebar__item" href="transaction-history.html">
+            <span class="admin-sidebar__item-icon">📋</span>
+            거래 내역
+          </a>
+          <a class="admin-sidebar__item admin-sidebar__item--active" href="settlement.html">
+            <span class="admin-sidebar__item-icon">💰</span>
+            정산
+          </a>
+          <a class="admin-sidebar__item" href="message-send.html">
+            <span class="admin-sidebar__item-icon">📬</span>
+            메시지 발송
+          </a>
+          <a class="admin-sidebar__item" href="notice-management.html">
+            <span class="admin-sidebar__item-icon">📢</span>
+            공지사항
+          </a>
+          <a class="admin-sidebar__item" href="activity-log.html">
+            <span class="admin-sidebar__item-icon">📝</span>
+            활동 로그
+          </a>
+          <a class="admin-sidebar__item" href="settings.html">
+            <span class="admin-sidebar__item-icon">⚙️</span>
+            설정
+          </a>
+          <a class="admin-sidebar__item" href="cache-management.html">
+            <span class="admin-sidebar__item-icon">🗄️</span>
+            캐시 관리
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">정산</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">정산</h1>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state">
+          <div class="empty-state__icon">💰</div>
+          <div class="empty-state__title">정산 대기 중인 챌린지가 없습니다.</div>
+          <div class="empty-state__description">종료된 챌린지가 발생하면 여기에 표시됩니다.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Mobile sidebar toggle
+    document.querySelectorAll('.admin-topbar__menu-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sidebar = btn.closest('.admin-layout').querySelector('.admin-sidebar');
+        sidebar.classList.toggle('admin-sidebar--open');
+      });
+    });
+
+    // Select All checkbox (Case 2)
+    const selectAll = document.getElementById('select-all');
+    if (selectAll) {
+      selectAll.addEventListener('change', () => {
+        const checkboxes = document.querySelectorAll('.participant-cb');
+        checkboxes.forEach(cb => { cb.checked = selectAll.checked; });
+        updateSelectedCount();
+      });
+    }
+
+    // Individual checkboxes
+    document.querySelectorAll('.participant-cb').forEach(cb => {
+      cb.addEventListener('change', () => {
+        updateSelectedCount();
+        // Update select-all state
+        const all = document.querySelectorAll('.participant-cb');
+        const checked = document.querySelectorAll('.participant-cb:checked');
+        if (selectAll) {
+          selectAll.checked = all.length === checked.length;
+          selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+        }
+      });
+    });
+
+    function updateSelectedCount() {
+      const checked = document.querySelectorAll('.participant-cb:checked');
+      const countEl = document.querySelector('.stl-action-bar__count');
+      if (countEl) {
+        countEl.textContent = checked.length + '건 선택됨';
+      }
+      // Disable button if 0 selected
+      const execBtn = document.querySelector('.stl-action-bar .btn--primary');
+      if (execBtn) {
+        execBtn.disabled = checked.length === 0;
+      }
+    }
+  </script>
+</body>
+</html>

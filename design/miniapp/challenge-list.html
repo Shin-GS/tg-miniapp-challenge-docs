@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Challenge List - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/miniapp-nav.css">
+  <style>
+    /* ===== Challenge List Screen Styles ===== */
+
+    /* Type Tabs (REGULAR / EVENT) */
+    .type-tabs {
+      display: flex;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .type-tabs__btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-3);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+      border-radius: var(--radius-md);
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-secondary);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      min-height: 44px;
+    }
+
+    .type-tabs__btn.active {
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+      border-color: transparent;
+      box-shadow: var(--shadow-md);
+    }
+
+    .type-tabs__btn:not(.active):hover {
+      background-color: var(--color-border);
+      color: var(--color-text);
+    }
+
+    /* Category Grid */
+    .category-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3);
+      padding: var(--space-4);
+    }
+
+    .category-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-5) var(--space-3);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      text-align: center;
+    }
+
+    .category-card:active {
+      transform: scale(0.98);
+    }
+
+    .category-card__icon {
+      font-size: 36px;
+      line-height: 1;
+    }
+
+    .category-card__name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .category-card__count {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+    }
+
+    /* Locked Category */
+    .category-card--locked {
+      opacity: 0.5;
+      position: relative;
+    }
+
+    .category-card--locked::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: var(--radius-lg);
+      pointer-events: none;
+    }
+
+    .category-card__lock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-1) var(--space-2);
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-warning-text);
+      background-color: var(--color-warning-bg);
+      border: 1px solid var(--color-warning-border);
+      border-radius: var(--radius-full);
+    }
+
+    /* Currently Active Section */
+    .active-section {
+      padding: 0 var(--space-4) var(--space-4);
+    }
+
+    .active-section__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .active-section__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3);
+    }
+
+    /* Category Header (inside challenge list) */
+    .category-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4);
+      padding-bottom: 0;
+    }
+
+    .category-header__left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .category-header__icon {
+      font-size: 32px;
+      line-height: 1;
+    }
+
+    .category-header__name {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .category-header__share {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background-color var(--transition-fast);
+    }
+
+    .category-header__share:active {
+      background-color: var(--color-bg-elevated);
+    }
+
+    .category-header__share-icon {
+      font-size: 18px;
+      color: var(--color-text-secondary);
+    }
+
+    /* Share Bottom Sheet */
+    .share-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .share-overlay.hidden {
+      display: none;
+    }
+
+    .share-sheet {
+      width: 100%;
+      max-width: 390px;
+      background: var(--color-bg-card);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      padding: var(--space-6) var(--space-4) var(--space-8);
+      animation: slideUp 0.2s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .share-sheet__title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      text-align: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .share-sheet__options {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .share-sheet__btn {
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      border: 2px solid var(--color-border);
+      cursor: pointer;
+      text-align: center;
+      transition: background-color var(--transition-fast);
+    }
+
+    .share-sheet__btn--telegram {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    .share-sheet__btn--telegram:active {
+      opacity: 0.9;
+    }
+
+    .share-sheet__btn--copy {
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+
+    .share-sheet__btn--copy:active {
+      background: var(--color-bg-elevated);
+    }
+
+    /* Challenge Card */
+    .challenge-card {
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      box-shadow: var(--shadow-md);
+      border: 2px solid var(--color-border);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .challenge-card:active {
+      transform: scale(0.98);
+    }
+
+    .challenge-card__top {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+
+    .challenge-card__icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: var(--gradient-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+
+    .challenge-card__info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .challenge-card__name {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin-bottom: var(--space-1);
+    }
+
+    .challenge-card__desc {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-normal);
+    }
+
+    .challenge-card__badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      margin-top: var(--space-2);
+    }
+
+    .challenge-card__meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+    }
+
+    .challenge-card__meta-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-2);
+      background-color: var(--color-bg-secondary);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+
+    .challenge-card__meta-value {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .challenge-card__meta-label {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+      text-transform: uppercase;
+    }
+
+    .challenge-card__spots {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--color-border);
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-danger);
+    }
+
+    .challenge-card__meta-value--free {
+      color: var(--color-success);
+      font-weight: var(--font-weight-black);
+    }
+
+    /* Difficulty Badges */
+    .badge--easy {
+      background-color: var(--color-success-bg);
+      color: var(--color-success-text);
+      border: 1px solid var(--color-success-border);
+    }
+
+    .badge--medium {
+      background-color: var(--color-warning-bg);
+      color: var(--color-warning-text);
+      border: 1px solid var(--color-warning-border);
+    }
+
+    .badge--hard {
+      background-color: var(--color-danger-bg);
+      color: var(--color-danger-text);
+      border: 1px solid var(--color-danger-border);
+    }
+
+    .badge--expert {
+      background-color: var(--color-expert-bg);
+      color: var(--color-expert-text);
+      border: 1px solid var(--color-expert-border);
+    }
+
+    .badge--popular {
+      background: var(--gradient-yellow);
+      color: var(--color-text-white);
+      border: none;
+      font-weight: var(--font-weight-black);
+    }
+
+    .badge--legend {
+      background: var(--gradient-blue);
+      color: var(--color-text-white);
+      border: none;
+      font-weight: var(--font-weight-black);
+    }
+
+    /* Reward Rate Badges (3-tier) */
+    .badge--reward-low {
+      background: transparent;
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+      font-weight: var(--font-weight-bold);
+    }
+
+    .badge--reward-mid {
+      background-color: var(--color-success);
+      color: var(--color-text-white);
+      border: none;
+      font-weight: var(--font-weight-bold);
+    }
+
+    .badge--reward-high {
+      background: linear-gradient(135deg, #F59E0B, #D97706);
+      color: var(--color-text-white);
+      border: none;
+      font-weight: var(--font-weight-black);
+    }
+
+    /* Challenge List */
+    .challenge-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      padding: var(--space-4);
+    }
+
+    /* Lock Modal */
+    .lock-modal {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lock-modal__backdrop {
+      position: absolute;
+      inset: 0;
+      background-color: var(--color-bg-overlay);
+      border-radius: inherit;
+    }
+
+    .lock-modal__content {
+      position: relative;
+      width: calc(100% - var(--space-8));
+      max-width: 320px;
+      background-color: var(--color-bg);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      text-align: center;
+      box-shadow: var(--shadow-xl);
+      animation: fadeIn var(--transition-normal);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .lock-modal__icon {
+      font-size: 48px;
+      margin-bottom: var(--space-4);
+    }
+
+    .lock-modal__message {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-normal);
+      margin-bottom: var(--space-5);
+    }
+
+    /* Unavailable Challenge Card */
+    .challenge-card--unavailable {
+      opacity: 0.55;
+    }
+
+    .challenge-card__status {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .challenge-card__status--full {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-black);
+      color: var(--color-danger);
+    }
+
+    .challenge-card__status--completed {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-black);
+      color: var(--color-success);
+    }
+  </style>
+</head>
+<body>
+  <!-- Page Navigation -->
+  <nav class="page-nav">
+    <a href="home.html">홈</a>
+    <a class="active" href="challenge-list.html">챌린지 목록</a>
+    <a href="challenge-detail.html">챌린지 상세</a>
+    <a href="my-challenges.html">내 챌린지</a>
+    <a href="verification-submit.html">인증 제출</a>
+    <a href="verification-result.html">인증 결과</a>
+    <a href="wallet.html">지갑</a>
+    <a href="withdrawal-request.html">출금</a>
+    <a href="leaderboard.html">리더보드</a>
+    <a href="invite-friends.html">초대</a>
+    <a href="settings.html">설정</a>
+    <a href="notice-list.html">공지</a>
+    <a href="levels.html">레벨</a>
+    <a href="faq.html">FAQ</a>
+    <a href="telegram-gate.html">TG 게이트</a>
+  </nav>
+
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">일반</button>
+    <button data-case="2">이벤트</button>
+    <button data-case="2-1">이벤트 빈</button>
+    <button data-case="3">빈 상태</button>
+    <button data-case="4">잠금 모달</button>
+    <button data-case="5">챌린지 목록</button>
+    <button data-case="6">챌린지 없음</button>
+    <button data-case="7">참여 불가</button>
+  </nav>
+
+  <div class="mobile-container">
+
+    <!-- ===== Case 1: REGULAR 탭 — 카테고리 있음 (참여 가능 + 진행 중 분리) ===== -->
+    <main class="screen active" id="case-1">
+
+      <!-- Type Tabs -->
+      <div class="type-tabs">
+        <button class="type-tabs__btn active">🏆 Regular</button>
+        <button class="type-tabs__btn">⚡ Event</button>
+      </div>
+
+      <!-- Available Categories Grid -->
+      <div class="category-grid">
+        <div class="category-card">
+          <span class="category-card__icon">🏃</span>
+          <span class="category-card__name">Running</span>
+          <span class="category-card__count">4 challenges</span>
+        </div>
+        <div class="category-card">
+          <span class="category-card__icon">📚</span>
+          <span class="category-card__name">Reading</span>
+          <span class="category-card__count">3 challenges</span>
+        </div>
+        <div class="category-card">
+          <span class="category-card__icon">🧘</span>
+          <span class="category-card__name">Meditation</span>
+          <span class="category-card__count">5 challenges</span>
+        </div>
+        <div class="category-card">
+          <span class="category-card__icon">💪</span>
+          <span class="category-card__name">Fitness</span>
+          <span class="category-card__count">6 challenges</span>
+        </div>
+        <div class="category-card">
+          <span class="category-card__icon">🍳</span>
+          <span class="category-card__name">Cooking</span>
+          <span class="category-card__count">2 challenges</span>
+        </div>
+      </div>
+
+      <!-- Currently Active Section -->
+      <div class="active-section">
+        <div class="active-section__label">Currently Active</div>
+        <div class="active-section__grid">
+          <div class="category-card category-card--locked">
+            <span class="category-card__icon">🎨</span>
+            <span class="category-card__name">Art</span>
+            <span class="category-card__lock-badge">🔒 In Progress</span>
+          </div>
+          <div class="category-card category-card--locked">
+            <span class="category-card__icon">🎵</span>
+            <span class="category-card__name">Music</span>
+            <span class="category-card__lock-badge">🔒 In Progress</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: EVENT 탭 — 챌린지 카드 목록 (카테고리 선택 없음) ===== -->
+    <main class="screen" id="case-2">
+
+      <!-- Type Tabs -->
+      <div class="type-tabs">
+        <button class="type-tabs__btn">🏆 Regular</button>
+        <button class="type-tabs__btn active">⚡ Event</button>
+      </div>
+
+      <!-- Challenge List (no category header) -->
+      <div class="challenge-list">
+        <!-- Event Challenge 1: 변동 리워드 -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon" style="background: var(--gradient-yellow);">🎯</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">New Year Resolution</div>
+              <div class="challenge-card__desc">Start the year right with 30 days of consistent habits</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--medium">MEDIUM</span>
+                <span class="badge badge--popular">🔥 POPULAR</span>
+                <span class="badge badge--reward-mid">+15%</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">30 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">5x / 7d</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">3-15 GRAM</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+          <div class="challenge-card__spots">🔥 2 spots left</div>
+        </div>
+
+        <!-- Event Challenge 2: 고정 리워드 (fixedRewardTon) -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon" style="background: var(--gradient-yellow);">🌸</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">Spring Detox</div>
+              <div class="challenge-card__desc">Clean eating & daily exercise for 14 days</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--easy">EASY</span>
+                <span class="badge badge--reward-mid">🎁 +0.5 GRAM</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">14 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / day</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1-5 GRAM</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Event Challenge 3: FREE + 고정 리워드 (fixedRewardTon, no deposit) -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon" style="background: var(--gradient-yellow);">🏖️</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">Summer Body Starter</div>
+              <div class="challenge-card__desc">7 days of simple morning exercise. No cost, just move!</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--easy">EASY</span>
+                <span class="badge badge--reward-mid">🎁 +0.3 GRAM</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">7 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / day</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value challenge-card__meta-value--free">FREE</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Event Challenge 4: 변동 리워드 (고율) -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon" style="background: var(--gradient-yellow);">💪</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">Iron Will</div>
+              <div class="challenge-card__desc">60 days of extreme discipline. Are you ready?</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--expert">EXPERT</span>
+                <span class="badge badge--legend">👑 LEGEND</span>
+                <span class="badge badge--reward-high">🎁 +25%</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">60 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / day</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">10-30 GRAM</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button class="pagination__btn" disabled>← Prev</button>
+        <button class="pagination__btn active">1</button>
+        <button class="pagination__btn">Next →</button>
+      </div>
+    </main>
+
+    <!-- ===== Case 2-1: EVENT 탭 — 이벤트 없음 (빈 상태) ===== -->
+    <main class="screen" id="case-2-1">
+
+      <!-- Type Tabs -->
+      <div class="type-tabs">
+        <button class="type-tabs__btn">🏆 Regular</button>
+        <button class="type-tabs__btn active">⚡ Event</button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state">
+        <div class="empty-state__icon">⚡</div>
+        <div class="empty-state__title">No Events Available</div>
+        <div class="empty-state__description">There are no events at the moment. Check back later!</div>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: 카테고리 없음 (빈 상태) ===== -->
+    <main class="screen" id="case-3">
+
+      <!-- Type Tabs -->
+      <div class="type-tabs">
+        <button class="type-tabs__btn active">🏆 Regular</button>
+        <button class="type-tabs__btn">⚡ Event</button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state">
+        <div class="empty-state__icon">📂</div>
+        <div class="empty-state__title">No Categories Available</div>
+        <div class="empty-state__description">There are no categories at the moment. Check back later!</div>
+      </div>
+    </main>
+
+    <!-- ===== Case 4: 잠금 카테고리 탭 시 안내 모달 ===== -->
+    <main class="screen" id="case-4">
+
+      <!-- Type Tabs -->
+      <div class="type-tabs">
+        <button class="type-tabs__btn active">🏆 Regular</button>
+        <button class="type-tabs__btn">⚡ Event</button>
+      </div>
+
+      <!-- Categories (dimmed background) -->
+      <div class="category-grid" style="opacity: 0.3; pointer-events: none;">
+        <div class="category-card">
+          <span class="category-card__icon">🏃</span>
+          <span class="category-card__name">Running</span>
+          <span class="category-card__count">4 challenges</span>
+        </div>
+        <div class="category-card">
+          <span class="category-card__icon">📚</span>
+          <span class="category-card__name">Reading</span>
+          <span class="category-card__count">3 challenges</span>
+        </div>
+        <div class="category-card category-card--locked">
+          <span class="category-card__icon">🎨</span>
+          <span class="category-card__name">Art</span>
+          <span class="category-card__lock-badge">🔒 In Progress</span>
+        </div>
+        <div class="category-card">
+          <span class="category-card__icon">🧘</span>
+          <span class="category-card__name">Meditation</span>
+          <span class="category-card__count">5 challenges</span>
+        </div>
+      </div>
+
+      <!-- Lock Modal Overlay -->
+      <div class="lock-modal">
+        <div class="lock-modal__backdrop"></div>
+        <div class="lock-modal__content">
+          <div class="lock-modal__icon">🔒</div>
+          <div class="lock-modal__message">You already have an active challenge in this category. Complete it first to start a new one.</div>
+          <button class="btn btn--primary btn--full">Go to My Challenges</button>
+          <button class="btn btn--ghost btn--full" style="margin-top: var(--space-2);">Close</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 5 (Case 6 in cases.md): 카테고리 내 챌린지 목록 (카드 있음) ===== -->
+    <main class="screen" id="case-5">
+
+      <!-- Category Header -->
+      <div class="category-header">
+        <div class="category-header__left">
+          <span class="category-header__icon">🏃</span>
+          <span class="category-header__name">Running</span>
+        </div>
+        <button class="category-header__share" onclick="document.getElementById('share-sheet-cat').classList.remove('hidden')">
+          <span class="category-header__share-icon">📤</span>
+        </button>
+      </div>
+
+      <!-- Challenge List -->
+      <div class="challenge-list">
+        <!-- FREE Challenge -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon">🏃</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">Your First Run</div>
+              <div class="challenge-card__desc">Just 3 days. Go outside and move. No distance required.</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--easy">EASY</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">3 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / day</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value challenge-card__meta-value--free">FREE</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- FREE + Fixed Reward Challenge (fixedRewardTon) -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon">🏃</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">Welcome Run</div>
+              <div class="challenge-card__desc">Complete 5 days of running and earn 0.3 GRAM reward. Free to join!</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--easy">EASY</span>
+                <span class="badge badge--reward-mid">🎁 +0.3 GRAM</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">5 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / day</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value challenge-card__meta-value--free">FREE</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Challenge 1 -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon">🏃</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">Morning Run</div>
+              <div class="challenge-card__desc">Run at least 1km every morning before 8 AM</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--easy">EASY</span>
+                <span class="badge badge--popular">🔥 POPULAR</span>
+                <span class="badge badge--reward-low">+8%</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">7 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / day</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1-5 GRAM</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+          <div class="challenge-card__spots">🔥 3 spots left</div>
+        </div>
+
+        <!-- Challenge 2 -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon">🏃</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">5K Training</div>
+              <div class="challenge-card__desc">Complete a 5K run 3 times a week for 4 weeks</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--medium">MEDIUM</span>
+                <span class="badge badge--reward-mid">+12%</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">28 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">3x / 7d</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">3-10 GRAM</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Challenge 3 -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon">🏃</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">Marathon Prep</div>
+              <div class="challenge-card__desc">Run 10km every other day to prepare for a marathon</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--hard">HARD</span>
+                <span class="badge badge--legend">👑 LEGEND</span>
+                <span class="badge badge--reward-high">🎁 +25%</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">60 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / 2d</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">5-20 GRAM</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Challenge 4 -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon">🏃</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">Evening Jog</div>
+              <div class="challenge-card__desc">Jog for 30 minutes every evening after work</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--expert">EXPERT</span>
+                <span class="badge badge--reward-low">+5%</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">21 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / day</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">2-8 GRAM</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button class="pagination__btn" disabled>← Prev</button>
+        <button class="pagination__btn active">1</button>
+        <button class="pagination__btn">2</button>
+        <button class="pagination__btn">Next →</button>
+      </div>
+    </main>
+
+    <!-- ===== Case 6 (Case 7 in cases.md): 카테고리 내 챌린지 없음 ===== -->
+    <main class="screen" id="case-6">
+
+      <!-- Category Header -->
+      <div class="category-header">
+        <div class="category-header__left">
+          <span class="category-header__icon">🍳</span>
+          <span class="category-header__name">Cooking</span>
+        </div>
+        <button class="category-header__share" onclick="document.getElementById('share-sheet-cat').classList.remove('hidden')">
+          <span class="category-header__share-icon">📤</span>
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state">
+        <div class="empty-state__icon">📋</div>
+        <div class="empty-state__title">No Challenges Available</div>
+        <div class="empty-state__description">No challenges available in this category. Check back later for new ones!</div>
+      </div>
+    </main>
+
+    <!-- ===== Case 7 (Case 10 in cases.md): 참여 불가 챌린지 카드 ===== -->
+    <main class="screen" id="case-7">
+
+      <!-- Category Header -->
+      <div class="category-header">
+        <div class="category-header__left">
+          <span class="category-header__icon">🏃</span>
+          <span class="category-header__name">Fitness & Health</span>
+        </div>
+        <button class="category-header__share" onclick="document.getElementById('share-sheet-cat').classList.remove('hidden')">
+          <span class="category-header__share-icon">📤</span>
+        </button>
+      </div>
+
+      <!-- Challenge List -->
+      <div class="challenge-list">
+        <!-- Challenge 1: 정상 카드 -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon">🏃</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">Morning Run</div>
+              <div class="challenge-card__desc">Run at least 1km every morning before 8 AM</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--easy">EASY</span>
+                <span class="badge badge--reward-low">+8%</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">30 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / day</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1-5 GRAM</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Challenge 2: FULL 카드 -->
+        <div class="challenge-card challenge-card--unavailable">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon">🏃</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">Sprint Challenge</div>
+              <div class="challenge-card__desc">High-intensity interval sprints every day for 2 weeks</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--medium">MEDIUM</span>
+                <span class="badge badge--popular">🔥 POPULAR</span>
+                <span class="badge badge--reward-mid">+12%</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">14 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / day</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">5 GRAM</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+          <div class="challenge-card__status">
+            <span class="challenge-card__status--full">FULL</span>
+          </div>
+        </div>
+
+        <!-- Challenge 3: ✓ Completed 카드 -->
+        <div class="challenge-card challenge-card--unavailable">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon">🏃</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">7-Day Streak</div>
+              <div class="challenge-card__desc">Build a 7-day running streak with daily verification</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--easy">EASY</span>
+                <span class="badge badge--reward-mid">🎁 +0.3 GRAM</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">7 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / day</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value challenge-card__meta-value--free">FREE</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+          <div class="challenge-card__status">
+            <span class="challenge-card__status--completed">✓ Completed</span>
+          </div>
+        </div>
+
+        <!-- Challenge 4: 정상 카드 -->
+        <div class="challenge-card">
+          <div class="challenge-card__top">
+            <div class="challenge-card__icon">🏃</div>
+            <div class="challenge-card__info">
+              <div class="challenge-card__name">Evening Jog</div>
+              <div class="challenge-card__desc">Jog for 30 minutes every evening after work</div>
+              <div class="challenge-card__badges">
+                <span class="badge badge--hard">HARD</span>
+                <span class="badge badge--reward-mid">+15%</span>
+              </div>
+            </div>
+          </div>
+          <div class="challenge-card__meta">
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">21 days</span>
+              <span class="challenge-card__meta-label">Duration</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">1x / day</span>
+              <span class="challenge-card__meta-label">Frequency</span>
+            </div>
+            <div class="challenge-card__meta-box">
+              <span class="challenge-card__meta-value">2-8 GRAM</span>
+              <span class="challenge-card__meta-label">Deposit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Share Bottom Sheet (카테고리 공유 바텀시트) -->
+  <div id="share-sheet-cat" class="share-overlay hidden" onclick="if(event.target===this) this.classList.add('hidden')">
+    <div class="share-sheet">
+      <div class="share-sheet__title">Share Category</div>
+      <div class="share-sheet__options">
+        <button class="share-sheet__btn share-sheet__btn--telegram" onclick="alert('WebApp.openTelegramLink called')">📤 Share to Telegram</button>
+        <button class="share-sheet__btn share-sheet__btn--copy" onclick="alert('Link copied!'); document.getElementById('share-sheet-cat').classList.add('hidden')">🔗 Copy Link</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Lock Modal close on backdrop click
+    document.querySelectorAll('.lock-modal__backdrop').forEach(backdrop => {
+      backdrop.addEventListener('click', () => {
+        // Switch to case 1 (category view)
+        document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelector('[data-case="1"]').classList.add('active');
+        document.getElementById('case-1').classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

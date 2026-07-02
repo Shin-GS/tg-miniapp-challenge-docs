@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Verification Submit - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/miniapp-nav.css">
+  <style>
+    /* ===== Verification Submit Screen Styles ===== */
+
+    /* Challenge Select Card */
+    .challenge-card {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .challenge-card:active {
+      transform: scale(0.98);
+      border-color: var(--color-primary-light);
+    }
+
+    .challenge-card__icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      background: var(--gradient-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-md);
+    }
+
+    .challenge-card__info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .challenge-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .challenge-card__name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .challenge-card__status {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
+      white-space: nowrap;
+      color: var(--color-primary);
+    }
+
+    .challenge-card__status--done {
+      color: var(--color-success-text);
+    }
+
+    /* Done state card */
+    .challenge-card--done {
+      border-color: var(--color-success-border);
+      opacity: 0.7;
+    }
+
+    .challenge-card__day {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    .challenge-card__progress {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .challenge-card__progress-bar {
+      flex: 1;
+    }
+
+    .challenge-card__progress-text {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-primary);
+      white-space: nowrap;
+    }
+
+    .challenge-card__arrow {
+      font-size: var(--font-size-base);
+      color: var(--color-text-tertiary);
+      flex-shrink: 0;
+    }
+
+    /* Guide Section */
+    .guide-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-4);
+      text-align: center;
+    }
+
+    .guide-section__challenge {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-md);
+      width: 100%;
+    }
+
+    .guide-section__challenge-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background: var(--gradient-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .guide-section__challenge-name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      text-align: left;
+    }
+
+    .guide-section__image {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-md);
+      border: 2px dashed var(--color-border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: var(--color-text-tertiary);
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .guide-section__image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .guide-section__image-hint {
+      position: absolute;
+      bottom: var(--space-2);
+      right: var(--space-2);
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-sm);
+    }
+
+    /* Guide Image Fullscreen Modal */
+    .guide-image-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.92);
+    }
+
+    .guide-image-modal.active {
+      display: flex;
+    }
+
+    .guide-image-modal__close {
+      position: absolute;
+      top: var(--space-4);
+      right: var(--space-4);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .guide-image-modal__image {
+      max-width: 90%;
+      max-height: 80vh;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+    }
+
+    .guide-section__text {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-relaxed);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-info-bg);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-info-border);
+      width: 100%;
+    }
+
+    /* Upload Section */
+    .upload-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-6);
+      padding-top: var(--space-4);
+    }
+
+    .upload-section__icon {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-md);
+      background: var(--gradient-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .upload-section__name {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      text-align: center;
+    }
+
+    .upload-section__status {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-6);
+      width: 100%;
+      border-radius: var(--radius-md);
+      border: 2px dashed var(--color-border-strong);
+      background-color: var(--color-bg-elevated);
+    }
+
+    .upload-section__status-icon {
+      font-size: 36px;
+    }
+
+    .upload-section__status-text {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+
+    /* Uploading state */
+    .upload-section__status--uploading {
+      border-color: var(--color-primary-lighter);
+      background-color: var(--color-bg);
+    }
+
+    .upload-section__status--uploading .upload-section__status-text {
+      color: var(--color-primary);
+    }
+
+    /* Uploaded state */
+    .upload-section__status--uploaded {
+      border-style: solid;
+      border-color: var(--color-success-border);
+      background: linear-gradient(to bottom right, var(--color-success-bg), var(--color-success-bg-deep));
+    }
+
+    .upload-section__status--uploaded .upload-section__status-text {
+      color: var(--color-success-text);
+      font-weight: var(--font-weight-black);
+    }
+
+    .upload-section__preview {
+      width: 100%;
+      aspect-ratio: 4/3;
+      border-radius: var(--radius-sm);
+      background-color: var(--color-bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      overflow: hidden;
+    }
+
+    /* Spinner animation */
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--color-primary-lighter);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Buttons area */
+    .btn-area {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      width: 100%;
+      margin-top: var(--space-4);
+    }
+
+    /* Success Section (Step 4) */
+    .success-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-4);
+      padding-top: var(--space-8);
+      text-align: center;
+    }
+
+    .success-section__icon {
+      font-size: 64px;
+    }
+
+    .success-section__title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .success-section__description {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-relaxed);
+    }
+
+    .success-section__time {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-tertiary);
+      padding: var(--space-2) var(--space-4);
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-full);
+    }
+
+    /* Give Up button style */
+    .btn--give-up {
+      background-color: transparent;
+      color: var(--color-danger);
+      font-weight: var(--font-weight-bold);
+      font-size: var(--font-size-sm);
+      text-transform: uppercase;
+    }
+
+    /* Modal warning text */
+    .modal__warning {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-warning-bg);
+      border: 1px solid var(--color-warning-border);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-warning-text);
+      line-height: var(--line-height-normal);
+    }
+
+    .modal__deposit-info {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-sm);
+      text-align: center;
+    }
+
+    .modal__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      text-align: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .modal__buttons {
+      display: flex;
+      gap: var(--space-3);
+      margin-top: var(--space-4);
+    }
+
+    .modal__buttons .btn {
+      flex: 1;
+    }
+
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* External Link Button */
+    .external-link-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--color-border);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      box-shadow: var(--shadow-sm);
+    }
+    .external-link-btn:active {
+      transform: scale(0.98);
+      border-color: var(--color-primary-light);
+    }
+    .external-link-btn__arrow {
+      font-size: var(--font-size-base);
+    }
+  </style>
+</head>
+<body>
+  <!-- Page Navigation -->
+  <nav class="page-nav">
+    <a href="home.html">홈</a>
+    <a href="challenge-list.html">챌린지 목록</a>
+    <a href="challenge-detail.html">챌린지 상세</a>
+    <a href="my-challenges.html">내 챌린지</a>
+    <a class="active" href="verification-submit.html">인증 제출</a>
+    <a href="verification-result.html">인증 결과</a>
+    <a href="wallet.html">지갑</a>
+    <a href="withdrawal-request.html">출금</a>
+    <a href="leaderboard.html">리더보드</a>
+    <a href="invite-friends.html">초대</a>
+    <a href="settings.html">설정</a>
+    <a href="notice-list.html">공지</a>
+    <a href="levels.html">레벨</a>
+    <a href="faq.html">FAQ</a>
+    <a href="telegram-gate.html">TG 게이트</a>
+  </nav>
+
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">선택</button>
+    <button data-case="2">모두 완료</button>
+    <button data-case="3">가이드</button>
+    <button data-case="9">참여+가이드</button>
+    <button data-case="4">업로드</button>
+    <button data-case="5">업로드 중</button>
+    <button data-case="6">업로드 완료</button>
+    <button data-case="7">포기</button>
+    <button data-case="8">제출 완료</button>
+  </nav>
+
+  <div class="mobile-container">
+
+    <!-- ===== Case 1: Step 1 - Challenge Select ===== -->
+    <main class="screen active" id="case-1">
+
+      <div class="space-y-4" style="padding: var(--space-4);">
+        <!-- Challenge Card 1 (NOW) -->
+        <div class="challenge-card" data-action="select-challenge">
+          <div class="challenge-card__icon">🏃</div>
+          <div class="challenge-card__info">
+            <div class="challenge-card__header">
+              <span class="challenge-card__name">Morning Run</span>
+              <span class="challenge-card__status">🔵 Now</span>
+            </div>
+            <span class="challenge-card__day">Day 5 of 30</span>
+            <div class="challenge-card__progress">
+              <div class="progress challenge-card__progress-bar">
+                <div class="progress__bar" style="width: 67%"></div>
+              </div>
+              <span class="challenge-card__progress-text">67%</span>
+            </div>
+          </div>
+          <span class="challenge-card__arrow">›</span>
+        </div>
+
+        <!-- Challenge Card 2 (DONE) -->
+        <div class="challenge-card challenge-card--done" data-action="select-challenge">
+          <div class="challenge-card__icon">📖</div>
+          <div class="challenge-card__info">
+            <div class="challenge-card__header">
+              <span class="challenge-card__name">Read 30 Minutes</span>
+              <span class="challenge-card__status challenge-card__status--done">✅ Done</span>
+            </div>
+            <span class="challenge-card__day">Day 12 of 21</span>
+            <div class="challenge-card__progress">
+              <div class="progress challenge-card__progress-bar">
+                <div class="progress__bar progress__bar--success" style="width: 85%"></div>
+              </div>
+              <span class="challenge-card__progress-text">85%</span>
+            </div>
+          </div>
+          <span class="challenge-card__arrow">›</span>
+        </div>
+
+        <!-- Challenge Card 3 (ANYTIME) -->
+        <div class="challenge-card" data-action="select-challenge">
+          <div class="challenge-card__icon">🧘</div>
+          <div class="challenge-card__info">
+            <div class="challenge-card__header">
+              <span class="challenge-card__name">Daily Meditation</span>
+              <span class="challenge-card__status">Anytime</span>
+            </div>
+            <span class="challenge-card__day">Day 3 of 14</span>
+            <div class="challenge-card__progress">
+              <div class="progress challenge-card__progress-bar">
+                <div class="progress__bar progress__bar--warning" style="width: 43%"></div>
+              </div>
+              <span class="challenge-card__progress-text">43%</span>
+            </div>
+          </div>
+          <span class="challenge-card__arrow">›</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: Step 1 - No Active Participations (Fallback) ===== -->
+    <main class="screen" id="case-2">
+
+      <div class="empty-state">
+        <span class="empty-state__icon">🎉</span>
+        <h2 class="empty-state__title">All Done!</h2>
+        <p class="empty-state__description">You've completed all missions for today. Come back tomorrow!</p>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: Step 2 - Photo Guide ===== -->
+    <main class="screen" id="case-3">
+
+      <div style="padding: var(--space-4);">
+        <div class="guide-section">
+          <!-- Challenge Info -->
+          <div class="guide-section__challenge">
+            <div class="guide-section__challenge-icon">🏃</div>
+            <span class="guide-section__challenge-name">Morning Run</span>
+          </div>
+
+          <!-- External Link Button (externalUrl 있을 때만 표시) -->
+          <button class="external-link-btn" onclick="window.open('https://instagram.com/DefyTON_official', '_blank')">
+            <span>📷</span>
+            <span>Open Instagram</span>
+            <span class="external-link-btn__arrow">↗</span>
+          </button>
+
+          <!-- Guide Image Placeholder -->
+          <div class="guide-section__image" id="guide-image-trigger">
+            <img src="https://via.placeholder.com/400x600/1a1a2e/ffffff?text=Guide+Image+(Portrait)" alt="Verification guide">
+            <span class="guide-section__image-hint">Tap to enlarge</span>
+          </div>
+
+          <!-- Guide Text -->
+          <div class="guide-section__text">
+            📸 Take a photo that clearly shows your activity. Make sure the photo is taken today and shows you actively running outdoors.
+          </div>
+
+          <!-- Ready Button -->
+          <div class="btn-area">
+            <button class="btn btn--primary btn--full">Ready to Upload Photo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guide Image Fullscreen Modal -->
+      <div class="guide-image-modal" id="guide-image-modal">
+        <button class="guide-image-modal__close" id="guide-image-modal-close">✕</button>
+        <img class="guide-image-modal__image" src="https://via.placeholder.com/400x600/1a1a2e/ffffff?text=Guide+Image+(Portrait)" alt="Verification guide full">
+      </div>
+    </main>
+
+    <!-- ===== Case 9: Step 2 - Joined + Photo Guide (참여 직후 진입) ===== -->
+    <main class="screen" id="case-9">
+
+      <div style="padding: var(--space-4);">
+        <div class="guide-section">
+          <!-- 참여 성공 배너 -->
+          <div style="width: 100%; padding: var(--space-4); background: var(--color-success-bg); border: 2px solid var(--color-success-border); border-radius: var(--radius-md); text-align: center; margin-bottom: var(--space-4); animation: fadeInSlide 0.3s ease-out;">
+            <span style="font-size: 24px; display: block;">✅</span>
+            <div style="font-size: 16px; font-weight: 900; color: var(--color-success-text); margin-top: 4px;">You're In!</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--color-success-text); margin-top: 4px; opacity: 0.9;">
+              📸 Take your photo now to earn your reward
+            </div>
+            <div style="font-size: 12px; font-weight: 600; color: var(--color-success-text); margin-top: 4px; opacity: 0.7;">
+              "Morning Run"
+            </div>
+          </div>
+
+          <!-- Challenge Info -->
+          <div class="guide-section__challenge">
+            <div class="guide-section__challenge-icon">🏃</div>
+            <span class="guide-section__challenge-name">Morning Run</span>
+          </div>
+
+          <!-- External Link Button (externalUrl 있을 때만 표시) -->
+          <button class="external-link-btn" onclick="window.open('https://instagram.com/DefyTON_official', '_blank')">
+            <span>📷</span>
+            <span>Open Instagram</span>
+            <span class="external-link-btn__arrow">↗</span>
+          </button>
+
+          <!-- Guide Image Placeholder -->
+          <div class="guide-section__image">
+            <img src="https://via.placeholder.com/400x600/1a1a2e/ffffff?text=Guide+Image+(Portrait)" alt="Verification guide">
+            <span class="guide-section__image-hint">Tap to enlarge</span>
+          </div>
+
+          <!-- Guide Text -->
+          <div class="guide-section__text">
+            📸 Take a photo that clearly shows your activity. Make sure the photo is taken today and shows you actively running outdoors.
+          </div>
+
+          <!-- Ready Button (justJoined) -->
+          <div class="btn-area">
+            <button class="btn btn--primary btn--full">📸 Take Photo Now</button>
+            <p style="font-size: 12px; text-align: center; color: var(--color-text-tertiary); margin-top: 8px;">You can also do this later — we'll remind you!</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 4: Step 3 - Upload (Waiting) ===== -->
+    <main class="screen" id="case-4">
+
+      <div style="padding: var(--space-4);">
+        <div class="upload-section">
+          <!-- Challenge Icon -->
+          <div class="upload-section__icon">🏃</div>
+          <span class="upload-section__name">Morning Run</span>
+
+          <!-- Upload Area (Empty) -->
+          <div class="upload-section__status">
+            <span class="upload-section__status-icon">📤</span>
+            <span class="upload-section__status-text">Tap below to upload your photo</span>
+          </div>
+
+          <!-- Buttons -->
+          <div class="btn-area">
+            <button class="btn btn--primary btn--full" id="btn-upload">Upload Photo</button>
+            <button class="btn btn--give-up btn--full" id="btn-giveup-trigger">포기</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 5: Step 3 - Uploading ===== -->
+    <main class="screen" id="case-5">
+
+      <div style="padding: var(--space-4);">
+        <div class="upload-section">
+          <!-- Challenge Icon -->
+          <div class="upload-section__icon">🏃</div>
+          <span class="upload-section__name">Morning Run</span>
+
+          <!-- Upload Area (Uploading) -->
+          <div class="upload-section__status upload-section__status--uploading">
+            <div class="spinner"></div>
+            <span class="upload-section__status-text">📤 Uploading...</span>
+          </div>
+
+          <!-- Buttons (Disabled) -->
+          <div class="btn-area">
+            <button class="btn btn--primary btn--full" disabled>Uploading...</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 6: Step 3 - Uploaded (Submit Ready) ===== -->
+    <main class="screen" id="case-6">
+
+      <div style="padding: var(--space-4);">
+        <div class="upload-section">
+          <!-- Challenge Icon -->
+          <div class="upload-section__icon">🏃</div>
+          <span class="upload-section__name">Morning Run</span>
+
+          <!-- Upload Area (Uploaded) -->
+          <div class="upload-section__status upload-section__status--uploaded">
+            <span class="upload-section__status-icon">✓</span>
+            <span class="upload-section__status-text">Photo Uploaded!</span>
+          </div>
+
+          <!-- Preview -->
+          <div class="upload-section__preview">🖼️</div>
+
+          <!-- Buttons -->
+          <div class="btn-area">
+            <button class="btn btn--primary btn--full" id="btn-submit">Submit for Verification</button>
+            <button class="btn btn--secondary btn--full btn--sm">Re-upload</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 7: Step 3 - Give Up Modal ===== -->
+    <main class="screen" id="case-7">
+
+      <div style="padding: var(--space-4);">
+        <div class="upload-section">
+          <!-- Challenge Icon -->
+          <div class="upload-section__icon">🏃</div>
+          <span class="upload-section__name">Morning Run</span>
+
+          <!-- Upload Area (Empty) -->
+          <div class="upload-section__status">
+            <span class="upload-section__status-icon">📤</span>
+            <span class="upload-section__status-text">Tap below to upload your photo</span>
+          </div>
+
+          <!-- Buttons -->
+          <div class="btn-area">
+            <button class="btn btn--primary btn--full">Upload Photo</button>
+            <button class="btn btn--give-up btn--full">포기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Give Up Modal -->
+      <div class="modal" id="giveup-modal">
+        <div class="modal__backdrop" data-action="close-modal"></div>
+        <div class="modal__content">
+          <h3 class="modal__title">Are you sure you want to give up?</h3>
+
+          <div class="space-y-4">
+            <div class="modal__warning">
+              ⚠️ You will lose 10% of your deposit
+            </div>
+
+            <div class="modal__deposit-info">
+              Deposit: 5.0 GRAM → Penalty: 0.5 GRAM
+            </div>
+          </div>
+
+          <div class="modal__buttons">
+            <button class="btn btn--secondary btn--sm" data-action="close-modal">Cancel</button>
+            <button class="btn btn--danger btn--sm">포기</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 8: Step 4 - Submitted (PENDING) ===== -->
+    <main class="screen" id="case-8">
+
+      <div style="padding: var(--space-4);">
+        <div class="success-section">
+          <span class="success-section__icon">✅</span>
+          <h2 class="success-section__title">Verification Submitted!</h2>
+          <p class="success-section__description">
+            You'll be notified when the result is ready.
+          </p>
+          <span class="success-section__time">⏱ Usually takes less than 1 minute</span>
+
+          <!-- Buttons -->
+          <div class="btn-area" style="margin-top: var(--space-8);">
+            <button class="btn btn--primary btn--full">🔍 Check Result</button>
+            <button class="btn btn--secondary btn--full">📸 Verify Next Challenge</button>
+            <button class="btn btn--ghost btn--full">🏠 Back to Home</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // ===== Case Switcher =====
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // ===== Challenge Card Click Feedback =====
+    document.querySelectorAll('[data-action="select-challenge"]').forEach(card => {
+      card.addEventListener('click', () => {
+        card.style.borderColor = 'var(--color-primary-light)';
+        card.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+          card.style.borderColor = '';
+          card.style.transform = '';
+        }, 200);
+      });
+    });
+
+    // ===== Upload Button Simulation =====
+    const btnUpload = document.getElementById('btn-upload');
+    if (btnUpload) {
+      btnUpload.addEventListener('click', () => {
+        btnUpload.textContent = 'Uploading...';
+        btnUpload.disabled = true;
+        setTimeout(() => {
+          btnUpload.textContent = 'Upload Photo';
+          btnUpload.disabled = false;
+        }, 2000);
+      });
+    }
+
+    // ===== Submit Button Simulation =====
+    const btnSubmit = document.getElementById('btn-submit');
+    if (btnSubmit) {
+      btnSubmit.addEventListener('click', () => {
+        btnSubmit.textContent = 'Submitting...';
+        btnSubmit.disabled = true;
+        setTimeout(() => {
+          btnSubmit.textContent = 'Submit for Verification';
+          btnSubmit.disabled = false;
+        }, 1500);
+      });
+    }
+
+    // ===== Give Up Modal Open =====
+    const btnGiveupTrigger = document.getElementById('btn-giveup-trigger');
+    if (btnGiveupTrigger) {
+      btnGiveupTrigger.addEventListener('click', () => {
+        // Switch to Case 7 to show modal
+        document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const case7Btn = document.querySelector('[data-case="7"]');
+        case7Btn.classList.add('active');
+        document.getElementById('case-7').classList.add('active');
+      });
+    }
+
+    // ===== Modal Close =====
+    document.querySelectorAll('[data-action="close-modal"]').forEach(el => {
+      el.addEventListener('click', () => {
+        const modal = el.closest('.modal');
+        if (modal) {
+          modal.hidden = true;
+        }
+      });
+    });
+
+    // ===== Header Back Button Feedback =====
+    document.querySelectorAll('.header__back').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.style.opacity = '0.5';
+        setTimeout(() => {
+          btn.style.opacity = '';
+        }, 150);
+      });
+    });
+
+    // ===== Guide Image Modal =====
+    const guideImageTrigger = document.getElementById('guide-image-trigger');
+    const guideImageModal = document.getElementById('guide-image-modal');
+    const guideImageModalClose = document.getElementById('guide-image-modal-close');
+
+    if (guideImageTrigger && guideImageModal) {
+      guideImageTrigger.addEventListener('click', () => {
+        guideImageModal.classList.add('active');
+      });
+      guideImageModalClose.addEventListener('click', () => {
+        guideImageModal.classList.remove('active');
+      });
+      guideImageModal.addEventListener('click', (e) => {
+        if (e.target === guideImageModal) {
+          guideImageModal.classList.remove('active');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Docs</title>
+    <style>
+        :root {
+            --color-bg: #f9fafb;
+            --color-card: #ffffff;
+            --color-border: #e5e7eb;
+            --color-text: #111827;
+            --color-text-secondary: #6b7280;
+            --color-accent: #3b82f6;
+            --color-accent-dim: #dbeafe;
+            --color-done: #10b981;
+            --color-draft: #f59e0b;
+            --color-outdated: #ef4444;
+            --color-todo: #6b7280;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            padding: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            margin-bottom: 8px;
+        }
+
+        .back-link:hover { color: var(--color-text); }
+
+        .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .header p { color: var(--color-text-secondary); font-size: 14px; }
+
+        /* Category Sections */
+        .category {
+            margin-bottom: 28px;
+        }
+
+        .category-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-count {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--color-text-secondary);
+        }
+
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--color-text);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+
+        .item:hover {
+            border-color: var(--color-accent);
+            background: var(--color-accent-dim);
+            color: var(--color-accent);
+        }
+
+        .item-icon {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            flex-shrink: 0;
+        }
+
+        .item:hover .item-icon { color: var(--color-accent); }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        .status-done { background: var(--color-done); }
+        .status-draft { background: var(--color-draft); }
+        .status-outdated { background: var(--color-outdated); }
+        .status-todo { background: var(--color-todo); }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--color-border);
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            .item-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="../index.html" class="back-link">← Docs Hub</a>
+        <h1>Design Docs</h1>
+        <p>화면을 클릭하면 디자인 명세가 새 탭으로 열립니다.</p>
+    </div>
+    <div id="content"></div>
+    <div class="legend">
+        <div class="legend-item"><span class="status-dot status-done"></span> Done</div>
+        <div class="legend-item"><span class="status-dot status-draft"></span> Draft</div>
+        <div class="legend-item"><span class="status-dot status-outdated"></span> Outdated</div>
+        <div class="legend-item"><span class="status-dot status-todo"></span> Todo</div>
+    </div>
+
+    <script src="shared/design-manifest.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        var manifest = window.__DESIGN_MANIFEST__;
+        var content = document.getElementById('content');
+
+        if (!manifest) {
+            content.innerHTML = '<div style="text-align:center;padding:60px;color:#6b7280;">매니페스트를 불러올 수 없습니다.</div>';
+            return;
+        }
+
+        var html = '';
+        Object.keys(manifest).forEach(function (key) {
+            var cat = manifest[key];
+            html += '<div class="category">';
+            html += '<div class="category-title">' + cat.label + ' <span class="category-count">(' + cat.items.length + ')</span></div>';
+            html += '<div class="item-grid">';
+
+            cat.items.forEach(function (item) {
+                var href = item.cssOnly ? item.file + '.css' : item.file + '.html';
+                html += '<a class="item" href="' + href + '" target="_blank" rel="noopener">';
+                html += '<span class="item-icon">' + (item.cssOnly ? '🎨' : '📄') + '</span>';
+                html += '<span>' + item.name + '</span>';
+                html += '<span class="status-dot status-' + item.status + '"></span>';
+                html += '</a>';
+            });
+
+            html += '</div></div>';
+        });
+
+        content.innerHTML = html;
+    })();
+    </script>
+</body>
+</html>

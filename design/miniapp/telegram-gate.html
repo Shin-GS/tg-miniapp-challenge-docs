@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Open in Telegram - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/miniapp-nav.css">
+  <style>
+    /* ===== Telegram Gate Screen ===== */
+
+    .gate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - var(--page-nav-height, 36px));
+      padding: var(--space-6);
+      text-align: center;
+    }
+
+    .gate__icon {
+      font-size: 72px;
+      margin-bottom: var(--space-6);
+    }
+
+    .gate__title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin-bottom: var(--space-3);
+    }
+
+    .gate__description {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-relaxed);
+      margin-bottom: var(--space-8);
+      max-width: 300px;
+    }
+
+    .gate__cta {
+      width: 100%;
+      max-width: 300px;
+      margin-bottom: var(--space-10);
+    }
+
+    .gate__footer {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-tertiary);
+    }
+
+    .gate__footer a {
+      color: var(--color-primary);
+      font-weight: var(--font-weight-bold);
+      text-decoration: none;
+    }
+
+    .gate__footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Page Navigation -->
+  <nav class="page-nav">
+    <a href="home.html">홈</a>
+    <a href="challenge-list.html">챌린지 목록</a>
+    <a href="challenge-detail.html">챌린지 상세</a>
+    <a href="my-challenges.html">내 챌린지</a>
+    <a href="verification-submit.html">인증 제출</a>
+    <a href="verification-result.html">인증 결과</a>
+    <a href="wallet.html">지갑</a>
+    <a href="withdrawal-request.html">출금</a>
+    <a href="leaderboard.html">리더보드</a>
+    <a href="invite-friends.html">초대</a>
+    <a href="settings.html">설정</a>
+    <a href="notice-list.html">공지</a>
+    <a href="levels.html">레벨</a>
+    <a href="faq.html">FAQ</a>
+    <a class="active" href="telegram-gate.html">TG 게이트</a>
+  </nav>
+
+  <div class="mobile-container">
+    <!-- No case-switcher: single screen -->
+
+    <main class="gate">
+      <!-- Icon -->
+      <div class="gate__icon">📱</div>
+
+      <!-- Title -->
+      <h1 class="gate__title">Open in Telegram</h1>
+
+      <!-- Description -->
+      <p class="gate__description">
+        DefyTON works best inside Telegram. Open the app in Telegram to get started.
+      </p>
+
+      <!-- CTA Button -->
+      <div class="gate__cta">
+        <a href="https://t.me/BOT_USERNAME/app" class="btn btn--primary btn--full btn--lg">
+          Open in Telegram
+        </a>
+      </div>
+
+      <!-- Footer helper text -->
+      <p class="gate__footer">
+        Don't have Telegram? <a href="https://telegram.org/apps" target="_blank" rel="noopener">Download here</a>
+      </p>
+    </main>
+  </div>
+</body>
+</html>

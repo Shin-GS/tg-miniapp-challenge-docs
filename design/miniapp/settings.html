@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Settings - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/miniapp-nav.css">
+  <style>
+    /* ===== Settings Screen Styles ===== */
+
+    /* Settings List */
+    .settings-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border-bottom: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+      min-height: 52px;
+    }
+
+    .settings-item:first-child {
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+
+    .settings-item:last-child {
+      border-radius: 0 0 var(--radius-md) var(--radius-md);
+      border-bottom: none;
+    }
+
+    .settings-item:only-child {
+      border-radius: var(--radius-md);
+      border-bottom: none;
+    }
+
+    .settings-item:active {
+      background-color: var(--color-bg-elevated);
+    }
+
+    .settings-item__icon {
+      font-size: 20px;
+      width: 28px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .settings-item__label {
+      flex: 1;
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+    }
+
+    .settings-item__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      margin-right: var(--space-2);
+    }
+
+    .settings-item__arrow {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-tertiary);
+      flex-shrink: 0;
+    }
+
+    /* Settings Group */
+    .settings-group {
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    /* Toggle Switch */
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .toggle__input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle__slider {
+      position: absolute;
+      inset: 0;
+      background-color: var(--color-border-strong);
+      border-radius: var(--radius-full);
+      transition: background-color var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .toggle__slider::before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--color-bg);
+      border-radius: 50%;
+      transition: transform var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .toggle__input:checked + .toggle__slider {
+      background-color: var(--color-success);
+    }
+
+    .toggle__input:checked + .toggle__slider::before {
+      transform: translateX(20px);
+    }
+
+    /* Edit Name Section */
+    .edit-name {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .edit-name__hint {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+    }
+
+    .edit-name__actions {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    /* Selection List (Country / Timezone) */
+    .selection-screen {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .selection-list {
+      display: flex;
+      flex-direction: column;
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .selection-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+      min-height: 48px;
+    }
+
+    .selection-item:last-child {
+      border-bottom: none;
+    }
+
+    .selection-item:active {
+      background-color: var(--color-bg-elevated);
+    }
+
+    .selection-item__label {
+      flex: 1;
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+    }
+
+    .selection-item__check {
+      font-size: var(--font-size-base);
+      color: var(--color-success);
+      font-weight: var(--font-weight-bold);
+    }
+
+    .selection-item--selected {
+      background-color: var(--color-success-bg);
+    }
+
+    .selection-item--selected .selection-item__label {
+      font-weight: var(--font-weight-bold);
+      color: var(--color-success-text);
+    }
+
+    /* Search Input */
+    .search-input {
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text);
+      transition: border-color var(--transition-fast);
+      min-height: 44px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .search-input::placeholder {
+      color: var(--color-text-tertiary);
+    }
+  </style>
+</head>
+<body>
+  <!-- Page Navigation -->
+  <nav class="page-nav">
+    <a href="home.html">홈</a>
+    <a href="challenge-list.html">챌린지 목록</a>
+    <a href="challenge-detail.html">챌린지 상세</a>
+    <a href="my-challenges.html">내 챌린지</a>
+    <a href="verification-submit.html">인증 제출</a>
+    <a href="verification-result.html">인증 결과</a>
+    <a href="wallet.html">지갑</a>
+    <a href="withdrawal-request.html">출금</a>
+    <a href="leaderboard.html">리더보드</a>
+    <a href="invite-friends.html">초대</a>
+    <a class="active" href="settings.html">설정</a>
+    <a href="notice-list.html">공지</a>
+    <a href="levels.html">레벨</a>
+    <a href="faq.html">FAQ</a>
+    <a href="telegram-gate.html">TG 게이트</a>
+  </nav>
+
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">기본</button>
+    <button data-case="2">이름 수정</button>
+    <button data-case="3">국가</button>
+    <button data-case="4">타임존</button>
+  </nav>
+
+  <div class="mobile-container">
+
+    <!-- ===== Case 1: 기본 상태 (메뉴 리스트) ===== -->
+    <main class="screen active" id="case-1">
+      <div style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);" class="space-y-4">
+        <!-- Settings Group: Main -->
+        <div class="settings-group">
+          <div class="settings-item">
+            <span class="settings-item__icon">🔔</span>
+            <span class="settings-item__label">Notifications</span>
+            <label class="toggle">
+              <input type="checkbox" class="toggle__input" checked>
+              <span class="toggle__slider"></span>
+            </label>
+          </div>
+          <div class="settings-item" data-action="edit-name">
+            <span class="settings-item__icon">✏️</span>
+            <span class="settings-item__label">Display Name</span>
+            <span class="settings-item__value">Alex</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+          <div class="settings-item" data-action="country">
+            <span class="settings-item__icon">🌍</span>
+            <span class="settings-item__label">Country</span>
+            <span class="settings-item__value">South Korea</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+          <div class="settings-item" data-action="timezone">
+            <span class="settings-item__icon">🕐</span>
+            <span class="settings-item__label">Timezone</span>
+            <span class="settings-item__value">Asia/Seoul</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+        </div>
+
+        <!-- Settings Group: Help & Support -->
+        <div class="settings-group">
+          <div class="settings-item" data-action="add-to-home">
+            <span class="settings-item__icon">📱</span>
+            <span class="settings-item__label">Add to Home Screen</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+          <div class="settings-item" data-action="faq">
+            <span class="settings-item__icon">📖</span>
+            <span class="settings-item__label">FAQ</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+          <div class="settings-item" data-action="contact">
+            <span class="settings-item__icon">💬</span>
+            <span class="settings-item__label">Contact Support</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+          <div class="settings-item" data-action="bug">
+            <span class="settings-item__icon">🐛</span>
+            <span class="settings-item__label">Report a Bug</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+        </div>
+
+        <!-- Settings Group: Legal -->
+        <div class="settings-group">
+          <div class="settings-item" data-action="terms">
+            <span class="settings-item__icon">📋</span>
+            <span class="settings-item__label">Terms of Service</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+          <div class="settings-item" data-action="privacy">
+            <span class="settings-item__icon">🔒</span>
+            <span class="settings-item__label">Privacy Policy</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: Display Name 편집 ===== -->
+    <main class="screen" id="case-2">
+      <div style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);" class="space-y-4">
+        <div class="section-header">Edit Display Name</div>
+
+        <div class="edit-name">
+          <input type="text" class="input" value="Alex" maxlength="30" placeholder="Enter your name" id="name-input">
+          <span class="edit-name__hint">Max 30 characters</span>
+          <div class="edit-name__actions">
+            <button class="btn btn--primary btn--sm" style="flex: 1;" id="save-name-btn">SAVE</button>
+            <button class="btn btn--secondary btn--sm" style="flex: 1;" id="cancel-name-btn">CANCEL</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: Country 선택 ===== -->
+    <main class="screen" id="case-3">
+      <div style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);" class="space-y-4">
+        <div class="section-header">Select Country</div>
+
+        <div class="selection-screen">
+          <input type="text" class="search-input" placeholder="🔍 Search country..." id="country-search">
+
+          <div class="selection-list" id="country-list">
+            <div class="selection-item" data-country="FR">
+              <span class="selection-item__label">🇫🇷 France</span>
+            </div>
+            <div class="selection-item" data-country="DE">
+              <span class="selection-item__label">🇩🇪 Germany</span>
+            </div>
+            <div class="selection-item" data-country="JP">
+              <span class="selection-item__label">🇯🇵 Japan</span>
+            </div>
+            <div class="selection-item selection-item--selected" data-country="KR">
+              <span class="selection-item__label">🇰🇷 South Korea</span>
+              <span class="selection-item__check">✓</span>
+            </div>
+            <div class="selection-item" data-country="GB">
+              <span class="selection-item__label">🇬🇧 United Kingdom</span>
+            </div>
+            <div class="selection-item" data-country="US">
+              <span class="selection-item__label">🇺🇸 United States</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 4: Timezone 선택 ===== -->
+    <main class="screen" id="case-4">
+      <div style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);" class="space-y-4">
+        <div class="section-header">Select Timezone</div>
+
+        <div class="selection-screen">
+          <input type="text" class="search-input" placeholder="🔍 Search timezone..." id="timezone-search">
+
+          <div class="selection-list" id="timezone-list">
+            <div class="selection-item selection-item--selected" data-tz="Asia/Seoul">
+              <span class="selection-item__label">Asia/Seoul (UTC+9)</span>
+              <span class="selection-item__check">✓</span>
+            </div>
+            <div class="selection-item" data-tz="Asia/Tokyo">
+              <span class="selection-item__label">Asia/Tokyo (UTC+9)</span>
+            </div>
+            <div class="selection-item" data-tz="America/New_York">
+              <span class="selection-item__label">America/New_York (UTC-5)</span>
+            </div>
+            <div class="selection-item" data-tz="Europe/London">
+              <span class="selection-item__label">Europe/London (UTC+0)</span>
+            </div>
+            <div class="selection-item" data-tz="Europe/Berlin">
+              <span class="selection-item__label">Europe/Berlin (UTC+1)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Toggle switch interaction
+    document.querySelectorAll('.toggle__input').forEach(toggle => {
+      toggle.addEventListener('change', () => {
+        // Visual feedback only (no API call in design spec)
+      });
+    });
+  </script>
+</body>
+</html>

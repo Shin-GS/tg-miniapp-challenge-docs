@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Levels - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/miniapp-nav.css">
+  <style>
+    /* ===== Levels Screen Styles ===== */
+
+    /* Current Level Card */
+    .level-hero {
+      background: var(--color-primary-gradient);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .level-hero__title {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-white);
+      line-height: var(--line-height-tight);
+    }
+
+    .level-hero__ton {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-bold);
+      color: rgba(255, 255, 255, 0.9);
+      margin-top: var(--space-2);
+    }
+
+    .level-hero__progress {
+      margin-top: var(--space-4);
+      width: 100%;
+      height: 10px;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .level-hero__progress-bar {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: var(--gradient-yellow);
+      transition: width var(--transition-normal);
+    }
+
+    .level-hero__next {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: var(--space-3);
+    }
+
+    /* Level List */
+    .level-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .level-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      background-color: var(--color-bg-card);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .level-item--current {
+      background: var(--gradient-blue);
+      border: 2px solid transparent;
+      box-shadow: var(--shadow-md);
+    }
+
+    .level-item--passed {
+      opacity: 0.6;
+    }
+
+    .level-item__left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .level-item__name {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .level-item--current .level-item__name {
+      color: var(--color-text-white);
+    }
+
+    .level-item__range {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    .level-item--current .level-item__range {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .level-item__right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .level-item__fee {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+
+    .level-item--current .level-item__fee {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .level-item__check {
+      font-size: var(--font-size-base);
+      color: var(--color-success);
+    }
+
+    .level-item__badge {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--space-1) var(--space-3);
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-black);
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      background-color: rgba(255, 255, 255, 0.25);
+      color: var(--color-text-white);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body>
+  <!-- Page Navigation -->
+  <nav class="page-nav">
+    <a href="home.html">홈</a>
+    <a href="challenge-list.html">챌린지 목록</a>
+    <a href="challenge-detail.html">챌린지 상세</a>
+    <a href="my-challenges.html">내 챌린지</a>
+    <a href="verification-submit.html">인증 제출</a>
+    <a href="verification-result.html">인증 결과</a>
+    <a href="wallet.html">지갑</a>
+    <a href="withdrawal-request.html">출금</a>
+    <a href="leaderboard.html">리더보드</a>
+    <a href="invite-friends.html">초대</a>
+    <a href="settings.html">설정</a>
+    <a href="notice-list.html">공지</a>
+    <a class="active" href="levels.html">레벨</a>
+    <a href="faq.html">FAQ</a>
+    <a href="telegram-gate.html">TG 게이트</a>
+  </nav>
+
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">레벨 3 (중간)</button>
+    <button data-case="2">레벨 0 (신규)</button>
+    <button data-case="3">레벨 10 (최고)</button>
+  </nav>
+
+  <div class="mobile-container">
+
+    <!-- ===== Case 1: Level 3 — 기본 상태 (중간 레벨) ===== -->
+    <main class="screen active" id="case-1">
+      <!-- Current Level Card -->
+      <div class="level-hero">
+        <div class="level-hero__title">Level 3</div>
+        <div class="level-hero__ton">10.5 GRAM</div>
+        <div class="level-hero__progress">
+          <div class="level-hero__progress-bar" style="width: 43.75%;"></div>
+        </div>
+        <div class="level-hero__next">Next Level: 4.5 GRAM needed</div>
+      </div>
+
+      <!-- Level List -->
+      <div class="section-header mt-6">All Levels</div>
+      <div class="level-list">
+        <!-- Level 0 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 0</span>
+            <span class="level-item__range">0 - 0.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 10%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 1 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 1</span>
+            <span class="level-item__range">1 - 2.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 9%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 2 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 2</span>
+            <span class="level-item__range">3 - 6.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 8%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 3 — current -->
+        <div class="level-item level-item--current">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 3</span>
+            <span class="level-item__range">7 - 14.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 7%</span>
+            <span class="level-item__badge">CURRENT</span>
+          </div>
+        </div>
+        <!-- Level 4 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 4</span>
+            <span class="level-item__range">15 - 29.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 6%</span>
+          </div>
+        </div>
+        <!-- Level 5 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 5</span>
+            <span class="level-item__range">30 - 59.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 5%</span>
+          </div>
+        </div>
+        <!-- Level 6 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 6</span>
+            <span class="level-item__range">60 - 119.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 4%</span>
+          </div>
+        </div>
+        <!-- Level 7 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 7</span>
+            <span class="level-item__range">120 - 249.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 3%</span>
+          </div>
+        </div>
+        <!-- Level 8 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 8</span>
+            <span class="level-item__range">250 - 499.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 2%</span>
+          </div>
+        </div>
+        <!-- Level 9 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 9</span>
+            <span class="level-item__range">500 - 999.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 1%</span>
+          </div>
+        </div>
+        <!-- Level 10 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 10</span>
+            <span class="level-item__range">1,000+ GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 0%</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: Level 0 — 신규 사용자 ===== -->
+    <main class="screen" id="case-2">
+      <!-- Current Level Card -->
+      <div class="level-hero">
+        <div class="level-hero__title">Level 0</div>
+        <div class="level-hero__ton">0 GRAM</div>
+        <div class="level-hero__progress">
+          <div class="level-hero__progress-bar" style="width: 0%;"></div>
+        </div>
+        <div class="level-hero__next">Next Level: 1 GRAM needed</div>
+      </div>
+
+      <!-- Level List -->
+      <div class="section-header mt-6">All Levels</div>
+      <div class="level-list">
+        <!-- Level 0 — current -->
+        <div class="level-item level-item--current">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 0</span>
+            <span class="level-item__range">0 - 0.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 10%</span>
+            <span class="level-item__badge">CURRENT</span>
+          </div>
+        </div>
+        <!-- Level 1 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 1</span>
+            <span class="level-item__range">1 - 2.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 9%</span>
+          </div>
+        </div>
+        <!-- Level 2 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 2</span>
+            <span class="level-item__range">3 - 6.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 8%</span>
+          </div>
+        </div>
+        <!-- Level 3 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 3</span>
+            <span class="level-item__range">7 - 14.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 7%</span>
+          </div>
+        </div>
+        <!-- Level 4 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 4</span>
+            <span class="level-item__range">15 - 29.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 6%</span>
+          </div>
+        </div>
+        <!-- Level 5 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 5</span>
+            <span class="level-item__range">30 - 59.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 5%</span>
+          </div>
+        </div>
+        <!-- Level 6 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 6</span>
+            <span class="level-item__range">60 - 119.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 4%</span>
+          </div>
+        </div>
+        <!-- Level 7 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 7</span>
+            <span class="level-item__range">120 - 249.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 3%</span>
+          </div>
+        </div>
+        <!-- Level 8 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 8</span>
+            <span class="level-item__range">250 - 499.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 2%</span>
+          </div>
+        </div>
+        <!-- Level 9 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 9</span>
+            <span class="level-item__range">500 - 999.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 1%</span>
+          </div>
+        </div>
+        <!-- Level 10 -->
+        <div class="level-item">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 10</span>
+            <span class="level-item__range">1,000+ GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 0%</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: Level 10 — 최고 레벨 ===== -->
+    <main class="screen" id="case-3">
+      <!-- Current Level Card -->
+      <div class="level-hero">
+        <div class="level-hero__title">Level 10</div>
+        <div class="level-hero__ton">1,500 GRAM</div>
+        <div class="level-hero__progress">
+          <div class="level-hero__progress-bar" style="width: 100%;"></div>
+        </div>
+        <div class="level-hero__next">Max Level Reached! 🎉</div>
+      </div>
+
+      <!-- Level List -->
+      <div class="section-header mt-6">All Levels</div>
+      <div class="level-list">
+        <!-- Level 0 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 0</span>
+            <span class="level-item__range">0 - 0.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 10%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 1 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 1</span>
+            <span class="level-item__range">1 - 2.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 9%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 2 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 2</span>
+            <span class="level-item__range">3 - 6.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 8%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 3 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 3</span>
+            <span class="level-item__range">7 - 14.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 7%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 4 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 4</span>
+            <span class="level-item__range">15 - 29.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 6%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 5 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 5</span>
+            <span class="level-item__range">30 - 59.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 5%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 6 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 6</span>
+            <span class="level-item__range">60 - 119.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 4%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 7 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 7</span>
+            <span class="level-item__range">120 - 249.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 3%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 8 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 8</span>
+            <span class="level-item__range">250 - 499.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 2%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 9 — passed -->
+        <div class="level-item level-item--passed">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 9</span>
+            <span class="level-item__range">500 - 999.99 GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 1%</span>
+            <span class="level-item__check">✓</span>
+          </div>
+        </div>
+        <!-- Level 10 — current -->
+        <div class="level-item level-item--current">
+          <div class="level-item__left">
+            <span class="level-item__name">Level 10</span>
+            <span class="level-item__range">1,000+ GRAM</span>
+          </div>
+          <div class="level-item__right">
+            <span class="level-item__fee">Fee: 0%</span>
+            <span class="level-item__badge">CURRENT</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+  </script>
+</body>
+</html>
