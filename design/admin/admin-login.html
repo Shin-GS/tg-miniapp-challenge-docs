@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>어드민 로그인 - DefyTON Admin</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/admin-layout.css">
+</head>
+<body>
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">기본</button>
+    <button data-case="2">로그인 중</button>
+    <button data-case="3">인증 오류</button>
+    <button data-case="4">계정 비활성화</button>
+  </nav>
+
+  <!-- ===== Case 1: 기본 상태 (로그인 폼) ===== -->
+  <main class="screen active" id="case-1" style="padding:0;">
+    <div class="admin-login">
+      <div class="admin-login__card">
+        <div class="admin-login__logo">DefyTON Admin</div>
+        <div class="admin-login__subtitle">관리자 로그인</div>
+
+        <form>
+          <div class="admin-login__field">
+            <label class="admin-login__label">아이디</label>
+            <input class="input" type="text" placeholder="아이디 입력">
+          </div>
+
+          <div class="admin-login__field">
+            <label class="admin-login__label">비밀번호</label>
+            <input class="input" type="password" placeholder="비밀번호 입력">
+          </div>
+
+          <div class="admin-login__field">
+            <label class="admin-login__label">OTP 코드</label>
+            <input class="input" type="text" placeholder="OTP 6자리 입력" maxlength="6" inputmode="numeric">
+          </div>
+
+          <button class="btn btn--primary btn--full" type="button" style="margin-top: var(--space-6);">
+            로그인
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 2: 로그인 중 ===== -->
+  <main class="screen" id="case-2" style="padding:0;">
+    <div class="admin-login">
+      <div class="admin-login__card">
+        <div class="admin-login__logo">DefyTON Admin</div>
+        <div class="admin-login__subtitle">관리자 로그인</div>
+
+        <form>
+          <div class="admin-login__field">
+            <label class="admin-login__label">아이디</label>
+            <input class="input" type="text" value="admin01" disabled>
+          </div>
+
+          <div class="admin-login__field">
+            <label class="admin-login__label">비밀번호</label>
+            <input class="input" type="password" value="••••••••" disabled>
+          </div>
+
+          <div class="admin-login__field">
+            <label class="admin-login__label">OTP 코드</label>
+            <input class="input" type="text" value="123456" disabled>
+          </div>
+
+          <button class="btn btn--primary btn--full" type="button" style="margin-top: var(--space-6); opacity: 0.7;" disabled>
+            로그인 중...
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 3: 인증 오류 ===== -->
+  <main class="screen" id="case-3" style="padding:0;">
+    <div class="admin-login">
+      <div class="admin-login__card">
+        <div class="admin-login__logo">DefyTON Admin</div>
+        <div class="admin-login__subtitle">관리자 로그인</div>
+
+        <!-- Error Message -->
+        <div class="notice notice--error" style="margin-bottom: var(--space-4);">
+          <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold);">
+            아이디 또는 비밀번호가 올바르지 않습니다.
+          </div>
+        </div>
+
+        <form>
+          <div class="admin-login__field">
+            <label class="admin-login__label">아이디</label>
+            <input class="input input--error" type="text" value="admin01">
+          </div>
+
+          <div class="admin-login__field">
+            <label class="admin-login__label">비밀번호</label>
+            <input class="input input--error" type="password" placeholder="비밀번호 입력">
+          </div>
+
+          <div class="admin-login__field">
+            <label class="admin-login__label">OTP 코드</label>
+            <input class="input" type="text" placeholder="OTP 6자리 입력" maxlength="6" inputmode="numeric">
+          </div>
+
+          <button class="btn btn--primary btn--full" type="button" style="margin-top: var(--space-6);">
+            로그인
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 4: 계정 비활성화 ===== -->
+  <main class="screen" id="case-4" style="padding:0;">
+    <div class="admin-login">
+      <div class="admin-login__card">
+        <div class="admin-login__logo">DefyTON Admin</div>
+        <div class="admin-login__subtitle">관리자 로그인</div>
+
+        <!-- Error Message -->
+        <div class="notice notice--error" style="margin-bottom: var(--space-4);">
+          <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold);">
+            비활성화된 계정입니다. 관리자에게 문의하세요.
+          </div>
+        </div>
+
+        <form>
+          <div class="admin-login__field">
+            <label class="admin-login__label">아이디</label>
+            <input class="input" type="text" value="admin01" disabled>
+          </div>
+
+          <div class="admin-login__field">
+            <label class="admin-login__label">비밀번호</label>
+            <input class="input" type="password" value="••••••••" disabled>
+          </div>
+
+          <div class="admin-login__field">
+            <label class="admin-login__label">OTP 코드</label>
+            <input class="input" type="text" value="123456" disabled>
+          </div>
+
+          <button class="btn btn--primary btn--full" type="button" style="margin-top: var(--space-6);" disabled>
+            로그인
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+  </script>
+  <script src="../shared/admin-nav.js"></script>
+</body>
+</html>

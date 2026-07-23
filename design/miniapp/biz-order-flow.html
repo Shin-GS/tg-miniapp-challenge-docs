@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Biz Order Flow - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Biz Order Flow Styles ===== */
+
+    /* Service Select Grid */
+    .service-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+
+    .service-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-6) var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      text-align: center;
+    }
+
+    .service-card:active {
+      transform: scale(0.97);
+      border-color: var(--color-primary);
+    }
+
+    .service-card__icon {
+      font-size: 40px;
+    }
+
+    .service-card__name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .service-card__price {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* Order Config */
+    .config-section {
+      margin-bottom: var(--space-6);
+    }
+
+    .config-section__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+    }
+
+    .platform-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--color-info-bg);
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-info-text);
+      margin-bottom: var(--space-4);
+    }
+
+    /* Quantity Presets */
+    .quantity-presets {
+      display: flex;
+      gap: var(--space-2);
+      margin-bottom: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .quantity-presets__btn {
+      padding: var(--space-2) var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      border-radius: var(--radius-full);
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .quantity-presets__btn.active {
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+      border-color: transparent;
+    }
+
+    /* Duration Toggle */
+    .duration-toggle {
+      display: flex;
+      gap: var(--space-2);
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-md);
+      padding: var(--space-1);
+    }
+
+    .duration-toggle__btn {
+      flex: 1;
+      padding: var(--space-3);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      border-radius: var(--radius-sm);
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      color: var(--color-text-secondary);
+    }
+
+    .duration-toggle__btn.active {
+      background-color: var(--color-bg-card);
+      color: var(--color-text);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Price Display */
+    .price-display {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4);
+      background: linear-gradient(to right, var(--color-info-bg), var(--color-expert-bg));
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-info-border);
+      margin-top: var(--space-4);
+    }
+
+    .price-display__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+
+    .price-display__value {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-primary);
+    }
+
+    /* One-time notice */
+    .onetime-notice {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background-color: var(--color-warning-bg);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-warning-border);
+      font-size: var(--font-size-xs);
+      color: var(--color-warning-text);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* Order Summary Card */
+    .summary-card {
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .summary-card__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .summary-card__row:last-child {
+      border-bottom: none;
+    }
+
+    .summary-card__label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .summary-card__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .summary-card__total {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">
+    <!-- Case Switcher -->
+    <nav class="case-switcher">
+      <button class="active" data-case="1">서비스 선택</button>
+      <button data-case="2">구성: Followers</button>
+      <button data-case="3">구성: Likes</button>
+      <button data-case="4">확인/결제</button>
+    </nav>
+
+    <!-- Case 1: Service Select -->
+    <main class="screen active" id="case-1">
+      <div class="section-header">Choose a Service</div>
+      <div class="service-grid">
+        <div class="service-card">
+          <div class="service-card__icon">📷</div>
+          <div class="service-card__name">Instagram Followers</div>
+          <div class="service-card__price">from ⭐12/ea</div>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">𝕏</div>
+          <div class="service-card__name">X Followers</div>
+          <div class="service-card__price">from ⭐12/ea</div>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">❤️</div>
+          <div class="service-card__name">Instagram Likes</div>
+          <div class="service-card__price">from ⭐5/ea</div>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">💙</div>
+          <div class="service-card__name">X Likes</div>
+          <div class="service-card__price">from ⭐5/ea</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Case 2: Config — Followers -->
+    <main class="screen" id="case-2">
+      <div class="platform-tag">📷 Instagram Followers</div>
+
+      <div class="config-section">
+        <div class="config-section__label">Target Account</div>
+        <input class="input" type="text" placeholder="@username" value="@defyton_official">
+      </div>
+
+      <div class="config-section">
+        <div class="config-section__label">Quantity</div>
+        <div class="quantity-presets">
+          <button class="quantity-presets__btn">50</button>
+          <button class="quantity-presets__btn active">100</button>
+          <button class="quantity-presets__btn">200</button>
+          <button class="quantity-presets__btn">500</button>
+        </div>
+        <input class="input" type="number" placeholder="30 — 1,000" value="100">
+      </div>
+
+      <div class="config-section">
+        <div class="config-section__label">Duration</div>
+        <div class="duration-toggle">
+          <div class="duration-toggle__btn active">2 weeks (×1.0)</div>
+          <div class="duration-toggle__btn">4 weeks (×1.3)</div>
+        </div>
+      </div>
+
+      <div class="price-display">
+        <div class="price-display__label">Total Price</div>
+        <div class="price-display__value">⭐ 1,200</div>
+      </div>
+
+      <div class="mt-6">
+        <button class="btn btn--primary btn--full">CONTINUE</button>
+      </div>
+    </main>
+
+    <!-- Case 3: Config — Likes -->
+    <main class="screen" id="case-3">
+      <div class="platform-tag">❤️ Instagram Likes</div>
+
+      <div class="config-section">
+        <div class="config-section__label">Target Post URL</div>
+        <input class="input" type="url" placeholder="https://instagram.com/p/..." value="https://instagram.com/p/CxYz123abc">
+      </div>
+
+      <div class="config-section">
+        <div class="config-section__label">Quantity</div>
+        <div class="quantity-presets" id="likes-presets">
+          <button class="quantity-presets__btn">50</button>
+          <button class="quantity-presets__btn active">100</button>
+          <button class="quantity-presets__btn">200</button>
+          <button class="quantity-presets__btn">500</button>
+        </div>
+        <input class="input" type="number" placeholder="30 — 1,000" value="100" id="likes-quantity-input">
+      </div>
+
+      <div class="config-section">
+        <div class="config-section__label">Duration</div>
+        <div class="onetime-notice">⚡ One-time · 3-day verification</div>
+      </div>
+
+      <div class="price-display">
+        <div class="price-display__label">Total Price</div>
+        <div class="price-display__value" id="likes-price">⭐ 500</div>
+      </div>
+
+      <div class="mt-6">
+        <button class="btn btn--primary btn--full">CONTINUE</button>
+      </div>
+    </main>
+
+    <!-- Case 4: Confirm & Pay -->
+    <main class="screen" id="case-4">
+      <div class="section-header">Order Summary</div>
+
+      <div class="summary-card">
+        <div class="summary-card__row">
+          <span class="summary-card__label">Service</span>
+          <span class="summary-card__value">📷 Instagram Followers</span>
+        </div>
+        <div class="summary-card__row">
+          <span class="summary-card__label">Account</span>
+          <span class="summary-card__value">@defyton_official</span>
+        </div>
+        <div class="summary-card__row">
+          <span class="summary-card__label">Quantity</span>
+          <span class="summary-card__value">100 followers</span>
+        </div>
+        <div class="summary-card__row">
+          <span class="summary-card__label">Duration</span>
+          <span class="summary-card__value">2 weeks</span>
+        </div>
+        <div class="summary-card__row">
+          <span class="summary-card__label">Total</span>
+          <span class="summary-card__total">⭐ 1,200</span>
+        </div>
+      </div>
+
+      <div class="notice notice--info mt-4" style="font-size: var(--font-size-xs);">
+        ⏱ Your order will be reviewed within 24 hours
+      </div>
+
+      <!-- 환불 경고 문구 -->
+      <div style="background: rgba(239, 68, 68, 0.1); border-radius: 8px; padding: 12px 16px; margin-top: 16px;">
+        <p style="font-size: 11px; color: #f87171; line-height: 1.5; margin: 0;">
+          ⚠️ <strong>Refund Policy</strong><br>
+          Chargebacks or unauthorized refunds after service delivery will result in permanent account termination and may be reported to Telegram and relevant platform partners.
+        </p>
+      </div>
+
+      <div class="mt-6">
+        <button class="btn btn--primary btn--full btn--lg">⭐ PAY 1,200 STARS</button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Case switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Duration toggle interaction (Case 2: Followers)
+    document.querySelectorAll('#case-2 .duration-toggle__btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('.duration-toggle__btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const priceEl = document.querySelector('#case-2 .price-display__value');
+        if (priceEl) {
+          priceEl.textContent = btn.textContent.includes('4 weeks') ? '⭐ 1,560' : '⭐ 1,200';
+        }
+      });
+    });
+
+    // Quantity preset interaction (Case 2: Followers)
+    document.querySelectorAll('#case-2 .quantity-presets__btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('.quantity-presets__btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Quantity preset interaction (Case 3: Likes)
+    document.querySelectorAll('#likes-presets .quantity-presets__btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('.quantity-presets__btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const qty = parseInt(btn.textContent);
+        document.getElementById('likes-quantity-input').value = qty;
+        document.getElementById('likes-price').textContent = '⭐ ' + (qty * 5).toLocaleString();
+      });
+    });
+
+    // Likes quantity input change
+    document.getElementById('likes-quantity-input').addEventListener('input', (e) => {
+      const qty = parseInt(e.target.value) || 0;
+      document.getElementById('likes-price').textContent = '⭐ ' + (qty * 5).toLocaleString();
+      // Deselect presets if manual input differs
+      const presets = document.querySelectorAll('#likes-presets .quantity-presets__btn');
+      presets.forEach(b => {
+        if (parseInt(b.textContent) === qty) {
+          b.classList.add('active');
+        } else {
+          b.classList.remove('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

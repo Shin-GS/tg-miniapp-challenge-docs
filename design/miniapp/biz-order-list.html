@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Biz Order List - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Biz Order List Styles ===== */
+
+    /* Order List Card */
+    .order-card {
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .order-card:active {
+      transform: scale(0.98);
+    }
+
+    .order-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-3);
+    }
+
+    .order-card__account {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .order-card__platform {
+      font-size: 20px;
+    }
+
+    .order-card__name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .order-card__subtitle {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      margin-top: var(--space-1);
+    }
+
+    .order-card__status {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      margin-top: var(--space-2);
+    }
+
+    .order-card__status--orange {
+      color: #f97316;
+    }
+
+    .order-card__progress {
+      margin-top: var(--space-3);
+    }
+
+    .order-card__progress-text {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-1);
+    }
+
+    /* Badge orange variant */
+    .badge--orange {
+      background: rgba(249, 115, 22, 0.15);
+      color: #f97316;
+    }
+
+    /* Platform icon circle */
+    .platform-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 11px;
+    }
+
+    .platform-icon--ig {
+      background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+    }
+
+    /* Order Detail */
+    .detail-header {
+      text-align: center;
+      margin-bottom: var(--space-6);
+    }
+
+    .detail-header__platform {
+      font-size: 40px;
+      margin-bottom: var(--space-2);
+    }
+
+    .detail-header__account {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .detail-progress {
+      margin-bottom: var(--space-6);
+    }
+
+    .detail-progress__text {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-2);
+    }
+
+    .detail-progress .progress {
+      height: 12px;
+    }
+
+    .detail-info {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin-top: var(--space-6);
+    }
+
+    .detail-info__row {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--font-size-sm);
+    }
+
+    .detail-info__label {
+      color: var(--color-text-secondary);
+    }
+
+    .detail-info__value {
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    /* Summary Card (reused in detail) */
+    .summary-card {
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .summary-card__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .summary-card__row:last-child {
+      border-bottom: none;
+    }
+
+    .summary-card__label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .summary-card__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">
+    <!-- Case Switcher -->
+    <nav class="case-switcher">
+      <button class="active" data-case="1">목록: AWAITING PAYMENT</button>
+      <button data-case="2">목록: PENDING</button>
+      <button data-case="3">목록: ACTIVE</button>
+      <button data-case="4">목록: COMPLETED</button>
+      <button data-case="5">상세: PENDING</button>
+      <button data-case="6">상세: ACTIVE</button>
+      <button data-case="7">상세: PENDING_PAYMENT</button>
+      <button data-case="8">상세: COMPLETED</button>
+    </nav>
+
+    <!-- Case 1: Order List (AWAITING PAYMENT) -->
+    <main class="screen active" id="case-1">
+      <div class="section-header">My Orders</div>
+      <div class="list">
+        <div class="order-card">
+          <div class="order-card__header">
+            <div class="order-card__account">
+              <span class="platform-icon platform-icon--ig">IG</span>
+              <div>
+                <div class="order-card__name">@sing34012</div>
+                <div class="order-card__subtitle">100 followers</div>
+              </div>
+            </div>
+            <span class="badge badge--orange">AWAITING PAYMENT</span>
+          </div>
+          <div class="order-card__status order-card__status--orange">Tap to complete payment · ⭐600</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Case 2: Order List (PENDING) -->
+    <main class="screen" id="case-2">
+      <div class="section-header">My Orders</div>
+      <div class="list">
+        <div class="order-card">
+          <div class="order-card__header">
+            <div class="order-card__account">
+              <span class="order-card__platform">📷</span>
+              <span class="order-card__name">@defyton_official</span>
+            </div>
+            <span class="badge badge--warning">PENDING</span>
+          </div>
+          <div class="order-card__status">Under review... Ordered Jun 15</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Case 3: Order List (ACTIVE) -->
+    <main class="screen" id="case-3">
+      <div class="section-header">My Orders</div>
+      <div class="list">
+        <div class="order-card">
+          <div class="order-card__header">
+            <div class="order-card__account">
+              <span class="order-card__platform">📷</span>
+              <span class="order-card__name">@defyton_official</span>
+            </div>
+            <span class="badge badge--info">ACTIVE</span>
+          </div>
+          <div class="order-card__progress">
+            <div class="order-card__progress-text">32/100 followers confirmed</div>
+            <div class="progress">
+              <div class="progress__bar" style="width: 32%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Case 4: Order List (COMPLETED) -->
+    <main class="screen" id="case-4">
+      <div class="section-header">My Orders</div>
+      <div class="list">
+        <div class="order-card">
+          <div class="order-card__header">
+            <div class="order-card__account">
+              <span class="order-card__platform">📷</span>
+              <span class="order-card__name">@defyton_official</span>
+            </div>
+            <span class="badge badge--success">COMPLETED</span>
+          </div>
+          <div class="order-card__status">✅ 95/100 retained after 4 weeks</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Case 5: Detail (PENDING) -->
+    <main class="screen" id="case-5">
+      <div class="detail-header">
+        <div class="detail-header__platform">📷</div>
+        <div class="detail-header__account">@defyton_official</div>
+      </div>
+
+      <div class="summary-card mb-4">
+        <div class="summary-card__row">
+          <span class="summary-card__label">Quantity</span>
+          <span class="summary-card__value">100 followers</span>
+        </div>
+        <div class="summary-card__row">
+          <span class="summary-card__label">Duration</span>
+          <span class="summary-card__value">2 weeks</span>
+        </div>
+        <div class="summary-card__row">
+          <span class="summary-card__label">Paid</span>
+          <span class="summary-card__value">⭐ 1,200</span>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="timeline">
+        <div class="timeline__item timeline__item--done">
+          <div class="timeline__dot"></div>
+          <div class="timeline__line"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Order Placed</div>
+            <div class="timeline__content-desc">Jun 15, 2025</div>
+          </div>
+        </div>
+        <div class="timeline__item timeline__item--active">
+          <div class="timeline__dot"></div>
+          <div class="timeline__line"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Under Review</div>
+            <div class="timeline__content-desc">Usually within 24 hours</div>
+          </div>
+        </div>
+        <div class="timeline__item timeline__item--pending">
+          <div class="timeline__dot"></div>
+          <div class="timeline__line"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Campaign Live</div>
+            <div class="timeline__content-desc">Followers will start joining</div>
+          </div>
+        </div>
+        <div class="timeline__item timeline__item--pending">
+          <div class="timeline__dot"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Completed</div>
+            <div class="timeline__content-desc">All verification periods done</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8">
+        <button class="btn btn--danger btn--full">CANCEL ORDER</button>
+      </div>
+    </main>
+
+    <!-- Case 6: Detail (ACTIVE) -->
+    <main class="screen" id="case-6">
+      <div class="detail-header">
+        <div class="detail-header__platform">📷</div>
+        <div class="detail-header__account">@defyton_official</div>
+      </div>
+
+      <div class="detail-progress">
+        <div class="detail-progress__text">
+          <span>Progress</span>
+          <span>32/100</span>
+        </div>
+        <div class="progress">
+          <div class="progress__bar" style="width: 32%;"></div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="timeline">
+        <div class="timeline__item timeline__item--done">
+          <div class="timeline__dot"></div>
+          <div class="timeline__line"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Order Placed</div>
+            <div class="timeline__content-desc">Jun 15, 2025</div>
+          </div>
+        </div>
+        <div class="timeline__item timeline__item--done">
+          <div class="timeline__dot"></div>
+          <div class="timeline__line"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Approved</div>
+            <div class="timeline__content-desc">Jun 16, 2025</div>
+          </div>
+        </div>
+        <div class="timeline__item timeline__item--active">
+          <div class="timeline__dot"></div>
+          <div class="timeline__line"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Campaign Active</div>
+            <div class="timeline__content-desc">32/100 followers confirmed</div>
+          </div>
+        </div>
+        <div class="timeline__item timeline__item--pending">
+          <div class="timeline__dot"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Completed</div>
+            <div class="timeline__content-desc">Est. Jul 1, 2025</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-info">
+        <div class="detail-info__row">
+          <span class="detail-info__label">Quantity</span>
+          <span class="detail-info__value">100 followers</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">Duration</span>
+          <span class="detail-info__value">2 weeks</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">Paid</span>
+          <span class="detail-info__value">⭐ 1,200</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">Est. Completion</span>
+          <span class="detail-info__value">Jul 1, 2025</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Case 7: Detail (PENDING_PAYMENT) -->
+    <main class="screen" id="case-7">
+      <div class="detail-header">
+        <div class="detail-header__platform" style="background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">IG</div>
+        <div class="detail-header__account">@sing34012</div>
+      </div>
+
+      <div class="summary-card mb-4">
+        <div class="summary-card__row">
+          <span class="summary-card__label">Quantity</span>
+          <span class="summary-card__value">100 followers</span>
+        </div>
+        <div class="summary-card__row">
+          <span class="summary-card__label">Duration</span>
+          <span class="summary-card__value">2 weeks</span>
+        </div>
+        <div class="summary-card__row">
+          <span class="summary-card__label">Total</span>
+          <span class="summary-card__value">⭐ 600</span>
+        </div>
+      </div>
+
+      <!-- Refund Policy Warning -->
+      <div style="background: rgba(239, 68, 68, 0.1); border-radius: 8px; padding: 12px 16px; margin-bottom: 24px;">
+        <p style="font-size: 11px; color: #f87171; line-height: 1.5; margin: 0;">
+          ⚠️ <strong>Refund Policy</strong><br>
+          Chargebacks or unauthorized refunds after service delivery will result in permanent account termination and may be reported to Telegram and relevant platform partners.
+        </p>
+      </div>
+
+      <button class="btn btn--primary btn--full mb-4" style="background: linear-gradient(to right, #9333ea, #4f46e5);">PAY ⭐600</button>
+      <button style="width: 100%; padding: 12px; font-size: 14px; font-weight: bold; color: #f87171; background: transparent; border: none; cursor: pointer;">Cancel Order</button>
+    </main>
+
+    <!-- Case 8: Detail (COMPLETED) -->
+    <main class="screen" id="case-8">
+      <div class="detail-header">
+        <div class="detail-header__platform">📷</div>
+        <div class="detail-header__account">@defyton_official</div>
+      </div>
+
+      <div class="detail-progress">
+        <div class="detail-progress__text">
+          <span>Retained</span>
+          <span>95/100 ✓</span>
+        </div>
+        <div class="progress">
+          <div class="progress__bar progress__bar--success" style="width: 95%;"></div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="timeline">
+        <div class="timeline__item timeline__item--done">
+          <div class="timeline__dot"></div>
+          <div class="timeline__line"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Order Placed</div>
+            <div class="timeline__content-desc">Jun 15, 2025</div>
+          </div>
+        </div>
+        <div class="timeline__item timeline__item--done">
+          <div class="timeline__dot"></div>
+          <div class="timeline__line"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Approved</div>
+            <div class="timeline__content-desc">Jun 16, 2025</div>
+          </div>
+        </div>
+        <div class="timeline__item timeline__item--done">
+          <div class="timeline__dot"></div>
+          <div class="timeline__line"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Campaign Complete</div>
+            <div class="timeline__content-desc">95/100 followers retained</div>
+          </div>
+        </div>
+        <div class="timeline__item timeline__item--done">
+          <div class="timeline__dot"></div>
+          <div class="timeline__content">
+            <div class="timeline__content-title">Settlement Done</div>
+            <div class="timeline__content-desc">Jul 2, 2025</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-info">
+        <div class="detail-info__row">
+          <span class="detail-info__label">Quantity</span>
+          <span class="detail-info__value">100 followers</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">Retained</span>
+          <span class="detail-info__value">95 followers</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">Duration</span>
+          <span class="detail-info__value">2 weeks</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">Paid</span>
+          <span class="detail-info__value">⭐ 1,200</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+  </script>
+</body>
+</html>

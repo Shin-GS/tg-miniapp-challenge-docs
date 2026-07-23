@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>캐시 관리 - Admin</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/admin-layout.css">
+  <style>
+    /* 이 화면 전용 스타일 */
+    .cache-summary {
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: var(--space-5);
+    }
+
+    .cache-summary__inner {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+    }
+
+    .cache-summary__item-label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-tertiary);
+      margin-bottom: var(--space-1);
+    }
+
+    .cache-summary__item-value {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .cache-summary__item-value span {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+    }
+
+    .cache-summary__divider {
+      width: 1px;
+      height: 40px;
+      background-color: var(--color-border);
+    }
+
+    /* 그룹 카드 그리드 */
+    .cache-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+    }
+
+    .cache-grid__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-3);
+    }
+
+    .cache-card {
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .cache-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cache-card__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .cache-card__pattern {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+      font-family: monospace;
+    }
+
+    .cache-card__desc {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+    }
+
+    .cache-card__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: var(--space-2);
+    }
+
+    .cache-card__count {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+
+    .cache-card__delete-btn {
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      min-height: 36px;
+      transition: all var(--transition-fast);
+      background-color: var(--color-danger-bg);
+      color: var(--color-danger-text);
+    }
+
+    .cache-card__delete-btn:hover {
+      background-color: var(--color-danger-bg-deep);
+    }
+
+    .cache-card__delete-btn:disabled {
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-disabled);
+      cursor: not-allowed;
+    }
+
+    /* 하단 전체 삭제 영역 */
+    .cache-danger-zone {
+      border-top: 1px solid var(--color-border);
+      padding-top: var(--space-6);
+      margin-top: var(--space-6);
+    }
+
+    .cache-danger-zone__btn {
+      padding: var(--space-3) var(--space-5);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      min-height: 44px;
+      transition: all var(--transition-fast);
+      background-color: var(--color-danger);
+      color: var(--color-text-white);
+    }
+
+    .cache-danger-zone__btn:hover {
+      opacity: 0.9;
+    }
+
+    .cache-danger-zone__btn:disabled {
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-disabled);
+      cursor: not-allowed;
+    }
+
+    .cache-danger-zone__hint {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      margin-top: var(--space-2);
+    }
+
+    /* 에러 상태 */
+    .cache-error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-10) 0;
+    }
+
+    .cache-error__card {
+      background-color: var(--color-danger-bg);
+      border: 1px solid var(--color-danger-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-6);
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .cache-error__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-danger-text);
+      margin-bottom: var(--space-1);
+    }
+
+    .cache-error__desc {
+      font-size: var(--font-size-sm);
+      color: var(--color-danger-text);
+      opacity: 0.7;
+    }
+
+    /* 페이지 설명 */
+    .cache-page-desc {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      margin-top: var(--space-1);
+    }
+  </style>
+</head>
+<body>
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">기본</button>
+    <button data-case="2">연결 실패</button>
+    <button data-case="3">캐시 비어 있음</button>
+  </nav>
+
+  <!-- ===== Case 1: 기본 상태 (캐시 정상 동작 중) ===== -->
+  <main class="screen active" id="case-1">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar" id="sidebar"></aside>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">🗄️ 캐시 관리</h1>
+        </div>
+        <p class="cache-page-desc">Valkey 캐시를 모니터링하고 수동으로 삭제할 수 있습니다.</p>
+
+        <!-- 요약 카드 -->
+        <div class="cache-summary" style="margin-top: var(--space-6);">
+          <div class="cache-summary__inner">
+            <div>
+              <p class="cache-summary__item-label">메모리 사용량</p>
+              <p class="cache-summary__item-value">1.15M <span>/ 128.00M</span></p>
+            </div>
+            <div class="cache-summary__divider"></div>
+            <div>
+              <p class="cache-summary__item-label">총 키 수</p>
+              <p class="cache-summary__item-value">18 <span>keys</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 그룹별 캐시 카드 그리드 -->
+        <div style="margin-top: var(--space-6);">
+          <h2 class="cache-grid__title">그룹별 캐시</h2>
+          <div class="cache-grid">
+            <!-- 챌린지 상세 -->
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">챌린지 상세</span>
+                <span class="cache-card__pattern">app:challenge:*</span>
+              </div>
+              <p class="cache-card__desc">챌린지 수정 후 반영 안 될 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">6 keys</span>
+                <button class="cache-card__delete-btn">삭제</button>
+              </div>
+            </div>
+
+            <!-- 챌린지 목록 -->
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">챌린지 목록</span>
+                <span class="cache-card__pattern">app:challenges:cat:*</span>
+              </div>
+              <p class="cache-card__desc">목록에서 챌린지 안 보일 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">1 keys</span>
+                <button class="cache-card__delete-btn">삭제</button>
+              </div>
+            </div>
+
+            <!-- 카테고리 -->
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">카테고리</span>
+                <span class="cache-card__pattern">app:categories:list</span>
+              </div>
+              <p class="cache-card__desc">카테고리 수정 후 반영 안 될 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">1 keys</span>
+                <button class="cache-card__delete-btn">삭제</button>
+              </div>
+            </div>
+
+            <!-- 공지 -->
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">공지</span>
+                <span class="cache-card__pattern">app:notices:active</span>
+              </div>
+              <p class="cache-card__desc">공지 올렸는데 안 보일 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">1 keys</span>
+                <button class="cache-card__delete-btn">삭제</button>
+              </div>
+            </div>
+
+            <!-- Stars 가격 -->
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">Stars 가격</span>
+                <span class="cache-card__pattern">app:stars:prices</span>
+              </div>
+              <p class="cache-card__desc">환율 바꿨는데 가격 안 바뀔 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">1 keys</span>
+                <button class="cache-card__delete-btn">삭제</button>
+              </div>
+            </div>
+
+            <!-- 리더보드 -->
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">리더보드</span>
+                <span class="cache-card__pattern">app:leaderboard:top100</span>
+              </div>
+              <p class="cache-card__desc">랭킹 이상할 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">0 keys</span>
+                <button class="cache-card__delete-btn" disabled>삭제</button>
+              </div>
+            </div>
+
+            <!-- 공개 웹 -->
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">공개 웹</span>
+                <span class="cache-card__pattern">public:*</span>
+              </div>
+              <p class="cache-card__desc">웹 페이지 안 바뀔 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">5 keys</span>
+                <button class="cache-card__delete-btn">삭제</button>
+              </div>
+            </div>
+
+            <!-- 인증 상태 -->
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">인증 상태</span>
+                <span class="cache-card__pattern">user:status:*</span>
+              </div>
+              <p class="cache-card__desc">밴 처리 후 즉시 적용 안 될 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">1 keys</span>
+                <button class="cache-card__delete-btn">삭제</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 전체 삭제 -->
+        <div class="cache-danger-zone">
+          <button class="cache-danger-zone__btn">🗑️ 전체 캐시 삭제</button>
+          <p class="cache-danger-zone__hint">모든 캐시를 삭제합니다. 일시적으로 응답이 느려질 수 있습니다.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 2: Valkey 연결 실패 ===== -->
+  <main class="screen" id="case-2">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar" id="sidebar"></aside>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">🗄️ 캐시 관리</h1>
+        </div>
+        <p class="cache-page-desc">Valkey 캐시를 모니터링하고 수동으로 삭제할 수 있습니다.</p>
+
+        <!-- 에러 상태 -->
+        <div class="cache-error">
+          <div class="cache-error__card">
+            <p class="cache-error__title">캐시 서버에 연결할 수 없습니다.</p>
+            <p class="cache-error__desc">서비스는 DB fallback으로 정상 동작 중입니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 3: 캐시 비어 있음 ===== -->
+  <main class="screen" id="case-3">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar" id="sidebar"></aside>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">🗄️ 캐시 관리</h1>
+        </div>
+        <p class="cache-page-desc">Valkey 캐시를 모니터링하고 수동으로 삭제할 수 있습니다.</p>
+
+        <!-- 요약 카드 (비어 있음) -->
+        <div class="cache-summary" style="margin-top: var(--space-6);">
+          <div class="cache-summary__inner">
+            <div>
+              <p class="cache-summary__item-label">메모리 사용량</p>
+              <p class="cache-summary__item-value">0M <span>/ 128.00M</span></p>
+            </div>
+            <div class="cache-summary__divider"></div>
+            <div>
+              <p class="cache-summary__item-label">총 키 수</p>
+              <p class="cache-summary__item-value">0 <span>keys</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 그룹별 캐시 카드 그리드 (모두 0) -->
+        <div style="margin-top: var(--space-6);">
+          <h2 class="cache-grid__title">그룹별 캐시</h2>
+          <div class="cache-grid">
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">챌린지 상세</span>
+                <span class="cache-card__pattern">app:challenge:*</span>
+              </div>
+              <p class="cache-card__desc">챌린지 수정 후 반영 안 될 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">0 keys</span>
+                <button class="cache-card__delete-btn" disabled>삭제</button>
+              </div>
+            </div>
+
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">챌린지 목록</span>
+                <span class="cache-card__pattern">app:challenges:cat:*</span>
+              </div>
+              <p class="cache-card__desc">목록에서 챌린지 안 보일 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">0 keys</span>
+                <button class="cache-card__delete-btn" disabled>삭제</button>
+              </div>
+            </div>
+
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">카테고리</span>
+                <span class="cache-card__pattern">app:categories:list</span>
+              </div>
+              <p class="cache-card__desc">카테고리 수정 후 반영 안 될 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">0 keys</span>
+                <button class="cache-card__delete-btn" disabled>삭제</button>
+              </div>
+            </div>
+
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">공지</span>
+                <span class="cache-card__pattern">app:notices:active</span>
+              </div>
+              <p class="cache-card__desc">공지 올렸는데 안 보일 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">0 keys</span>
+                <button class="cache-card__delete-btn" disabled>삭제</button>
+              </div>
+            </div>
+
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">Stars 가격</span>
+                <span class="cache-card__pattern">app:stars:prices</span>
+              </div>
+              <p class="cache-card__desc">환율 바꿨는데 가격 안 바뀔 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">0 keys</span>
+                <button class="cache-card__delete-btn" disabled>삭제</button>
+              </div>
+            </div>
+
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">리더보드</span>
+                <span class="cache-card__pattern">app:leaderboard:top100</span>
+              </div>
+              <p class="cache-card__desc">랭킹 이상할 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">0 keys</span>
+                <button class="cache-card__delete-btn" disabled>삭제</button>
+              </div>
+            </div>
+
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">공개 웹</span>
+                <span class="cache-card__pattern">public:*</span>
+              </div>
+              <p class="cache-card__desc">웹 페이지 안 바뀔 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">0 keys</span>
+                <button class="cache-card__delete-btn" disabled>삭제</button>
+              </div>
+            </div>
+
+            <div class="cache-card">
+              <div class="cache-card__header">
+                <span class="cache-card__label">인증 상태</span>
+                <span class="cache-card__pattern">user:status:*</span>
+              </div>
+              <p class="cache-card__desc">밴 처리 후 즉시 적용 안 될 때 삭제</p>
+              <div class="cache-card__footer">
+                <span class="cache-card__count">0 keys</span>
+                <button class="cache-card__delete-btn" disabled>삭제</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 전체 삭제 (비활성) -->
+        <div class="cache-danger-zone">
+          <button class="cache-danger-zone__btn" disabled>🗑️ 전체 캐시 삭제</button>
+          <p class="cache-danger-zone__hint">모든 캐시를 삭제합니다. 일시적으로 응답이 느려질 수 있습니다.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // 케이스 전환 로직
+    document.querySelectorAll('.case-switcher button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('case-' + btn.dataset.case).classList.add('active');
+      });
+    });
+  </script>
+  <script src="../shared/admin-nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Notice List - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Notice List Screen Styles ===== */
+
+    /* Notice Card */
+    .notice-card {
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: all var(--transition-normal);
+    }
+
+    .notice-card__header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+    }
+
+    .notice-card__header:active {
+      background-color: var(--color-bg-elevated);
+    }
+
+    .notice-card__content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .notice-card__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      line-height: var(--line-height-normal);
+    }
+
+    .notice-card__date {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+    }
+
+    .notice-card__chevron {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-tertiary);
+      transition: transform var(--transition-fast);
+    }
+
+    .notice-card--expanded .notice-card__chevron {
+      transform: rotate(180deg);
+    }
+
+    .notice-card__body {
+      display: none;
+      padding: 0 var(--space-4) var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-normal);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-relaxed);
+      border-top: 1px solid var(--color-border);
+      margin-top: 0;
+      padding-top: var(--space-3);
+      white-space: pre-wrap;
+    }
+
+    .notice-card--expanded .notice-card__body {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">공지 목록</button>
+    <button data-case="2">빈 상태</button>
+    <button data-case="3">펼침</button>
+  </nav>
+
+  <div class="mobile-container">
+
+    <!-- ===== Case 1: Notices (공지 있음) ===== -->
+    <main class="screen active" id="case-1">
+      <div class="space-y-4">
+        <!-- Notice Cards -->
+        <div class="list">
+          <!-- Notice 1: Maintenance -->
+          <div class="notice-card" data-accordion>
+            <div class="notice-card__header">
+              <div class="notice-card__content">
+                <div class="mb-2">
+                  <span class="badge badge--warning">MAINTENANCE</span>
+                </div>
+                <div class="notice-card__title">Server maintenance on May 20</div>
+                <div class="notice-card__date">2026-05-18</div>
+              </div>
+              <span class="notice-card__chevron">▼</span>
+            </div>
+            <div class="notice-card__body">
+              Scheduled maintenance on May 20, 10:00-12:00 UTC. The app may be temporarily unavailable.
+            </div>
+          </div>
+
+          <!-- Notice 2: Event -->
+          <div class="notice-card" data-accordion>
+            <div class="notice-card__header">
+              <div class="notice-card__content">
+                <div class="mb-2">
+                  <span class="badge badge--info">EVENT</span>
+                </div>
+                <div class="notice-card__title">New Year Challenge Event!</div>
+                <div class="notice-card__date">2026-05-15</div>
+              </div>
+              <span class="notice-card__chevron">▼</span>
+            </div>
+            <div class="notice-card__body">
+              Celebrate the new year with a special challenge event! Join now and earn bonus rewards.
+            </div>
+          </div>
+
+          <!-- Notice 3: General -->
+          <div class="notice-card" data-accordion>
+            <div class="notice-card__header">
+              <div class="notice-card__content">
+                <div class="mb-2">
+                  <span class="badge badge--neutral">GENERAL</span>
+                </div>
+                <div class="notice-card__title">Welcome to DefyTON!</div>
+                <div class="notice-card__date">2026-05-01</div>
+              </div>
+              <span class="notice-card__chevron">▼</span>
+            </div>
+            <div class="notice-card__body">
+              Welcome to DefyTON! Start your first challenge today and build lasting habits with the power of commitment.
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="pagination__btn" disabled>←</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn" disabled>→</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: Empty (빈 상태) ===== -->
+    <main class="screen" id="case-2">
+      <div class="empty-state">
+        <span class="empty-state__icon">📢</span>
+        <div class="empty-state__title">No Notices</div>
+        <div class="empty-state__description">There are no announcements at this time.</div>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: Expanded (아코디언 펼침) ===== -->
+    <main class="screen" id="case-3">
+      <div class="space-y-4">
+        <!-- Notice Cards -->
+        <div class="list">
+          <!-- Notice 1: Expanded -->
+          <div class="notice-card notice-card--expanded" data-accordion>
+            <div class="notice-card__header">
+              <div class="notice-card__content">
+                <div class="mb-2">
+                  <span class="badge badge--warning">MAINTENANCE</span>
+                </div>
+                <div class="notice-card__title">Server maintenance on May 20</div>
+                <div class="notice-card__date">2026-05-18</div>
+              </div>
+              <span class="notice-card__chevron">▼</span>
+            </div>
+            <div class="notice-card__body">
+              Scheduled maintenance on May 20, 10:00-12:00 UTC. The app may be temporarily unavailable.
+            </div>
+          </div>
+
+          <!-- Notice 2: Collapsed -->
+          <div class="notice-card" data-accordion>
+            <div class="notice-card__header">
+              <div class="notice-card__content">
+                <div class="mb-2">
+                  <span class="badge badge--info">EVENT</span>
+                </div>
+                <div class="notice-card__title">New Year Challenge Event!</div>
+                <div class="notice-card__date">2026-05-15</div>
+              </div>
+              <span class="notice-card__chevron">▼</span>
+            </div>
+            <div class="notice-card__body">
+              Celebrate the new year with a special challenge event! Join now and earn bonus rewards.
+            </div>
+          </div>
+
+          <!-- Notice 3: Collapsed -->
+          <div class="notice-card" data-accordion>
+            <div class="notice-card__header">
+              <div class="notice-card__content">
+                <div class="mb-2">
+                  <span class="badge badge--neutral">GENERAL</span>
+                </div>
+                <div class="notice-card__title">Welcome to DefyTON!</div>
+                <div class="notice-card__date">2026-05-01</div>
+              </div>
+              <span class="notice-card__chevron">▼</span>
+            </div>
+            <div class="notice-card__body">
+              Welcome to DefyTON! Start your first challenge today and build lasting habits with the power of commitment.
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="pagination__btn" disabled>←</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn" disabled>→</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Accordion Toggle
+    document.querySelectorAll('[data-accordion] .notice-card__header').forEach(header => {
+      header.addEventListener('click', () => {
+        const card = header.closest('.notice-card');
+        const parent = card.closest('.list');
+
+        // Close other cards in the same list
+        if (parent) {
+          parent.querySelectorAll('.notice-card--expanded').forEach(openCard => {
+            if (openCard !== card) {
+              openCard.classList.remove('notice-card--expanded');
+            }
+          });
+        }
+
+        // Toggle current card
+        card.classList.toggle('notice-card--expanded');
+      });
+    });
+  </script>
+</body>
+</html>

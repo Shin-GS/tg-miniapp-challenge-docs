@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biz 주문 관리 - Admin</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/admin-layout.css">
+  <style>
+    /* Biz 주문 관리 전용 스타일 */
+
+    .admin-content .screen {
+      padding: 0;
+    }
+
+    .admin-content .screen.active {
+      display: block;
+    }
+
+    .page-title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin-bottom: var(--space-6);
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: var(--space-2);
+      margin-bottom: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .filter-tabs__btn {
+      padding: var(--space-2) var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      border-radius: var(--radius-full);
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: 1px solid var(--color-border);
+    }
+
+    .filter-tabs__btn.active {
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+      border-color: transparent;
+    }
+
+    /* Data Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-size-sm);
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: var(--space-3) var(--space-4);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      background-color: var(--color-bg-elevated);
+      border-bottom: 2px solid var(--color-border);
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text);
+      vertical-align: middle;
+    }
+
+    .data-table tr:hover {
+      background-color: var(--color-bg-secondary);
+    }
+
+    .data-table__link {
+      color: var(--color-primary);
+      font-weight: var(--font-weight-semibold);
+      text-decoration: none;
+    }
+
+    .data-table__link:hover {
+      text-decoration: underline;
+    }
+
+    /* Action Buttons */
+    .action-btns {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .action-btn {
+      padding: var(--space-1) var(--space-3);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: none;
+      transition: opacity var(--transition-fast);
+    }
+
+    .action-btn:hover {
+      opacity: 0.8;
+    }
+
+    .action-btn--approve {
+      background-color: var(--color-success);
+      color: var(--color-text-white);
+    }
+
+    .action-btn--reject {
+      background-color: var(--color-danger);
+      color: var(--color-text-white);
+    }
+
+    /* Progress in table */
+    .table-progress {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .table-progress__bar {
+      width: 80px;
+      height: 6px;
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .table-progress__fill {
+      height: 100%;
+      background: var(--color-primary-gradient);
+      border-radius: var(--radius-full);
+    }
+
+    .table-progress__text {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+    }
+
+    /* Platform badge */
+    .platform-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* Modal Overrides */
+    .modal-form__group {
+      margin-bottom: var(--space-4);
+    }
+
+    .modal-form__label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+    }
+
+    .modal-form__summary {
+      background-color: var(--color-bg-elevated);
+      border-radius: var(--radius-sm);
+      padding: var(--space-3);
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--space-4);
+    }
+
+    .modal-form__summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--space-1) 0;
+    }
+
+    .modal-form__summary-label {
+      color: var(--color-text-secondary);
+    }
+
+    .modal-form__summary-value {
+      font-weight: var(--font-weight-bold);
+    }
+
+    /* Radio Options */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .radio-option:hover {
+      background-color: var(--color-bg-secondary);
+    }
+
+    .radio-option.selected {
+      border-color: var(--color-primary);
+      background-color: rgba(139, 92, 246, 0.05);
+    }
+
+    .radio-option__circle {
+      width: 18px;
+      height: 18px;
+      border-radius: var(--radius-full);
+      border: 2px solid var(--color-border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .radio-option.selected .radio-option__circle {
+      border-color: var(--color-primary);
+    }
+
+    .radio-option.selected .radio-option__circle::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary-gradient);
+    }
+
+    .radio-option__text {
+      font-size: var(--font-size-sm);
+      color: var(--color-text);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: var(--space-3);
+      margin-top: var(--space-6);
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- Admin Layout -->
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="sidebar"></aside>
+
+    <!-- Content -->
+    <div class="admin-content">
+      <!-- Case Switcher -->
+      <nav class="case-switcher" style="--case-switcher-top: 0;">
+        <button class="active" data-case="1">목록: PENDING_REVIEW</button>
+        <button data-case="2">목록: ACTIVE</button>
+        <button data-case="3">승인 모달</button>
+        <button data-case="4">거절 모달</button>
+      </nav>
+
+      <!-- Case 1: PENDING_REVIEW -->
+      <main class="screen active" id="case-1" style="padding: var(--space-6);">
+        <h1 class="page-title">📊 Biz 주문 관리</h1>
+
+        <div class="filter-tabs">
+          <button class="filter-tabs__btn active">PENDING_REVIEW</button>
+          <button class="filter-tabs__btn">ACTIVE</button>
+          <button class="filter-tabs__btn">COMPLETED</button>
+          <button class="filter-tabs__btn">CANCELLED</button>
+          <button class="filter-tabs__btn">REJECTED</button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>주문자</th>
+              <th>플랫폼</th>
+              <th>타겟 계정</th>
+              <th>수량</th>
+              <th>기간</th>
+              <th>Stars</th>
+              <th>주문일</th>
+              <th>액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td><a class="data-table__link" href="#" target="_blank">Challenger_aB3xK9</a></td>
+              <td><span class="platform-badge">📷 Instagram</span></td>
+              <td><a class="data-table__link" href="https://instagram.com/defyton_official" target="_blank">@defyton_official</a></td>
+              <td>100</td>
+              <td>2주</td>
+              <td>⭐ 1,200</td>
+              <td>2025-06-15</td>
+              <td>
+                <div class="action-btns">
+                  <button class="action-btn action-btn--approve" onclick="document.querySelector('[data-case=&quot;3&quot;]').click()">승인</button>
+                  <button class="action-btn action-btn--reject" onclick="document.querySelector('[data-case=&quot;4&quot;]').click()">거절</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><a class="data-table__link" href="#" target="_blank">Challenger_xY7mN2</a></td>
+              <td><span class="platform-badge">𝕏 X</span></td>
+              <td><a class="data-table__link" href="https://x.com/defyton_app" target="_blank">@defyton_app</a></td>
+              <td>200</td>
+              <td>4주</td>
+              <td>⭐ 3,120</td>
+              <td>2025-06-16</td>
+              <td>
+                <div class="action-btns">
+                  <button class="action-btn action-btn--approve">승인</button>
+                  <button class="action-btn action-btn--reject">거절</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </main>
+
+      <!-- Case 2: ACTIVE -->
+      <main class="screen" id="case-2" style="padding: var(--space-6);">
+        <h1 class="page-title">📊 Biz 주문 관리</h1>
+
+        <div class="filter-tabs">
+          <button class="filter-tabs__btn">PENDING_REVIEW</button>
+          <button class="filter-tabs__btn active">ACTIVE</button>
+          <button class="filter-tabs__btn">COMPLETED</button>
+          <button class="filter-tabs__btn">CANCELLED</button>
+          <button class="filter-tabs__btn">REJECTED</button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>주문자</th>
+              <th>플랫폼</th>
+              <th>타겟 계정</th>
+              <th>수량</th>
+              <th>진행률</th>
+              <th>챌린지</th>
+              <th>승인일</th>
+              <th>액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>3</td>
+              <td><a class="data-table__link" href="#" target="_blank">Challenger_pQ4wR8</a></td>
+              <td><span class="platform-badge">📷 Instagram</span></td>
+              <td><a class="data-table__link" href="https://instagram.com/crypto_guru" target="_blank">@crypto_guru</a></td>
+              <td>100</td>
+              <td>
+                <div class="table-progress">
+                  <div class="table-progress__bar"><div class="table-progress__fill" style="width: 65%;"></div></div>
+                  <span class="table-progress__text">65/100</span>
+                </div>
+              </td>
+              <td><a class="data-table__link" href="#">#142</a></td>
+              <td>2025-06-10</td>
+              <td>
+                <button class="action-btn" style="background-color: var(--color-warning); color: var(--color-text-white);">완료</button>
+              </td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><a class="data-table__link" href="#" target="_blank">Challenger_mN5tV3</a></td>
+              <td><span class="platform-badge">𝕏 X</span></td>
+              <td><a class="data-table__link" href="https://x.com/web3_daily" target="_blank">@web3_daily</a></td>
+              <td>50</td>
+              <td>
+                <div class="table-progress">
+                  <div class="table-progress__bar"><div class="table-progress__fill" style="width: 32%;"></div></div>
+                  <span class="table-progress__text">16/50</span>
+                </div>
+              </td>
+              <td><a class="data-table__link" href="#">#145</a></td>
+              <td>2025-06-12</td>
+              <td>
+                <button class="action-btn" style="background-color: var(--color-warning); color: var(--color-text-white);">완료</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </main>
+
+      <!-- Case 3: 승인 모달 -->
+      <main class="screen" id="case-3" style="padding: var(--space-6);">
+        <h1 class="page-title">📊 Biz 주문 관리</h1>
+        <p style="color: var(--color-text-secondary); margin-bottom: var(--space-4);">승인 모달 예시 (오버레이 상태)</p>
+
+        <!-- Modal -->
+        <div class="modal" style="position: relative; inset: unset; height: 400px;">
+          <div class="modal__backdrop" style="border-radius: var(--radius-lg);"></div>
+          <div class="modal__content" style="max-width: 440px;">
+            <h2 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); margin-bottom: var(--space-4);">주문 승인</h2>
+
+            <div class="modal-form__summary">
+              <div class="modal-form__summary-row">
+                <span class="modal-form__summary-label">타겟 계정</span>
+                <span class="modal-form__summary-value">@defyton_official</span>
+              </div>
+              <div class="modal-form__summary-row">
+                <span class="modal-form__summary-label">플랫폼</span>
+                <span class="modal-form__summary-value">📷 Instagram</span>
+              </div>
+              <div class="modal-form__summary-row">
+                <span class="modal-form__summary-label">수량</span>
+                <span class="modal-form__summary-value">100명</span>
+              </div>
+              <div class="modal-form__summary-row">
+                <span class="modal-form__summary-label">기간</span>
+                <span class="modal-form__summary-value">2주</span>
+              </div>
+            </div>
+
+            <div class="notice notice--info" style="font-size: var(--font-size-xs);">
+              승인 시 EVENT 챌린지가 자동 생성됩니다.
+            </div>
+
+            <div class="modal-actions">
+              <button class="btn btn--secondary btn--sm">취소</button>
+              <button class="btn btn--success btn--sm">승인 확정</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Case 4: 거절 모달 -->
+      <main class="screen" id="case-4" style="padding: var(--space-6);">
+        <h1 class="page-title">📊 Biz 주문 관리</h1>
+        <p style="color: var(--color-text-secondary); margin-bottom: var(--space-4);">거절 모달 예시 (오버레이 상태)</p>
+
+        <!-- Modal -->
+        <div class="modal" style="position: relative; inset: unset; height: 500px;">
+          <div class="modal__backdrop" style="border-radius: var(--radius-lg);"></div>
+          <div class="modal__content" style="max-width: 440px;">
+            <h2 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); margin-bottom: var(--space-4);">주문 거절</h2>
+
+            <div class="modal-form__summary">
+              <div class="modal-form__summary-row">
+                <span class="modal-form__summary-label">타겟 계정</span>
+                <span class="modal-form__summary-value">@defyton_official</span>
+              </div>
+              <div class="modal-form__summary-row">
+                <span class="modal-form__summary-label">플랫폼</span>
+                <span class="modal-form__summary-value">📷 Instagram</span>
+              </div>
+            </div>
+
+            <div class="modal-form__group">
+              <div class="modal-form__label">거절 사유</div>
+              <div class="radio-group">
+                <div class="radio-option selected">
+                  <div class="radio-option__circle"></div>
+                  <span class="radio-option__text">Account not found or private</span>
+                </div>
+                <div class="radio-option">
+                  <div class="radio-option__circle"></div>
+                  <span class="radio-option__text">Inappropriate content</span>
+                </div>
+                <div class="radio-option">
+                  <div class="radio-option__circle"></div>
+                  <span class="radio-option__text">Spam/scam account</span>
+                </div>
+                <div class="radio-option">
+                  <div class="radio-option__circle"></div>
+                  <span class="radio-option__text">Other</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="notice notice--warning" style="font-size: var(--font-size-xs);">
+              거절 시 Stars가 자동 환불됩니다.
+            </div>
+
+            <div class="modal-actions">
+              <button class="btn btn--secondary btn--sm">취소</button>
+              <button class="btn btn--danger btn--sm">거절 확정</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Radio group interaction
+    document.querySelectorAll('.radio-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        opt.closest('.radio-group').querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+      });
+    });
+  </script>
+  <script src="../shared/admin-nav.js"></script>
+</body>
+</html>
