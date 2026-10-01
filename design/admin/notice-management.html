@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공지사항 관리 - Admin</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/admin-layout.css">
+  <style>
+    /* 이 화면 전용 스타일 */
+    .nm-toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      border-radius: var(--radius-full);
+      background-color: var(--color-bg-elevated);
+      border: 2px solid var(--color-border);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .nm-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: var(--color-text-tertiary);
+      transition: all var(--transition-fast);
+    }
+
+    .nm-toggle--active {
+      background-color: var(--color-success-bg);
+      border-color: var(--color-success-border);
+    }
+
+    .nm-toggle--active::after {
+      left: 22px;
+      background-color: var(--color-success);
+    }
+
+    .nm-form-field {
+      margin-bottom: var(--space-4);
+    }
+
+    .nm-form-label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+    }
+
+    .nm-form-input {
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-normal);
+      background-color: var(--color-bg);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      transition: border-color var(--transition-fast);
+      min-height: 40px;
+    }
+
+    .nm-form-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .nm-form-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-normal);
+      background-color: var(--color-bg);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      resize: vertical;
+      transition: border-color var(--transition-fast);
+      font-family: var(--font-family);
+    }
+
+    .nm-form-textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .nm-form-textarea::placeholder,
+    .nm-form-input::placeholder {
+      color: var(--color-text-tertiary);
+    }
+
+    .nm-form-row {
+      display: flex;
+      gap: var(--space-4);
+    }
+
+    .nm-form-row > .nm-form-field {
+      flex: 1;
+    }
+
+    .nm-form-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .nm-form-toggle__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+    }
+
+    .nm-modal-actions {
+      display: flex;
+      gap: var(--space-3);
+      margin-top: var(--space-6);
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--color-border);
+    }
+
+    @media (max-width: 768px) {
+      .nm-form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">목록</button>
+    <button data-case="2">생성 모달</button>
+    <button data-case="3">수정 모달</button>
+    <button data-case="4">빈 상태</button>
+  </nav>
+
+  <!-- ===== Case 1: 목록 — 공지 있음 ===== -->
+  <main class="screen active" id="case-1">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar" id="sidebar"></aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">공지사항 관리</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">공지사항 관리</h1>
+          <div class="admin-page-header__actions">
+            <button class="btn btn--primary btn--sm">공지 생성</button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="admin-filter">
+          <select class="admin-filter__select">
+            <option value="" selected>전체</option>
+            <option value="true">활성</option>
+            <option value="false">비활성</option>
+          </select>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>유형</th>
+                <th>제목</th>
+                <th>활성</th>
+                <th>기간</th>
+                <th>생성일</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#1</td>
+                <td><span class="badge badge--warning">MAINTENANCE</span></td>
+                <td>서버 점검 안내</td>
+                <td><span class="nm-toggle nm-toggle--active" title="활성"></span></td>
+                <td>2026-05-20 ~ 2026-05-20</td>
+                <td>2026-05-18</td>
+              </tr>
+              <tr>
+                <td>#2</td>
+                <td><span class="badge badge--info">EVENT</span></td>
+                <td>신년 챌린지 이벤트</td>
+                <td><span class="nm-toggle nm-toggle--active" title="활성"></span></td>
+                <td>2026-05-15 ~ 2026-06-15</td>
+                <td>2026-05-15</td>
+              </tr>
+              <tr>
+                <td>#3</td>
+                <td><span class="badge badge--neutral">GENERAL</span></td>
+                <td>서비스 오픈 안내</td>
+                <td><span class="nm-toggle" title="비활성"></span></td>
+                <td>상시 노출</td>
+                <td>2026-05-01</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="admin-mobile-card">
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ID</span>
+              <span class="admin-mobile-card__value">#1</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span class="badge badge--warning">MAINTENANCE</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">제목</span>
+              <span class="admin-mobile-card__value">서버 점검 안내</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">활성</span>
+              <span class="nm-toggle nm-toggle--active" title="활성"></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">기간</span>
+              <span class="admin-mobile-card__value">2026-05-20 ~ 2026-05-20</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">생성일</span>
+              <span class="admin-mobile-card__value">2026-05-18</span>
+            </div>
+          </div>
+
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ID</span>
+              <span class="admin-mobile-card__value">#2</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span class="badge badge--info">EVENT</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">제목</span>
+              <span class="admin-mobile-card__value">신년 챌린지 이벤트</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">활성</span>
+              <span class="nm-toggle nm-toggle--active" title="활성"></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">기간</span>
+              <span class="admin-mobile-card__value">2026-05-15 ~ 2026-06-15</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">생성일</span>
+              <span class="admin-mobile-card__value">2026-05-15</span>
+            </div>
+          </div>
+
+          <div class="admin-mobile-card__item">
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">ID</span>
+              <span class="admin-mobile-card__value">#3</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">유형</span>
+              <span class="badge badge--neutral">GENERAL</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">제목</span>
+              <span class="admin-mobile-card__value">서비스 오픈 안내</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">활성</span>
+              <span class="nm-toggle" title="비활성"></span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">기간</span>
+              <span class="admin-mobile-card__value">상시 노출</span>
+            </div>
+            <div class="admin-mobile-card__row">
+              <span class="admin-mobile-card__label">생성일</span>
+              <span class="admin-mobile-card__value">2026-05-01</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" style="margin-top: var(--space-4);">
+          <button class="pagination__btn" disabled>‹</button>
+          <button class="pagination__btn active">1</button>
+          <button class="pagination__btn" disabled>‹</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 2: 생성 폼 (모달) ===== -->
+  <main class="screen" id="case-2">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar" id="sidebar"></aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">공지사항 관리</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content (dimmed) -->
+      <div class="admin-content" style="opacity: 0.3;">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">공지사항 관리</h1>
+          <div class="admin-page-header__actions">
+            <button class="btn btn--primary btn--sm">공지 생성</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Modal -->
+      <div class="modal">
+        <div class="modal__backdrop"></div>
+        <div class="modal__content">
+          <h2 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); color: var(--color-text); margin-bottom: var(--space-6);">공지 생성</h2>
+
+          <div class="nm-form-field">
+            <label class="nm-form-label">유형</label>
+            <select class="nm-form-input">
+              <option value="GENERAL" selected>GENERAL</option>
+              <option value="MAINTENANCE">MAINTENANCE</option>
+              <option value="EVENT">EVENT</option>
+            </select>
+          </div>
+
+          <div class="nm-form-field">
+            <label class="nm-form-label">제목</label>
+            <input type="text" class="nm-form-input" placeholder="공지 제목을 입력하세요" maxlength="200">
+          </div>
+
+          <div class="nm-form-field">
+            <label class="nm-form-label">내용</label>
+            <textarea class="nm-form-textarea" placeholder="공지 내용을 입력하세요" maxlength="2000"></textarea>
+          </div>
+
+          <div class="nm-form-row">
+            <div class="nm-form-field">
+              <label class="nm-form-label">시작일 (선택)</label>
+              <input type="datetime-local" class="nm-form-input">
+              <span style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin-top: var(--space-1); display: block;">비어있으면 즉시 노출</span>
+            </div>
+            <div class="nm-form-field">
+              <label class="nm-form-label">종료일 (선택)</label>
+              <input type="datetime-local" class="nm-form-input">
+              <span style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin-top: var(--space-1); display: block;">비어있으면 무기한 노출</span>
+            </div>
+          </div>
+
+          <div class="nm-form-field">
+            <div class="nm-form-toggle">
+              <span class="nm-toggle nm-toggle--active" id="create-toggle"></span>
+              <span class="nm-form-toggle__label">활성</span>
+            </div>
+          </div>
+
+          <div class="nm-modal-actions">
+            <button class="btn btn--primary btn--sm" disabled>생성</button>
+            <button class="btn btn--ghost btn--sm">취소</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 3: 수정 폼 (모달) ===== -->
+  <main class="screen" id="case-3">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar" id="sidebar"></aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">공지사항 관리</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content (dimmed) -->
+      <div class="admin-content" style="opacity: 0.3;">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">공지사항 관리</h1>
+          <div class="admin-page-header__actions">
+            <button class="btn btn--primary btn--sm">공지 생성</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Modal -->
+      <div class="modal">
+        <div class="modal__backdrop"></div>
+        <div class="modal__content">
+          <h2 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); color: var(--color-text); margin-bottom: var(--space-6);">공지 수정</h2>
+
+          <div class="nm-form-field">
+            <label class="nm-form-label">유형</label>
+            <select class="nm-form-input">
+              <option value="GENERAL">GENERAL</option>
+              <option value="MAINTENANCE" selected>MAINTENANCE</option>
+              <option value="EVENT">EVENT</option>
+            </select>
+          </div>
+
+          <div class="nm-form-field">
+            <label class="nm-form-label">제목</label>
+            <input type="text" class="nm-form-input" value="서버 점검 안내" maxlength="200">
+          </div>
+
+          <div class="nm-form-field">
+            <label class="nm-form-label">내용</label>
+            <textarea class="nm-form-textarea" maxlength="2000">안녕하세요. 서비스 안정화를 위한 서버 점검이 예정되어 있습니다. 점검 시간 동안 서비스 이용이 제한될 수 있으니 양해 부탁드립니다.</textarea>
+          </div>
+
+          <div class="nm-form-row">
+            <div class="nm-form-field">
+              <label class="nm-form-label">시작일 (선택)</label>
+              <div style="display: flex; gap: var(--space-2); align-items: center;">
+                <input type="datetime-local" class="nm-form-input" value="2026-05-20T00:00" style="flex: 1;">
+                <button class="btn btn--ghost btn--sm" style="color: var(--color-error); white-space: nowrap; flex-shrink: 0;">초기화</button>
+              </div>
+              <span style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin-top: var(--space-1); display: block;">비어있으면 즉시 노출</span>
+            </div>
+            <div class="nm-form-field">
+              <label class="nm-form-label">종료일 (선택)</label>
+              <div style="display: flex; gap: var(--space-2); align-items: center;">
+                <input type="datetime-local" class="nm-form-input" value="2026-05-20T23:59" style="flex: 1;">
+                <button class="btn btn--ghost btn--sm" style="color: var(--color-error); white-space: nowrap; flex-shrink: 0;">초기화</button>
+              </div>
+              <span style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin-top: var(--space-1); display: block;">비어있으면 무기한 노출</span>
+            </div>
+          </div>
+
+          <div class="nm-form-field">
+            <div class="nm-form-toggle">
+              <span class="nm-toggle nm-toggle--active" id="edit-toggle"></span>
+              <span class="nm-form-toggle__label">활성</span>
+            </div>
+          </div>
+
+          <div class="nm-modal-actions">
+            <button class="btn btn--primary btn--sm">저장</button>
+            <button class="btn btn--ghost btn--sm">취소</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Case 4: 빈 상태 ===== -->
+  <main class="screen" id="case-4">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar" id="sidebar"></aside>
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-topbar">
+        <button class="admin-topbar__menu-btn">☰</button>
+        <span class="admin-topbar__title">공지사항 관리</span>
+        <span style="width:44px;"></span>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="admin-page-header">
+          <h1 class="admin-page-header__title">공지사항 관리</h1>
+          <div class="admin-page-header__actions">
+            <button class="btn btn--primary btn--sm">공지 생성</button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="admin-filter">
+          <select class="admin-filter__select">
+            <option value="" selected>전체</option>
+            <option value="true">활성</option>
+            <option value="false">비활성</option>
+          </select>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state">
+          <div class="empty-state__icon">📢</div>
+          <div class="empty-state__title">공지사항 없음</div>
+          <div class="empty-state__description">공지사항이 없습니다.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Mobile sidebar toggle
+    document.querySelectorAll('.admin-topbar__menu-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sidebar = btn.closest('.admin-layout').querySelector('.admin-sidebar');
+        sidebar.classList.toggle('admin-sidebar--open');
+      });
+    });
+
+    // Toggle click interaction
+    document.querySelectorAll('.nm-toggle').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        toggle.classList.toggle('nm-toggle--active');
+      });
+    });
+  </script>
+  <script src="../shared/admin-nav.js"></script>
+</body>
+</html>

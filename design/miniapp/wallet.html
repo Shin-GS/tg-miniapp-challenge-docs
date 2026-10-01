@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wallet - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Wallet Screen Styles ===== */
+
+    /* Wallet Connection Info */
+    .wallet-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .wallet-info__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background: var(--gradient-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .wallet-info__details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .wallet-info__name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .wallet-info__address {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      font-family: monospace;
+    }
+
+    .wallet-info__disconnect {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-danger);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-full);
+      background-color: var(--color-danger-bg);
+      border: 1px solid var(--color-danger-border);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .wallet-info__disconnect:active {
+      transform: scale(0.95);
+    }
+
+    /* Balance Cards */
+    .balance-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-3);
+    }
+
+    .balance-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-4) var(--space-2);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--color-border);
+      background-color: var(--color-bg-card);
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+
+    .balance-card__label {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      margin-bottom: var(--space-2);
+    }
+
+    .balance-card__value {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      line-height: var(--line-height-tight);
+    }
+
+    .balance-card__unit {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-tertiary);
+      margin-top: var(--space-1);
+    }
+
+    .balance-card--available {
+      border-color: var(--color-success-border);
+      background: linear-gradient(to bottom, var(--color-success-bg), var(--color-bg-card));
+    }
+
+    .balance-card--locked {
+      border-color: var(--color-warning-border);
+      background: linear-gradient(to bottom, var(--color-warning-bg), var(--color-bg-card));
+    }
+
+    .balance-card--reward {
+      border-color: var(--color-expert-border);
+      background: linear-gradient(to bottom, var(--color-expert-bg), var(--color-bg-card));
+    }
+
+    /* Buy GRAM Section */
+    .buy-section__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      margin-bottom: var(--space-3);
+    }
+
+    .buy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-2);
+    }
+
+    .buy-grid--row2 {
+      grid-template-columns: 1fr 1fr;
+      margin-top: var(--space-2);
+    }
+
+    .buy-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-3) var(--space-2);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--color-border);
+      background-color: var(--color-bg-card);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      min-height: 64px;
+    }
+
+    .buy-btn:active {
+      transform: scale(0.96);
+    }
+
+    .buy-btn.selected {
+      border-color: var(--color-primary);
+      background: linear-gradient(to bottom, var(--color-info-bg), var(--color-bg-card));
+      box-shadow: var(--shadow-md);
+    }
+
+    .buy-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .buy-btn__amount {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .buy-btn__fee {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+      margin-top: 2px;
+    }
+
+    .buy-btn.selected .buy-btn__amount {
+      color: var(--color-primary);
+    }
+
+    /* Loading state for buy button */
+    .buy-btn--loading {
+      position: relative;
+      border-color: var(--color-primary);
+      pointer-events: none;
+    }
+
+    .buy-btn--loading::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--color-primary-lighter);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .buy-btn--loading .buy-btn__amount,
+    .buy-btn--loading .buy-btn__fee {
+      visibility: hidden;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Pending Withdrawals */
+    .withdrawal-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .withdrawal-item__info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .withdrawal-item__amount {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .withdrawal-item__meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .withdrawal-item__date {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+    }
+
+    .withdrawal-item__cancel {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-danger);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      background-color: var(--color-danger-bg);
+      border: 1px solid var(--color-danger-border);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .withdrawal-item__cancel:active {
+      transform: scale(0.95);
+    }
+
+    /* Waiting message */
+    .waiting-msg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+      background-color: var(--color-info-bg);
+      border: 1px solid var(--color-info-border);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-info-text);
+    }
+
+    .waiting-msg__spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--color-info-border);
+      border-top-color: var(--color-info);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* Guide text */
+    .guide-text {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      text-align: center;
+      padding: var(--space-2) 0;
+    }
+
+    /* Purchase Confirm Modal */
+    .purchase-confirm__row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: var(--space-2) 0;
+    }
+
+    .purchase-confirm__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+    }
+
+    .purchase-confirm__value {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .purchase-confirm__value--highlight {
+      color: var(--color-primary);
+    }
+
+    .purchase-confirm__fee-note {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+      text-align: right;
+    }
+
+    .purchase-confirm__reassurance {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      text-align: center;
+      line-height: var(--line-height-normal);
+      margin-top: var(--space-3);
+      padding: var(--space-2) var(--space-3);
+      background-color: var(--color-success-bg);
+      border-radius: var(--radius-sm);
+    }
+
+    /* Payment Method Selection */
+    .payment-methods {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+    }
+
+    .payment-method {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--color-border);
+      background-color: var(--color-bg-card);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .payment-method:active {
+      transform: scale(0.98);
+    }
+
+    .payment-method.selected {
+      border-color: var(--color-primary);
+      background: linear-gradient(to bottom, var(--color-info-bg), var(--color-bg-card));
+      box-shadow: var(--shadow-sm);
+    }
+
+    .payment-method__icon {
+      font-size: var(--font-size-lg);
+      flex-shrink: 0;
+    }
+
+    .payment-method__info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .payment-method__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .payment-method__badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-full);
+      background-color: var(--color-success);
+      color: var(--color-text-white);
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
+      white-space: nowrap;
+    }
+
+    .payment-method__price {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-secondary);
+      flex-shrink: 0;
+    }
+
+    /* Stars price in buy button (disconnected state) */
+    .buy-btn__stars {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+    }
+
+    .buy-btn.selected .buy-btn__stars {
+      color: var(--color-primary);
+    }
+
+    /* Connect wallet hint */
+    .connect-hint {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      text-align: center;
+      padding: var(--space-2) 0;
+    }
+
+    .connect-hint a {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: var(--font-weight-bold);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">미연결</button>
+    <button data-case="1-1">연결만</button>
+    <button data-case="2">연결됨</button>
+    <button data-case="3">잔액 없음</button>
+    <button data-case="4-A">GRAM 확인</button>
+    <button data-case="4-B">Stars 확인</button>
+    <button data-case="4-1-A">GRAM 구매 중</button>
+    <button data-case="4-1-B">Stars 구매 중</button>
+    <button data-case="5">대기</button>
+    <button data-case="6">해제 차단</button>
+    <button data-case="7">해제 확인</button>
+  </nav>
+
+  <div class="mobile-container">
+
+    <!-- ===== Case 1: 지갑 미연결 상태 ===== -->
+    <main class="screen active" id="case-1">
+
+      <div class="space-y-4" style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+        <!-- Balance Cards (viewable even without wallet) -->
+        <div class="section-header">Balance</div>
+        <div class="balance-grid">
+          <div class="balance-card balance-card--available">
+            <span class="balance-card__label">Deposit</span>
+            <span class="balance-card__value">2.5</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--locked">
+            <span class="balance-card__label">Locked</span>
+            <span class="balance-card__value">5.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--reward">
+            <span class="balance-card__label">Reward</span>
+            <span class="balance-card__value">1.2</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+        </div>
+
+        <!-- Buy GRAM Section (Stars active) -->
+        <div class="buy-section__title">Buy GRAM</div>
+        <div class="buy-grid">
+          <button class="buy-btn" data-amount="1" data-stars="169">
+            <span class="buy-btn__amount">1 GRAM</span>
+            <span class="buy-btn__stars">169 ⭐</span>
+          </button>
+          <button class="buy-btn" data-amount="5" data-stars="842">
+            <span class="buy-btn__amount">5 GRAM</span>
+            <span class="buy-btn__stars">842 ⭐</span>
+          </button>
+          <button class="buy-btn" data-amount="15" data-stars="2525">
+            <span class="buy-btn__amount">15 GRAM</span>
+            <span class="buy-btn__stars">2,525 ⭐</span>
+          </button>
+        </div>
+        <div class="buy-grid buy-grid--row2">
+          <button class="buy-btn" data-amount="30" data-stars="5050">
+            <span class="buy-btn__amount">30 GRAM</span>
+            <span class="buy-btn__stars">5,050 ⭐</span>
+          </button>
+          <button class="buy-btn" data-amount="60" data-stars="10100">
+            <span class="buy-btn__amount">60 GRAM</span>
+            <span class="buy-btn__stars">10,100 ⭐</span>
+          </button>
+        </div>
+
+        <!-- Connect wallet hint -->
+        <p class="connect-hint">Have GRAM? <a href="#" id="connect-hint-link">Connect wallet</a> for direct payment</p>
+
+        <!-- Connect Wallet CTA -->
+        <button class="btn btn--primary btn--full" id="connect-wallet-btn">
+          💎 CONNECT WALLET
+        </button>
+
+        <!-- Withdraw Button (disabled) -->
+        <button class="btn btn--secondary btn--full" disabled>
+          WITHDRAW
+        </button>
+      </div>
+    </main>
+
+    <!-- ===== Case 1-1: 지갑 연결됨 (다른 기기) — Linked Only ===== -->
+    <main class="screen" id="case-1-1">
+
+      <div class="space-y-4" style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+        <!-- Wallet Info (warning style) -->
+        <div class="wallet-info" style="border-color: var(--color-warning-border);">
+          <div class="wallet-info__icon" style="background: var(--color-warning-bg);">🔗</div>
+          <div class="wallet-info__details">
+            <span class="wallet-info__name">Wallet Linked</span>
+            <span class="wallet-info__address">0:d9...4abf</span>
+          </div>
+        </div>
+
+        <!-- Guide message -->
+        <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); line-height: var(--line-height-normal); padding: 0 var(--space-1);">
+          Your wallet is linked but not active on this device. TON Connect sessions are device-specific for security. Connect on this device to make purchases.
+        </p>
+
+        <!-- Connect on this device button -->
+        <button class="btn btn--primary btn--full" id="connect-this-device-btn">
+          🔗 CONNECT ON THIS DEVICE
+        </button>
+
+        <!-- Balance Cards -->
+        <div class="section-header">Balance</div>
+        <div class="balance-grid">
+          <div class="balance-card balance-card--available">
+            <span class="balance-card__label">Deposit</span>
+            <span class="balance-card__value">5.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--locked">
+            <span class="balance-card__label">Locked</span>
+            <span class="balance-card__value">3.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--reward">
+            <span class="balance-card__label">Reward</span>
+            <span class="balance-card__value">2.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+        </div>
+
+        <!-- Buy GRAM Section (Stars active) -->
+        <div class="buy-section__title">Buy GRAM</div>
+        <div class="buy-grid">
+          <button class="buy-btn" data-amount="1" data-stars="169">
+            <span class="buy-btn__amount">1 GRAM</span>
+            <span class="buy-btn__stars">169 ⭐</span>
+          </button>
+          <button class="buy-btn" data-amount="5" data-stars="842">
+            <span class="buy-btn__amount">5 GRAM</span>
+            <span class="buy-btn__stars">842 ⭐</span>
+          </button>
+          <button class="buy-btn" data-amount="15" data-stars="2525">
+            <span class="buy-btn__amount">15 GRAM</span>
+            <span class="buy-btn__stars">2,525 ⭐</span>
+          </button>
+        </div>
+        <div class="buy-grid buy-grid--row2">
+          <button class="buy-btn" data-amount="30" data-stars="5050">
+            <span class="buy-btn__amount">30 GRAM</span>
+            <span class="buy-btn__stars">5,050 ⭐</span>
+          </button>
+          <button class="buy-btn" data-amount="60" data-stars="10100">
+            <span class="buy-btn__amount">60 GRAM</span>
+            <span class="buy-btn__stars">10,100 ⭐</span>
+          </button>
+        </div>
+
+        <!-- Connect wallet hint -->
+        <p class="connect-hint">Have GRAM? <a href="#" id="connect-hint-link-1-1">Connect wallet</a> for direct payment</p>
+
+        <!-- Withdraw Button (active — has balance) -->
+        <button class="btn btn--secondary btn--full" data-action="withdraw">
+          WITHDRAW
+        </button>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: 지갑 연결 + 잔액 있음 ===== -->
+    <main class="screen" id="case-2">
+
+      <div class="space-y-4" style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+        <!-- Wallet Info -->
+        <div class="wallet-info">
+          <div class="wallet-info__icon">💎</div>
+          <div class="wallet-info__details">
+            <span class="wallet-info__name">Tonkeeper</span>
+            <span class="wallet-info__address">UQBx...3kF2</span>
+          </div>
+          <button class="wallet-info__disconnect" data-action="disconnect">Disconnect</button>
+        </div>
+
+        <!-- Balance Cards -->
+        <div class="section-header">Balance</div>
+        <div class="balance-grid">
+          <div class="balance-card balance-card--available">
+            <span class="balance-card__label">Deposit</span>
+            <span class="balance-card__value">12.5</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--locked">
+            <span class="balance-card__label">Locked</span>
+            <span class="balance-card__value">15.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--reward">
+            <span class="balance-card__label">Reward</span>
+            <span class="balance-card__value">3.8</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+        </div>
+
+        <!-- Buy GRAM Section -->
+        <div class="buy-section__title">Buy GRAM</div>
+        <div class="buy-grid">
+          <button class="buy-btn" data-amount="1">
+            <span class="buy-btn__amount">1 GRAM</span>
+          </button>
+          <button class="buy-btn selected" data-amount="5">
+            <span class="buy-btn__amount">5 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="15">
+            <span class="buy-btn__amount">15 GRAM</span>
+          </button>
+        </div>
+        <div class="buy-grid buy-grid--row2">
+          <button class="buy-btn" data-amount="30">
+            <span class="buy-btn__amount">30 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="60">
+            <span class="buy-btn__amount">60 GRAM</span>
+          </button>
+        </div>
+
+        <!-- Payment Method Selection (shown after package selected) -->
+        <div class="payment-methods" id="payment-methods-case2">
+          <div class="payment-method selected" data-method="stars">
+            <span class="payment-method__icon">⭐</span>
+            <div class="payment-method__info">
+              <span class="payment-method__label">Pay with Stars</span>
+            </div>
+            <span class="payment-method__price">842 ⭐</span>
+          </div>
+          <div class="payment-method" data-method="GRAM">
+            <span class="payment-method__icon">💎</span>
+            <div class="payment-method__info">
+              <span class="payment-method__label">Pay with GRAM</span>
+              <span class="payment-method__badge">Best rate</span>
+            </div>
+            <span class="payment-method__price">5.5 GRAM</span>
+          </div>
+        </div>
+
+        <!-- Withdraw Button -->
+        <button class="btn btn--secondary btn--full" data-action="withdraw">
+          WITHDRAW
+        </button>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: 지갑 연결 + 잔액 0 ===== -->
+    <main class="screen" id="case-3">
+
+      <div class="space-y-4" style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+        <!-- Wallet Info -->
+        <div class="wallet-info">
+          <div class="wallet-info__icon">💎</div>
+          <div class="wallet-info__details">
+            <span class="wallet-info__name">Tonkeeper</span>
+            <span class="wallet-info__address">UQBx...3kF2</span>
+          </div>
+          <button class="wallet-info__disconnect" data-action="disconnect">Disconnect</button>
+        </div>
+
+        <!-- Balance Cards (all zero) -->
+        <div class="section-header">Balance</div>
+        <div class="balance-grid">
+          <div class="balance-card balance-card--available">
+            <span class="balance-card__label">Deposit</span>
+            <span class="balance-card__value">0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--locked">
+            <span class="balance-card__label">Locked</span>
+            <span class="balance-card__value">0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--reward">
+            <span class="balance-card__label">Reward</span>
+            <span class="balance-card__value">0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+        </div>
+
+        <!-- Guide Text -->
+        <p class="guide-text">💡 Buy GRAM to start your challenge!</p>
+
+        <!-- Buy GRAM Section -->
+        <div class="buy-section__title">Buy GRAM</div>
+        <div class="buy-grid">
+          <button class="buy-btn" data-amount="1">
+            <span class="buy-btn__amount">1 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="5">
+            <span class="buy-btn__amount">5 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="15">
+            <span class="buy-btn__amount">15 GRAM</span>
+          </button>
+        </div>
+        <div class="buy-grid buy-grid--row2">
+          <button class="buy-btn" data-amount="30">
+            <span class="buy-btn__amount">30 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="60">
+            <span class="buy-btn__amount">60 GRAM</span>
+          </button>
+        </div>
+
+        <!-- Payment Method Selection (shown after package selected) -->
+        <div class="payment-methods" id="payment-methods-case3" hidden>
+          <div class="payment-method selected" data-method="stars">
+            <span class="payment-method__icon">⭐</span>
+            <div class="payment-method__info">
+              <span class="payment-method__label">Pay with Stars</span>
+            </div>
+            <span class="payment-method__price">842 ⭐</span>
+          </div>
+          <div class="payment-method" data-method="GRAM">
+            <span class="payment-method__icon">💎</span>
+            <div class="payment-method__info">
+              <span class="payment-method__label">Pay with GRAM</span>
+              <span class="payment-method__badge">Best rate</span>
+            </div>
+            <span class="payment-method__price">5.5 GRAM</span>
+          </div>
+        </div>
+
+        <!-- Withdraw Button (disabled - no balance) -->
+        <button class="btn btn--secondary btn--full" disabled data-action="withdraw-disabled">
+          WITHDRAW
+        </button>
+      </div>
+    </main>
+
+    <!-- ===== Case 4-A: TON Connect 구매 확인 모달 ===== -->
+    <main class="screen" id="case-4-A">
+
+      <div class="space-y-4" style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+        <!-- Wallet Info -->
+        <div class="wallet-info">
+          <div class="wallet-info__icon">💎</div>
+          <div class="wallet-info__details">
+            <span class="wallet-info__name">Tonkeeper</span>
+            <span class="wallet-info__address">UQBx...3kF2</span>
+          </div>
+          <button class="wallet-info__disconnect" data-action="disconnect">Disconnect</button>
+        </div>
+
+        <!-- Balance Cards -->
+        <div class="section-header">Balance</div>
+        <div class="balance-grid">
+          <div class="balance-card balance-card--available">
+            <span class="balance-card__label">Deposit</span>
+            <span class="balance-card__value">12.5</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--locked">
+            <span class="balance-card__label">Locked</span>
+            <span class="balance-card__value">15.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--reward">
+            <span class="balance-card__label">Reward</span>
+            <span class="balance-card__value">3.8</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+        </div>
+
+        <!-- Buy GRAM Section (5 GRAM selected) -->
+        <div class="buy-section__title">Buy GRAM</div>
+        <div class="buy-grid">
+          <button class="buy-btn" data-amount="1">
+            <span class="buy-btn__amount">1 GRAM</span>
+          </button>
+          <button class="buy-btn selected" data-amount="5">
+            <span class="buy-btn__amount">5 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="15">
+            <span class="buy-btn__amount">15 GRAM</span>
+          </button>
+        </div>
+        <div class="buy-grid buy-grid--row2">
+          <button class="buy-btn" data-amount="30">
+            <span class="buy-btn__amount">30 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="60">
+            <span class="buy-btn__amount">60 GRAM</span>
+          </button>
+        </div>
+
+        <!-- Payment Method (GRAM selected) -->
+        <div class="payment-methods">
+          <div class="payment-method" data-method="stars">
+            <span class="payment-method__icon">⭐</span>
+            <div class="payment-method__info">
+              <span class="payment-method__label">Pay with Stars</span>
+            </div>
+            <span class="payment-method__price">842 ⭐</span>
+          </div>
+          <div class="payment-method selected" data-method="GRAM">
+            <span class="payment-method__icon">💎</span>
+            <div class="payment-method__info">
+              <span class="payment-method__label">Pay with GRAM</span>
+              <span class="payment-method__badge">Best rate</span>
+            </div>
+            <span class="payment-method__price">5.5 GRAM</span>
+          </div>
+        </div>
+
+        <!-- Withdraw Button -->
+        <button class="btn btn--secondary btn--full" data-action="withdraw">
+          WITHDRAW
+        </button>
+      </div>
+
+      <!-- TON Connect Purchase Confirm Modal -->
+      <div class="modal" id="modal-purchase-confirm-GRAM">
+        <div class="modal__backdrop" data-action="close-GRAM-modal"></div>
+        <div class="modal__content">
+          <div class="text-center" style="margin-bottom: var(--space-4);">
+            <span style="font-size: 48px;">💎</span>
+          </div>
+          <h3 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); text-align: center; margin-bottom: var(--space-3);">
+            Confirm Purchase
+          </h3>
+          <div style="margin-bottom: var(--space-4);">
+            <div class="purchase-confirm__row">
+              <span class="purchase-confirm__label">You will receive</span>
+              <span class="purchase-confirm__value purchase-confirm__value--highlight">5 GRAM</span>
+            </div>
+            <div class="purchase-confirm__row">
+              <span class="purchase-confirm__label">Total payment</span>
+              <div style="text-align: right;">
+                <span class="purchase-confirm__value">5.5 GRAM</span>
+                <div class="purchase-confirm__fee-note">(incl. 10% fee)</div>
+              </div>
+            </div>
+          </div>
+          <div class="purchase-confirm__reassurance">
+            Fee is one-time. Your deposit returns in full when you succeed.
+          </div>
+          <div class="flex flex-col gap-3" style="margin-top: var(--space-4);">
+            <button class="btn btn--primary btn--full" data-action="confirm-purchase-GRAM">
+              CONFIRM & PAY
+            </button>
+            <button class="btn btn--ghost btn--full" data-action="close-GRAM-modal">
+              CANCEL
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 4-B: Stars 구매 확인 모달 ===== -->
+    <main class="screen" id="case-4-B">
+
+      <div class="space-y-4" style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+        <!-- Wallet Info -->
+        <div class="wallet-info">
+          <div class="wallet-info__icon">💎</div>
+          <div class="wallet-info__details">
+            <span class="wallet-info__name">Tonkeeper</span>
+            <span class="wallet-info__address">UQBx...3kF2</span>
+          </div>
+          <button class="wallet-info__disconnect" data-action="disconnect">Disconnect</button>
+        </div>
+
+        <!-- Balance Cards -->
+        <div class="section-header">Balance</div>
+        <div class="balance-grid">
+          <div class="balance-card balance-card--available">
+            <span class="balance-card__label">Deposit</span>
+            <span class="balance-card__value">12.5</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--locked">
+            <span class="balance-card__label">Locked</span>
+            <span class="balance-card__value">15.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--reward">
+            <span class="balance-card__label">Reward</span>
+            <span class="balance-card__value">3.8</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+        </div>
+
+        <!-- Buy GRAM Section (5 GRAM selected) -->
+        <div class="buy-section__title">Buy GRAM</div>
+        <div class="buy-grid">
+          <button class="buy-btn" data-amount="1">
+            <span class="buy-btn__amount">1 GRAM</span>
+          </button>
+          <button class="buy-btn selected" data-amount="5">
+            <span class="buy-btn__amount">5 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="15">
+            <span class="buy-btn__amount">15 GRAM</span>
+          </button>
+        </div>
+        <div class="buy-grid buy-grid--row2">
+          <button class="buy-btn" data-amount="30">
+            <span class="buy-btn__amount">30 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="60">
+            <span class="buy-btn__amount">60 GRAM</span>
+          </button>
+        </div>
+
+        <!-- Payment Method (Stars selected) -->
+        <div class="payment-methods">
+          <div class="payment-method selected" data-method="stars">
+            <span class="payment-method__icon">⭐</span>
+            <div class="payment-method__info">
+              <span class="payment-method__label">Pay with Stars</span>
+            </div>
+            <span class="payment-method__price">842 ⭐</span>
+          </div>
+          <div class="payment-method" data-method="GRAM">
+            <span class="payment-method__icon">💎</span>
+            <div class="payment-method__info">
+              <span class="payment-method__label">Pay with GRAM</span>
+              <span class="payment-method__badge">Best rate</span>
+            </div>
+            <span class="payment-method__price">5.5 GRAM</span>
+          </div>
+        </div>
+
+        <!-- Withdraw Button -->
+        <button class="btn btn--secondary btn--full" data-action="withdraw">
+          WITHDRAW
+        </button>
+      </div>
+
+      <!-- Stars Purchase Confirm Modal -->
+      <div class="modal" id="modal-purchase-confirm-stars">
+        <div class="modal__backdrop" data-action="close-stars-modal"></div>
+        <div class="modal__content">
+          <div class="text-center" style="margin-bottom: var(--space-4);">
+            <span style="font-size: 48px;">⭐</span>
+          </div>
+          <h3 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); text-align: center; margin-bottom: var(--space-3);">
+            Confirm Purchase
+          </h3>
+          <div style="margin-bottom: var(--space-4);">
+            <div class="purchase-confirm__row">
+              <span class="purchase-confirm__label">You will receive</span>
+              <span class="purchase-confirm__value purchase-confirm__value--highlight">5 GRAM</span>
+            </div>
+            <div class="purchase-confirm__row">
+              <span class="purchase-confirm__label">Total</span>
+              <span class="purchase-confirm__value">842 ⭐</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-3" style="margin-top: var(--space-4);">
+            <button class="btn btn--primary btn--full" data-action="confirm-purchase-stars">
+              CONFIRM & PAY
+            </button>
+            <button class="btn btn--ghost btn--full" data-action="close-stars-modal">
+              CANCEL
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 4-1-A: TON Connect 구매 진행 중 ===== -->
+    <main class="screen" id="case-4-1-A">
+
+      <div class="space-y-4" style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+        <!-- Wallet Info -->
+        <div class="wallet-info">
+          <div class="wallet-info__icon">💎</div>
+          <div class="wallet-info__details">
+            <span class="wallet-info__name">Tonkeeper</span>
+            <span class="wallet-info__address">UQBx...3kF2</span>
+          </div>
+          <button class="wallet-info__disconnect" data-action="disconnect">Disconnect</button>
+        </div>
+
+        <!-- Balance Cards -->
+        <div class="section-header">Balance</div>
+        <div class="balance-grid">
+          <div class="balance-card balance-card--available">
+            <span class="balance-card__label">Deposit</span>
+            <span class="balance-card__value">12.5</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--locked">
+            <span class="balance-card__label">Locked</span>
+            <span class="balance-card__value">15.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--reward">
+            <span class="balance-card__label">Reward</span>
+            <span class="balance-card__value">3.8</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+        </div>
+
+        <!-- Buy GRAM Section (5 GRAM selected, loading) -->
+        <div class="buy-section__title">Buy GRAM</div>
+        <div class="buy-grid">
+          <button class="buy-btn" disabled data-amount="1">
+            <span class="buy-btn__amount">1 GRAM</span>
+          </button>
+          <button class="buy-btn buy-btn--loading" data-amount="5">
+            <span class="buy-btn__amount">5 GRAM</span>
+          </button>
+          <button class="buy-btn" disabled data-amount="15">
+            <span class="buy-btn__amount">15 GRAM</span>
+          </button>
+        </div>
+        <div class="buy-grid buy-grid--row2">
+          <button class="buy-btn" disabled data-amount="30">
+            <span class="buy-btn__amount">30 GRAM</span>
+          </button>
+          <button class="buy-btn" disabled data-amount="60">
+            <span class="buy-btn__amount">60 GRAM</span>
+          </button>
+        </div>
+
+        <!-- Waiting Message -->
+        <div class="waiting-msg">
+          <span class="waiting-msg__spinner"></span>
+          Waiting for wallet confirmation...
+        </div>
+
+        <!-- Withdraw Button -->
+        <button class="btn btn--secondary btn--full" disabled>
+          WITHDRAW
+        </button>
+      </div>
+    </main>
+
+    <!-- ===== Case 4-1-B: Stars 구매 진행 중 ===== -->
+    <main class="screen" id="case-4-1-B">
+
+      <div class="space-y-4" style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+        <!-- Wallet Info -->
+        <div class="wallet-info">
+          <div class="wallet-info__icon">💎</div>
+          <div class="wallet-info__details">
+            <span class="wallet-info__name">Tonkeeper</span>
+            <span class="wallet-info__address">UQBx...3kF2</span>
+          </div>
+          <button class="wallet-info__disconnect" data-action="disconnect">Disconnect</button>
+        </div>
+
+        <!-- Balance Cards -->
+        <div class="section-header">Balance</div>
+        <div class="balance-grid">
+          <div class="balance-card balance-card--available">
+            <span class="balance-card__label">Deposit</span>
+            <span class="balance-card__value">12.5</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--locked">
+            <span class="balance-card__label">Locked</span>
+            <span class="balance-card__value">15.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--reward">
+            <span class="balance-card__label">Reward</span>
+            <span class="balance-card__value">3.8</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+        </div>
+
+        <!-- Buy GRAM Section (5 GRAM selected, loading) -->
+        <div class="buy-section__title">Buy GRAM</div>
+        <div class="buy-grid">
+          <button class="buy-btn" disabled data-amount="1">
+            <span class="buy-btn__amount">1 GRAM</span>
+          </button>
+          <button class="buy-btn buy-btn--loading" data-amount="5">
+            <span class="buy-btn__amount">5 GRAM</span>
+          </button>
+          <button class="buy-btn" disabled data-amount="15">
+            <span class="buy-btn__amount">15 GRAM</span>
+          </button>
+        </div>
+        <div class="buy-grid buy-grid--row2">
+          <button class="buy-btn" disabled data-amount="30">
+            <span class="buy-btn__amount">30 GRAM</span>
+          </button>
+          <button class="buy-btn" disabled data-amount="60">
+            <span class="buy-btn__amount">60 GRAM</span>
+          </button>
+        </div>
+
+        <!-- Processing Message -->
+        <div class="waiting-msg">
+          <span class="waiting-msg__spinner"></span>
+          Processing payment...
+        </div>
+
+        <!-- Verifying Message (shown after payment confirmed) -->
+        <div class="waiting-msg" style="margin-top: var(--space-2); background-color: var(--color-success-bg); border-color: var(--color-success-border);">
+          <span class="waiting-msg__spinner" style="border-color: var(--color-success-border); border-top-color: var(--color-success);"></span>
+          <span style="color: var(--color-success-text);">Verifying...</span>
+        </div>
+
+        <!-- Withdraw Button -->
+        <button class="btn btn--secondary btn--full" disabled>
+          WITHDRAW
+        </button>
+      </div>
+    </main>
+
+    <!-- ===== Case 5: Pending Withdrawals 있음 ===== -->
+    <main class="screen" id="case-5">
+
+      <div class="space-y-4" style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+        <!-- Wallet Info -->
+        <div class="wallet-info">
+          <div class="wallet-info__icon">💎</div>
+          <div class="wallet-info__details">
+            <span class="wallet-info__name">Tonkeeper</span>
+            <span class="wallet-info__address">UQBx...3kF2</span>
+          </div>
+          <button class="wallet-info__disconnect" data-action="disconnect-blocked">Disconnect</button>
+        </div>
+
+        <!-- Balance Cards -->
+        <div class="section-header">Balance</div>
+        <div class="balance-grid">
+          <div class="balance-card balance-card--available">
+            <span class="balance-card__label">Deposit</span>
+            <span class="balance-card__value">8.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--locked">
+            <span class="balance-card__label">Locked</span>
+            <span class="balance-card__value">10.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--reward">
+            <span class="balance-card__label">Reward</span>
+            <span class="balance-card__value">5.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+        </div>
+
+        <!-- Buy GRAM Section -->
+        <div class="buy-section__title">Buy GRAM</div>
+        <div class="buy-grid">
+          <button class="buy-btn" data-amount="1">
+            <span class="buy-btn__amount">1 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="5">
+            <span class="buy-btn__amount">5 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="15">
+            <span class="buy-btn__amount">15 GRAM</span>
+          </button>
+        </div>
+        <div class="buy-grid buy-grid--row2">
+          <button class="buy-btn" data-amount="30">
+            <span class="buy-btn__amount">30 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="60">
+            <span class="buy-btn__amount">60 GRAM</span>
+          </button>
+        </div>
+
+        <!-- Withdraw Button -->
+        <button class="btn btn--secondary btn--full" data-action="withdraw">
+          WITHDRAW
+        </button>
+
+        <!-- Pending Withdrawals Summary -->
+        <div class="card card--compact card--interactive" style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-black); color: var(--color-text);">💸 Pending Withdrawals (2)</div>
+            <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); color: var(--color-text-secondary);">15 GRAM in progress</div>
+          </div>
+          <span style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-primary);">Manage →</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 6: Disconnect 차단 (출금 진행 중) ===== -->
+    <main class="screen" id="case-6">
+
+      <div class="space-y-4" style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+        <!-- Wallet Info -->
+        <div class="wallet-info">
+          <div class="wallet-info__icon">💎</div>
+          <div class="wallet-info__details">
+            <span class="wallet-info__name">Tonkeeper</span>
+            <span class="wallet-info__address">UQBx...3kF2</span>
+          </div>
+          <button class="wallet-info__disconnect" data-action="disconnect-blocked">Disconnect</button>
+        </div>
+
+        <!-- Balance Cards -->
+        <div class="section-header">Balance</div>
+        <div class="balance-grid">
+          <div class="balance-card balance-card--available">
+            <span class="balance-card__label">Deposit</span>
+            <span class="balance-card__value">8.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--locked">
+            <span class="balance-card__label">Locked</span>
+            <span class="balance-card__value">10.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--reward">
+            <span class="balance-card__label">Reward</span>
+            <span class="balance-card__value">5.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+        </div>
+
+        <!-- Buy GRAM Section -->
+        <div class="buy-section__title">Buy GRAM</div>
+        <div class="buy-grid">
+          <button class="buy-btn" data-amount="1">
+            <span class="buy-btn__amount">1 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="5">
+            <span class="buy-btn__amount">5 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="15">
+            <span class="buy-btn__amount">15 GRAM</span>
+          </button>
+        </div>
+        <div class="buy-grid buy-grid--row2">
+          <button class="buy-btn" data-amount="30">
+            <span class="buy-btn__amount">30 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="60">
+            <span class="buy-btn__amount">60 GRAM</span>
+          </button>
+        </div>
+
+        <!-- Withdraw Button -->
+        <button class="btn btn--secondary btn--full" data-action="withdraw">
+          WITHDRAW
+        </button>
+
+        <!-- Pending Withdrawals Summary -->
+        <div class="card card--compact card--interactive" style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-black); color: var(--color-text);">💸 Pending Withdrawals (1)</div>
+            <div style="font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); color: var(--color-text-secondary);">10 GRAM in progress</div>
+          </div>
+          <span style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-primary);">Manage →</span>
+        </div>
+      </div>
+
+      <!-- Disconnect Blocked Modal -->
+      <div class="modal" id="modal-dc-blocked">
+        <div class="modal__backdrop" data-action="close-modal-blocked"></div>
+        <div class="modal__content">
+          <div class="text-center" style="margin-bottom: var(--space-4);">
+            <span style="font-size: 48px;">⚠️</span>
+          </div>
+          <h3 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); text-align: center; margin-bottom: var(--space-3);">
+            Cannot Disconnect
+          </h3>
+          <p style="font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); text-align: center; margin-bottom: var(--space-6); line-height: var(--line-height-normal);">
+            Cannot disconnect wallet while withdrawal requests are in progress. Please cancel pending requests or wait for processing to complete.
+          </p>
+          <button class="btn btn--primary btn--full" data-action="close-modal-blocked">
+            OK
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 7: Disconnect 확인 (출금 없음) ===== -->
+    <main class="screen" id="case-7">
+
+      <div class="space-y-4" style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+        <!-- Wallet Info -->
+        <div class="wallet-info">
+          <div class="wallet-info__icon">💎</div>
+          <div class="wallet-info__details">
+            <span class="wallet-info__name">Tonkeeper</span>
+            <span class="wallet-info__address">UQBx...3kF2</span>
+          </div>
+          <button class="wallet-info__disconnect" data-action="disconnect-confirm">Disconnect</button>
+        </div>
+
+        <!-- Balance Cards -->
+        <div class="section-header">Balance</div>
+        <div class="balance-grid">
+          <div class="balance-card balance-card--available">
+            <span class="balance-card__label">Deposit</span>
+            <span class="balance-card__value">12.5</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--locked">
+            <span class="balance-card__label">Locked</span>
+            <span class="balance-card__value">15.0</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+          <div class="balance-card balance-card--reward">
+            <span class="balance-card__label">Reward</span>
+            <span class="balance-card__value">3.8</span>
+            <span class="balance-card__unit">GRAM</span>
+          </div>
+        </div>
+
+        <!-- Buy GRAM Section -->
+        <div class="buy-section__title">Buy GRAM</div>
+        <div class="buy-grid">
+          <button class="buy-btn" data-amount="1">
+            <span class="buy-btn__amount">1 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="5">
+            <span class="buy-btn__amount">5 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="15">
+            <span class="buy-btn__amount">15 GRAM</span>
+          </button>
+        </div>
+        <div class="buy-grid buy-grid--row2">
+          <button class="buy-btn" data-amount="30">
+            <span class="buy-btn__amount">30 GRAM</span>
+          </button>
+          <button class="buy-btn" data-amount="60">
+            <span class="buy-btn__amount">60 GRAM</span>
+          </button>
+        </div>
+
+        <!-- Withdraw Button -->
+        <button class="btn btn--secondary btn--full" data-action="withdraw">
+          WITHDRAW
+        </button>
+      </div>
+
+      <!-- Disconnect Confirm Modal -->
+      <div class="modal" id="modal-dc-confirm">
+        <div class="modal__backdrop" data-action="close-modal-confirm"></div>
+        <div class="modal__content">
+          <div class="text-center" style="margin-bottom: var(--space-4);">
+            <span style="font-size: 48px;">🔌</span>
+          </div>
+          <h3 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); text-align: center; margin-bottom: var(--space-3);">
+            Disconnect Wallet?
+          </h3>
+          <p style="font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); text-align: center; margin-bottom: var(--space-6); line-height: var(--line-height-normal);">
+            You can connect a new wallet anytime.
+          </p>
+          <div class="flex flex-col gap-3">
+            <button class="btn btn--danger btn--full" data-action="confirm-disconnect">
+              DISCONNECT
+            </button>
+            <button class="btn btn--ghost btn--full" data-action="close-modal-confirm">
+              CANCEL
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Cancel Withdrawal Confirm Modal (shared) -->
+    <div class="modal" id="modal-cancel-withdrawal" hidden>
+      <div class="modal__backdrop" data-action="close-cancel-modal"></div>
+      <div class="modal__content">
+        <div class="text-center" style="margin-bottom: var(--space-4);">
+          <span style="font-size: 48px;">🗑️</span>
+        </div>
+        <h3 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-black); text-align: center; margin-bottom: var(--space-3);">
+          Cancel Withdrawal?
+        </h3>
+        <p style="font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); text-align: center; margin-bottom: var(--space-6); line-height: var(--line-height-normal);">
+          The amount will be returned to your available balance.
+        </p>
+        <div class="flex flex-col gap-3">
+          <button class="btn btn--danger btn--full" data-action="confirm-cancel-withdrawal">
+            CANCEL WITHDRAWAL
+          </button>
+          <button class="btn btn--ghost btn--full" data-action="close-cancel-modal">
+            KEEP IT
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast toast--error" id="toast-insufficient" hidden>
+      Insufficient balance
+    </div>
+    <div class="toast toast--success" id="toast-cancelled" hidden>
+      Withdrawal cancelled. Balance restored.
+    </div>
+
+  </div>
+
+  <script>
+    // ===== Case Switcher =====
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+
+      // Case 4-A (GRAM Confirm) 선택 시 모달 표시
+      if (caseId === '4-A') {
+        const tonModal = document.getElementById('modal-purchase-confirm-GRAM');
+        if (tonModal) tonModal.hidden = false;
+      }
+
+      // Case 4-B (Stars Confirm) 선택 시 모달 표시
+      if (caseId === '4-B') {
+        const starsModal = document.getElementById('modal-purchase-confirm-stars');
+        if (starsModal) starsModal.hidden = false;
+      }
+
+      // Show DC Blocked modal for Case 6
+      const blockedModal = document.getElementById('modal-dc-blocked');
+      if (caseId === '6' && blockedModal) {
+        blockedModal.hidden = false;
+      }
+
+      // Show DC Confirm modal for Case 7
+      const confirmModal = document.getElementById('modal-dc-confirm');
+      if (caseId === '7' && confirmModal) {
+        confirmModal.hidden = false;
+      }
+    });
+
+    // ===== Buy Button Selection =====
+    document.querySelectorAll('.buy-btn:not(.buy-btn--loading):not([disabled])').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Deselect siblings
+        const grid = btn.closest('.screen');
+        if (!grid) return;
+        grid.querySelectorAll('.buy-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+
+    // ===== Payment Method Selection =====
+    document.querySelectorAll('.payment-method').forEach(method => {
+      method.addEventListener('click', () => {
+        const container = method.closest('.payment-methods');
+        if (!container) return;
+        container.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+        method.classList.add('selected');
+      });
+    });
+
+    // ===== TON Connect Purchase Confirm Modal =====
+    document.querySelectorAll('[data-action="close-GRAM-modal"]').forEach(el => {
+      el.addEventListener('click', () => {
+        const modal = document.getElementById('modal-purchase-confirm-GRAM');
+        if (modal) modal.hidden = true;
+      });
+    });
+
+    // Confirm GRAM purchase → switch to Case 4-1-A (GRAM Buying)
+    document.querySelectorAll('[data-action="confirm-purchase-GRAM"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modal = document.getElementById('modal-purchase-confirm-GRAM');
+        if (modal) modal.hidden = true;
+        // Switch to Case 4-1-A
+        document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelector('[data-case="4-1-A"]').classList.add('active');
+        document.getElementById('case-4-1-A').classList.add('active');
+      });
+    });
+
+    // ===== Stars Purchase Confirm Modal =====
+    document.querySelectorAll('[data-action="close-stars-modal"]').forEach(el => {
+      el.addEventListener('click', () => {
+        const modal = document.getElementById('modal-purchase-confirm-stars');
+        if (modal) modal.hidden = true;
+      });
+    });
+
+    // Confirm Stars purchase → switch to Case 4-1-B (Stars Buying)
+    document.querySelectorAll('[data-action="confirm-purchase-stars"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modal = document.getElementById('modal-purchase-confirm-stars');
+        if (modal) modal.hidden = true;
+        // Switch to Case 4-1-B
+        document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelector('[data-case="4-1-B"]').classList.add('active');
+        document.getElementById('case-4-1-B').classList.add('active');
+      });
+    });
+
+    // ===== Disconnect Actions =====
+    // Blocked disconnect (Case 5 & 6)
+    document.querySelectorAll('[data-action="disconnect-blocked"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modal = document.getElementById('modal-dc-blocked');
+        if (modal) modal.hidden = false;
+      });
+    });
+
+    // Confirm disconnect (Case 7)
+    document.querySelectorAll('[data-action="disconnect-confirm"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modal = document.getElementById('modal-dc-confirm');
+        if (modal) modal.hidden = false;
+      });
+    });
+
+    // Close blocked modal
+    document.querySelectorAll('[data-action="close-modal-blocked"]').forEach(el => {
+      el.addEventListener('click', () => {
+        const modal = document.getElementById('modal-dc-blocked');
+        if (modal) modal.hidden = true;
+      });
+    });
+
+    // Close confirm modal
+    document.querySelectorAll('[data-action="close-modal-confirm"]').forEach(el => {
+      el.addEventListener('click', () => {
+        const modal = document.getElementById('modal-dc-confirm');
+        if (modal) modal.hidden = true;
+      });
+    });
+
+    // Confirm disconnect action
+    document.querySelectorAll('[data-action="confirm-disconnect"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modal = document.getElementById('modal-dc-confirm');
+        if (modal) modal.hidden = true;
+        // Switch to Case 1 (Not Connected)
+        document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelector('[data-case="1"]').classList.add('active');
+        document.getElementById('case-1').classList.add('active');
+      });
+    });
+
+    // ===== Cancel Withdrawal =====
+    document.querySelectorAll('[data-action="cancel-withdrawal"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modal = document.getElementById('modal-cancel-withdrawal');
+        if (modal) modal.hidden = false;
+      });
+    });
+
+    document.querySelectorAll('[data-action="close-cancel-modal"]').forEach(el => {
+      el.addEventListener('click', () => {
+        const modal = document.getElementById('modal-cancel-withdrawal');
+        if (modal) modal.hidden = true;
+      });
+    });
+
+    document.querySelectorAll('[data-action="confirm-cancel-withdrawal"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modal = document.getElementById('modal-cancel-withdrawal');
+        if (modal) modal.hidden = true;
+        // Show success toast
+        showToast('toast-cancelled');
+      });
+    });
+
+    // ===== Withdraw Disabled (Zero Balance) =====
+    document.querySelectorAll('[data-action="withdraw-disabled"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showToast('toast-insufficient');
+      });
+    });
+
+    // ===== Toast Helper =====
+    function showToast(id) {
+      const toast = document.getElementById(id);
+      if (!toast) return;
+      toast.hidden = false;
+      setTimeout(() => { toast.hidden = true; }, 3000);
+    }
+
+    // ===== Connect Wallet Button =====
+    document.getElementById('connect-wallet-btn')?.addEventListener('click', () => {
+      // Simulate connection → switch to Case 2
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelector('[data-case="2"]').classList.add('active');
+      document.getElementById('case-2').classList.add('active');
+    });
+
+    // ===== Connect on This Device Button (Case 1-1) =====
+    document.getElementById('connect-this-device-btn')?.addEventListener('click', () => {
+      // Simulate connection on this device → switch to Case 2
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelector('[data-case="2"]').classList.add('active');
+      document.getElementById('case-2').classList.add('active');
+    });
+
+    // ===== Connect Hint Links =====
+    document.getElementById('connect-hint-link')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('connect-wallet-btn')?.click();
+    });
+    document.getElementById('connect-hint-link-1-1')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('connect-this-device-btn')?.click();
+    });
+  </script>
+</body>
+</html>

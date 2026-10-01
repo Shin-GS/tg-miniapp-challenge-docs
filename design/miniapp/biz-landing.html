@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Biz Landing - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Biz Landing Styles ===== */
+
+    .biz-hero {
+      text-align: center;
+      padding: var(--space-8) var(--space-4);
+    }
+
+    .biz-hero__icon {
+      font-size: 64px;
+      margin-bottom: var(--space-4);
+    }
+
+    .biz-hero__title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+    }
+
+    .biz-hero__subtitle {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-relaxed);
+    }
+
+    /* Value Props */
+    .value-props {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .value-prop {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .value-prop__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .value-prop__icon--green { background: var(--color-success-bg); }
+    .value-prop__icon--blue { background: var(--color-info-bg); }
+    .value-prop__icon--yellow { background: var(--color-warning-bg); }
+
+    .value-prop__text {
+      flex: 1;
+    }
+
+    .value-prop__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      margin-bottom: 2px;
+    }
+
+    .value-prop__desc {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+    }
+
+    /* How It Works */
+    .how-it-works {
+      margin-top: var(--space-6);
+    }
+
+    .how-it-works__steps {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+
+    .step__number {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step__content {
+      flex: 1;
+    }
+
+    .step__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      margin-bottom: 2px;
+    }
+
+    .step__desc {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+    }
+
+    /* CTA Section */
+    .biz-cta {
+      margin-top: var(--space-8);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .btn--orders {
+      background-color: var(--color-bg-card);
+      color: var(--color-primary);
+      border: 2px solid var(--color-primary);
+      position: relative;
+    }
+
+    .btn--orders .order-badge {
+      background: var(--gradient-red);
+      color: var(--color-text-white);
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      margin-left: var(--space-2);
+    }
+
+    /* Back to Challenges Link */
+    .biz-back-link {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: opacity var(--transition-fast);
+    }
+
+    .biz-back-link:active {
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">
+    <!-- Case Switcher -->
+    <nav class="case-switcher">
+      <button class="active" data-case="1">첫 진입</button>
+      <button data-case="2">주문 있음</button>
+    </nav>
+
+    <!-- Case 1: First Visit (No Orders) -->
+    <main class="screen active" id="case-1">
+      <!-- Back to Challenges Link -->
+      <div class="biz-back-link">← Back to Challenges</div>
+
+      <div class="biz-hero">
+        <div class="biz-hero__icon">🚀</div>
+        <h1 class="biz-hero__title">Grow Your Audience</h1>
+        <p class="biz-hero__subtitle">Get real, verified followers for your Instagram or X account. They stay for weeks, not hours.</p>
+      </div>
+
+      <div class="value-props">
+        <div class="value-prop">
+          <div class="value-prop__icon value-prop__icon--green">👥</div>
+          <div class="value-prop__text">
+            <div class="value-prop__title">Real Followers</div>
+            <div class="value-prop__desc">Actual users who follow and engage</div>
+          </div>
+        </div>
+        <div class="value-prop">
+          <div class="value-prop__icon value-prop__icon--blue">🤖</div>
+          <div class="value-prop__text">
+            <div class="value-prop__title">AI-Verified</div>
+            <div class="value-prop__desc">Weekly screenshots prove they stay</div>
+          </div>
+        </div>
+        <div class="value-prop">
+          <div class="value-prop__icon value-prop__icon--yellow">⭐</div>
+          <div class="value-prop__text">
+            <div class="value-prop__title">Affordable</div>
+            <div class="value-prop__desc">From ⭐12 per follower with Telegram Stars</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="how-it-works">
+        <div class="section-header">How It Works</div>
+        <div class="how-it-works__steps">
+          <div class="step">
+            <div class="step__number">1</div>
+            <div class="step__content">
+              <div class="step__title">Choose</div>
+              <div class="step__desc">Pick your platform and set a target account</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step__number">2</div>
+            <div class="step__content">
+              <div class="step__title">Pay</div>
+              <div class="step__desc">Pay with Telegram Stars, reviewed within 24h</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step__number">3</div>
+            <div class="step__content">
+              <div class="step__title">Grow</div>
+              <div class="step__desc">Real users follow you, verified weekly by AI</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="biz-cta">
+        <button class="btn btn--primary btn--full btn--lg">GET STARTED</button>
+      </div>
+    </main>
+
+    <!-- Case 2: Has Orders -->
+    <main class="screen" id="case-2">
+      <!-- Back to Challenges Link -->
+      <div class="biz-back-link">← Back to Challenges</div>
+
+      <div class="biz-hero">
+        <div class="biz-hero__icon">🚀</div>
+        <h1 class="biz-hero__title">Grow Your Audience</h1>
+        <p class="biz-hero__subtitle">Get real, verified followers for your Instagram or X account. They stay for weeks, not hours.</p>
+      </div>
+
+      <div class="value-props">
+        <div class="value-prop">
+          <div class="value-prop__icon value-prop__icon--green">👥</div>
+          <div class="value-prop__text">
+            <div class="value-prop__title">Real Followers</div>
+            <div class="value-prop__desc">Actual users who follow and engage</div>
+          </div>
+        </div>
+        <div class="value-prop">
+          <div class="value-prop__icon value-prop__icon--blue">🤖</div>
+          <div class="value-prop__text">
+            <div class="value-prop__title">AI-Verified</div>
+            <div class="value-prop__desc">Weekly screenshots prove they stay</div>
+          </div>
+        </div>
+        <div class="value-prop">
+          <div class="value-prop__icon value-prop__icon--yellow">⭐</div>
+          <div class="value-prop__text">
+            <div class="value-prop__title">Affordable</div>
+            <div class="value-prop__desc">From ⭐12 per follower with Telegram Stars</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="how-it-works">
+        <div class="section-header">How It Works</div>
+        <div class="how-it-works__steps">
+          <div class="step">
+            <div class="step__number">1</div>
+            <div class="step__content">
+              <div class="step__title">Choose</div>
+              <div class="step__desc">Pick your platform and set a target account</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step__number">2</div>
+            <div class="step__content">
+              <div class="step__title">Pay</div>
+              <div class="step__desc">Pay with Telegram Stars, reviewed within 24h</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step__number">3</div>
+            <div class="step__content">
+              <div class="step__title">Grow</div>
+              <div class="step__desc">Real users follow you, verified weekly by AI</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="biz-cta">
+        <button class="btn btn--primary btn--full btn--lg">GET STARTED</button>
+        <button class="btn btn--orders btn--full">MY ORDERS <span class="order-badge">3</span></button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+  </script>
+</body>
+</html>

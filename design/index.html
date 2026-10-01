@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Docs</title>
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-surface: #ffffff;
+            --color-border: #e2e8f0;
+            --color-text: #1e293b;
+            --color-text-secondary: #64748b;
+            --color-text-dim: #94a3b8;
+            --color-accent: #3b82f6;
+            --color-accent-bg: #eff6ff;
+            --color-accent-hover: #dbeafe;
+            --color-done: #10b981;
+            --color-draft: #f59e0b;
+            --color-outdated: #ef4444;
+            --color-todo: #94a3b8;
+            --top-height: 40px;
+            --sidebar-width: 180px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== Top Bar ===== */
+        .top-bar {
+            height: var(--top-height);
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .top-bar__logo {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-text);
+            white-space: nowrap;
+        }
+
+        /* Category Tabs (1열 — 카테고리 선택) */
+        .category-tabs {
+            display: flex;
+            gap: 2px;
+            margin-left: 12px;
+        }
+
+        .category-tab {
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all 0.12s;
+            white-space: nowrap;
+        }
+
+        .category-tab:hover {
+            background: var(--color-accent-hover);
+            color: var(--color-text);
+        }
+
+        .category-tab.active {
+            background: var(--color-accent);
+            color: #fff;
+        }
+
+        /* Right side: viewport + open */
+        .top-bar__right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .viewport-btn {
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 500;
+            border-radius: 4px;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-text-dim);
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+
+        .viewport-btn:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+
+        .viewport-btn.active {
+            border-color: var(--color-accent);
+            background: var(--color-accent-bg);
+            color: var(--color-accent);
+            font-weight: 600;
+        }
+
+        /* ===== Main Layout ===== */
+        .main-layout {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ===== Sidebar (선택된 카테고리 페이지만) ===== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--color-surface);
+            border-right: 1px solid var(--color-border);
+            overflow-y: auto;
+            flex-shrink: 0;
+            padding: 8px 0;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 3px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+
+        .sidebar__item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all 0.1s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar__item:hover {
+            background: var(--color-accent-hover);
+            color: var(--color-text);
+        }
+
+        .sidebar__item.active {
+            background: var(--color-accent-bg);
+            color: var(--color-accent);
+            border-left-color: var(--color-accent);
+            font-weight: 600;
+        }
+
+        .sidebar__item-status {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        .status-done { background: var(--color-done); }
+        .status-draft { background: var(--color-draft); }
+        .status-outdated { background: var(--color-outdated); }
+        .status-todo { background: var(--color-todo); }
+
+        /* ===== Content Area ===== */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--color-bg);
+        }
+
+        /* Case Tabs (2열) */
+        .case-tabs {
+            display: none;
+            gap: 4px;
+            padding: 6px 12px;
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            overflow-x: auto;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .case-tabs.visible { display: flex; }
+
+        .case-tabs::-webkit-scrollbar { height: 3px; }
+        .case-tabs::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+
+        .case-tab {
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 4px;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all 0.12s;
+            white-space: nowrap;
+        }
+
+        .case-tab:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+
+        .case-tab.active {
+            border-color: var(--color-accent);
+            background: var(--color-accent);
+            color: #fff;
+        }
+
+        /* iframe */
+        .viewport-frame {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow: auto;
+            padding: 12px;
+        }
+
+        .iframe-wrapper {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            transition: width 0.2s ease;
+            height: 100%;
+        }
+
+        .iframe-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* Empty State */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-dim);
+            gap: 8px;
+        }
+
+        .empty-state__icon { font-size: 40px; opacity: 0.4; }
+        .empty-state__text { font-size: 13px; }
+
+        @media (max-width: 900px) {
+            .sidebar { width: 150px; }
+            .viewport-btn { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <span class="top-bar__logo">📐 Design Docs</span>
+        <nav class="category-tabs" id="category-tabs"></nav>
+        <div class="top-bar__right">
+            <div id="viewport-bar"></div>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <aside class="sidebar" id="sidebar"></aside>
+        <section class="content-area">
+            <nav class="case-tabs" id="case-tabs"></nav>
+            <div class="viewport-frame" id="viewport-frame">
+                <div class="empty-state">
+                    <div class="empty-state__icon">📄</div>
+                    <div class="empty-state__text">페이지를 선택하세요</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="shared/design-manifest.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        var manifest = window.__DESIGN_MANIFEST__ || {};
+        var config = window.__DESIGN_CONFIG__ || {};
+        var viewports = config.viewports || [{ name: "Full", width: null }];
+        var categoryDefaults = config.categoryDefaults || {};
+
+        var state = {
+            category: null,
+            file: null,
+            viewportWidth: null
+        };
+
+        var iframeEl = null;
+        var categoryKeys = Object.keys(manifest);
+
+        // DOM
+        var categoryTabsEl = document.getElementById('category-tabs');
+        var sidebarEl = document.getElementById('sidebar');
+        var caseTabsEl = document.getElementById('case-tabs');
+        var viewportFrameEl = document.getElementById('viewport-frame');
+        var viewportBarEl = document.getElementById('viewport-bar');
+
+        // ===== Render Category Tabs =====
+        function renderCategoryTabs() {
+            var html = '';
+            categoryKeys.forEach(function (key) {
+                html += '<button class="category-tab" data-cat="' + key + '">' + manifest[key].label + '</button>';
+            });
+            categoryTabsEl.innerHTML = html;
+        }
+
+        // ===== Render Viewport Buttons =====
+        function renderViewportBar() {
+            var html = '';
+            viewports.forEach(function (vp) {
+                html += '<button class="viewport-btn" data-width="' + (vp.width || '') + '">' + (vp.width ? vp.width : 'Full') + '</button>';
+            });
+            viewportBarEl.innerHTML = html;
+        }
+
+        // ===== Select Category =====
+        function selectCategory(catKey) {
+            state.category = catKey;
+
+            // Update tabs
+            categoryTabsEl.querySelectorAll('.category-tab').forEach(function (t) {
+                t.classList.toggle('active', t.dataset.cat === catKey);
+            });
+
+            // Render sidebar with only this category's items
+            var cat = manifest[catKey];
+            var html = '';
+            cat.items.forEach(function (item) {
+                var attrs = ' data-file="' + item.file + '"';
+                if (item.cssOnly) attrs += ' data-css="true"';
+                html += '<div class="sidebar__item"' + attrs + '>';
+                html += '<span>' + item.name + '</span>';
+                html += '<span class="sidebar__item-status status-' + item.status + '"></span>';
+                html += '</div>';
+            });
+            sidebarEl.innerHTML = html;
+
+            // Set default viewport for category
+            var defaultVpName = categoryDefaults[catKey];
+            if (defaultVpName && !state.viewportWidth) {
+                var found = viewports.find(function (v) { return v.name === defaultVpName; });
+                if (found) state.viewportWidth = found.width;
+            }
+            updateViewportButtons();
+        }
+
+        // ===== Load Page =====
+        function loadPage(file, isCss) {
+            state.file = file;
+
+            // Update sidebar active
+            sidebarEl.querySelectorAll('.sidebar__item').forEach(function (el) {
+                el.classList.toggle('active', el.dataset.file === file);
+            });
+
+            var url = isCss ? file + '.css' : file + '.html';
+
+            if (isCss) {
+                viewportFrameEl.innerHTML = '<div class="empty-state"><div class="empty-state__icon">🎨</div>' +
+                    '<div class="empty-state__text">CSS 파일: <a href="' + url + '" target="_blank">' + url + '</a></div></div>';
+                caseTabsEl.classList.remove('visible');
+                updateHash();
+                return;
+            }
+
+            // Render iframe
+            var width = state.viewportWidth;
+            var wrapperStyle = width ? 'width:' + width + 'px;max-width:100%;' : 'width:100%;';
+            viewportFrameEl.innerHTML = '<div class="iframe-wrapper" style="' + wrapperStyle + '">' +
+                '<iframe id="design-iframe" src="' + url + '"></iframe></div>';
+            iframeEl = document.getElementById('design-iframe');
+
+            iframeEl.onload = function () {
+                extractCaseTabs();
+                hideInternalNav();
+            };
+
+            updateHash();
+        }
+
+        // ===== Extract Case Tabs from iframe =====
+        function extractCaseTabs() {
+            if (!iframeEl) return;
+            try {
+                var doc = iframeEl.contentDocument || iframeEl.contentWindow.document;
+
+                // 패턴 1: .case-switcher button (miniapp, admin 표준)
+                var switcher = doc.querySelector('.case-switcher');
+                var buttons = switcher ? switcher.querySelectorAll('button') : [];
+
+                // 패턴 2: .case-tabs .case-tab (web 레거시)
+                var tabsContainer = doc.querySelector('.case-tabs');
+                var tabButtons = tabsContainer ? tabsContainer.querySelectorAll('.case-tab') : [];
+
+                var sourceButtons = buttons.length > 0 ? buttons : tabButtons;
+                var sourceContainer = buttons.length > 0 ? switcher : tabsContainer;
+
+                if (sourceButtons.length === 0) {
+                    caseTabsEl.classList.remove('visible');
+                    return;
+                }
+
+                var html = '';
+                sourceButtons.forEach(function (btn, idx) {
+                    var label = btn.textContent.trim();
+                    var caseId = btn.dataset.case || String(idx + 1);
+                    // onclick="showCase('xxx')" 에서 ID 추출
+                    var onclickAttr = btn.getAttribute('onclick') || '';
+                    var onclickMatch = onclickAttr.match(/showCase\(['"](.+?)['"]\)/);
+                    if (onclickMatch) caseId = onclickMatch[1];
+                    var isActive = btn.classList.contains('active');
+                    html += '<button class="case-tab' + (isActive ? ' active' : '') + '" data-case="' + caseId + '">' + label + '</button>';
+                });
+                caseTabsEl.innerHTML = html;
+                caseTabsEl.classList.add('visible');
+
+                // Hide internal switcher/tabs
+                if (sourceContainer) sourceContainer.style.display = 'none';
+            } catch (e) {
+                caseTabsEl.classList.remove('visible');
+            }
+        }
+
+        // ===== Hide internal navigation =====
+        function hideInternalNav() {
+            if (!iframeEl) return;
+            try {
+                var doc = iframeEl.contentDocument || iframeEl.contentWindow.document;
+
+                // Admin: sidebar 링크 비활성화 (레이아웃은 유지, 네비게이션만 차단)
+                var adminLinks = doc.querySelectorAll('.admin-sidebar__item');
+                adminLinks.forEach(function (link) {
+                    link.style.pointerEvents = 'none';
+                });
+            } catch (e) { /* ignore */ }
+        }
+
+        // ===== Switch Case =====
+        function switchCase(caseId) {
+            if (!iframeEl) return;
+            try {
+                var doc = iframeEl.contentDocument || iframeEl.contentWindow.document;
+
+                // 패턴 1: .case-switcher + .screen (miniapp, admin)
+                var switcher = doc.querySelector('.case-switcher');
+                if (switcher) {
+                    // 내부 버튼을 직접 클릭 시뮬레이션 → 각 HTML의 자체 JS가 커스텀 로직 실행
+                    var btn = doc.querySelector('.case-switcher button[data-case="' + caseId + '"]');
+                    if (btn) btn.click();
+                }
+
+                // 패턴 2: .case-tabs + .case-tab (web)
+                var tabsContainer = doc.querySelector('.case-tabs');
+                if (tabsContainer && !switcher) {
+                    var tabBtn = null;
+                    tabsContainer.querySelectorAll('.case-tab').forEach(function (t) {
+                        var onclick = t.getAttribute('onclick') || '';
+                        var match = onclick.match(/showCase\(['"](.+?)['"]\)/);
+                        if (match && match[1] === caseId) tabBtn = t;
+                    });
+                    if (tabBtn) tabBtn.click();
+                }
+            } catch (e) { /* ignore */ }
+
+            caseTabsEl.querySelectorAll('.case-tab').forEach(function (t) {
+                t.classList.toggle('active', t.dataset.case === caseId);
+            });
+        }
+
+        // ===== Set Viewport =====
+        function setViewport(width) {
+            state.viewportWidth = width;
+            var wrapper = viewportFrameEl.querySelector('.iframe-wrapper');
+            if (wrapper) {
+                wrapper.style.width = width ? width + 'px' : '100%';
+                wrapper.style.maxWidth = '100%';
+            }
+            updateViewportButtons();
+            updateHash();
+        }
+
+        function updateViewportButtons() {
+            viewportBarEl.querySelectorAll('.viewport-btn').forEach(function (btn) {
+                var w = btn.dataset.width ? parseInt(btn.dataset.width) : null;
+                btn.classList.toggle('active', w === state.viewportWidth);
+            });
+        }
+
+        // ===== Hash Routing =====
+        function updateHash() {
+            if (!state.file) return;
+            var h = state.file;
+            if (state.viewportWidth) h += '@' + state.viewportWidth;
+            history.replaceState(null, '', '#' + h);
+        }
+
+        function loadFromHash() {
+            var hash = location.hash.replace('#', '');
+            if (!hash) return false;
+
+            var parts = hash.split('@');
+            var file = parts[0];
+            var width = parts[1] ? parseInt(parts[1]) : null;
+
+            // Find category
+            var foundCat = null;
+            categoryKeys.forEach(function (catKey) {
+                manifest[catKey].items.forEach(function (item) {
+                    if (item.file === file) foundCat = catKey;
+                });
+            });
+
+            if (foundCat) {
+                if (width) state.viewportWidth = width;
+                selectCategory(foundCat);
+                var item = manifest[foundCat].items.find(function (i) { return i.file === file; });
+                loadPage(file, item && item.cssOnly);
+                return true;
+            }
+            return false;
+        }
+
+        // ===== Events =====
+        categoryTabsEl.addEventListener('click', function (e) {
+            var tab = e.target.closest('.category-tab');
+            if (!tab) return;
+            state.file = null;
+            state.viewportWidth = null;
+            caseTabsEl.classList.remove('visible');
+            viewportFrameEl.innerHTML = '<div class="empty-state"><div class="empty-state__icon">📄</div><div class="empty-state__text">페이지를 선택하세요</div></div>';
+            selectCategory(tab.dataset.cat);
+        });
+
+        sidebarEl.addEventListener('click', function (e) {
+            var item = e.target.closest('.sidebar__item');
+            if (!item) return;
+            loadPage(item.dataset.file, item.dataset.css === 'true');
+        });
+
+        caseTabsEl.addEventListener('click', function (e) {
+            var tab = e.target.closest('.case-tab');
+            if (!tab) return;
+            switchCase(tab.dataset.case);
+        });
+
+        viewportBarEl.addEventListener('click', function (e) {
+            var btn = e.target.closest('.viewport-btn');
+            if (!btn) return;
+            setViewport(btn.dataset.width ? parseInt(btn.dataset.width) : null);
+        });
+
+        // ===== Init =====
+        renderCategoryTabs();
+        renderViewportBar();
+
+        if (!loadFromHash()) {
+            // Default: first category
+            if (categoryKeys.length > 0) {
+                selectCategory(categoryKeys[0]);
+            }
+        }
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Challenge Public Detail - Design Spec</title>
+    <style>
+        /* 
+         * Challenge Public Detail Page Design Spec
+         * 
+         * BE-rendered public page (no login required)
+         * URL: /challenges/{encodedId}
+         * Purpose: Search engine indexing, social sharing, challenge detail entry
+         * 
+         * Cases:
+         * - Case 1: Normal — active challenge (active=true)
+         * - Case 2: 404 — inactive or non-existent
+         */
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f14;
+            color: #e4e4e7;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ===== Common Header ===== */
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(15, 15, 20, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #1c1c24;
+            padding: 14px 0;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 32px;
+        }
+
+        .header-logo {
+            font-size: 22px;
+            font-weight: 900;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .nav-item {
+            font-size: 14px;
+            font-weight: 500;
+            color: #a1a1aa;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-item:hover { color: #ffffff; }
+
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .nav-dropdown-trigger {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #a1a1aa;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            transition: color 0.2s;
+        }
+
+        .nav-dropdown-trigger:hover { color: #ffffff; }
+
+        .nav-dropdown-arrow {
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+
+        .nav-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1c1c24;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 200px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-dropdown:hover .nav-dropdown-menu { display: block; }
+        .nav-dropdown:hover .nav-dropdown-arrow { transform: rotate(180deg); }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #e4e4e7;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.15s;
+        }
+
+        .dropdown-item:hover { background: #27272a; }
+
+        .dropdown-item-icon { font-size: 16px; width: 20px; text-align: center; }
+
+        .header-cta {
+            display: inline-block;
+            padding: 8px 18px;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+
+        .header-cta:hover { opacity: 0.9; }
+
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #e4e4e7;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 53px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0f0f14;
+            padding: 24px 20px;
+            z-index: 999;
+            overflow-y: auto;
+        }
+
+        .mobile-menu.open { display: block; }
+
+        .mobile-menu-item {
+            display: block;
+            padding: 14px 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: #e4e4e7;
+            text-decoration: none;
+            border-bottom: 1px solid #1c1c24;
+        }
+
+        .mobile-submenu { display: none; padding-left: 16px; }
+        .mobile-submenu.open { display: block; }
+
+        .mobile-submenu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            color: #a1a1aa;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .mobile-menu-cta {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            padding: 14px 24px;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* ===== Mini Header (for 404) ===== */
+        .mini-header {
+            padding: 14px 0;
+            border-bottom: 1px solid #1c1c24;
+        }
+
+        .mini-header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* ===== Breadcrumb ===== */
+        .breadcrumb {
+            padding: 16px 0 0;
+            font-size: 13px;
+        }
+
+        .breadcrumb a {
+            color: #71717a;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover { color: #a1a1aa; }
+
+        .breadcrumb span {
+            color: #52525b;
+            margin: 0 8px;
+        }
+
+        .breadcrumb-current {
+            color: #a1a1aa;
+        }
+
+        /* ===== Page Content ===== */
+        .page-content {
+            padding: 32px 0;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* Challenge Title Section */
+        .challenge-title-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .challenge-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .challenge-description {
+            font-size: 14px;
+            color: #a1a1aa;
+            line-height: 1.7;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* Badges */
+        .badges {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-category { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+        .badge-easy { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+        .badge-medium { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+        .badge-hard { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+
+        /* Info Card */
+        .info-card {
+            background: #1c1c24;
+            border-radius: 12px;
+            padding: 4px 20px;
+            margin-bottom: 32px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .info-row:last-child { border-bottom: none; }
+
+        .info-label { font-size: 14px; color: #71717a; font-weight: 500; }
+        .info-value { font-size: 14px; color: #ffffff; font-weight: 700; }
+        .info-value--highlight { color: #4ade80; }
+
+        /* CTA */
+        .cta-wrapper {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            width: 100%;
+            max-width: 400px;
+            padding: 16px 32px;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .cta-button:hover { opacity: 0.9; transform: translateY(-1px); }
+        .cta-button:active { transform: translateY(0); }
+
+        /* Related Challenges */
+        .related-section {
+            margin-bottom: 48px;
+        }
+
+        .related-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 16px;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .related-card {
+            background: #1c1c24;
+            border-radius: 12px;
+            padding: 16px;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s, transform 0.1s;
+            display: block;
+        }
+
+        .related-card:hover { background: #24242e; transform: translateY(-2px); }
+
+        .related-card-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .related-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .related-card-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .related-card-deposit {
+            font-size: 11px;
+            color: #a1a1aa;
+        }
+
+        /* ===== Common Footer ===== */
+        .site-footer {
+            border-top: 1px solid #1c1c24;
+            padding: 40px 0 32px;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 20px;
+            font-weight: 900;
+            background: linear-gradient(to right, #9333ea, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .footer-nav a {
+            font-size: 13px;
+            color: #71717a;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-nav a:hover { color: #a1a1aa; }
+
+        .footer-copyright { font-size: 12px; color: #52525b; }
+
+        /* ===== 404 Page ===== */
+        .error-section {
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .error-icon { font-size: 48px; margin-bottom: 16px; }
+
+        .error-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .error-message {
+            font-size: 14px;
+            color: #a1a1aa;
+            line-height: 1.7;
+            max-width: 360px;
+            margin: 0 auto 32px;
+        }
+
+        /* ===== Case Switcher ===== */
+        .case-tabs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a2e;
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+            z-index: 2000;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .case-tab {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            background: #27272a;
+            color: #a1a1aa;
+            border: none;
+        }
+
+        .case-tab.active { background: #9333ea; color: #ffffff; }
+
+        .case-content { display: none; padding-top: 52px; }
+        .case-content.active { display: block; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .header-nav { display: none; }
+            .header-cta { display: none; }
+            .mobile-menu-toggle { display: block; }
+
+            .related-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .challenge-title { font-size: 20px; }
+            .cta-button { padding: 14px 24px; font-size: 16px; }
+            .related-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Design Spec Case Tabs -->
+    <div class="case-tabs">
+        <button class="case-tab active" onclick="showCase('active')">정상</button>
+        <button class="case-tab" onclick="showCase('notfound')">404</button>
+    </div>
+
+    <!-- Case 1: Normal — active challenge -->
+    <div id="case-active" class="case-content active">
+        <!-- Full Header -->
+        <header class="site-header">
+            <div class="container">
+                <div class="header-inner">
+                    <a href="/" class="header-logo">DefyTON</a>
+                    <nav class="header-nav">
+                        <div class="nav-dropdown">
+                            <button class="nav-dropdown-trigger">Categories <span class="nav-dropdown-arrow">▾</span></button>
+                            <div class="nav-dropdown-menu">
+                                <a href="/categories/morning-routine" class="dropdown-item"><span class="dropdown-item-icon">🏃</span> Morning Routine</a>
+                                <a href="/categories/reading" class="dropdown-item"><span class="dropdown-item-icon">📚</span> Reading</a>
+                                <a href="/categories/wellness" class="dropdown-item"><span class="dropdown-item-icon">🧘</span> Wellness</a>
+                                <a href="/categories/fitness" class="dropdown-item"><span class="dropdown-item-icon">💪</span> Fitness</a>
+                            </div>
+                        </div>
+                        <a href="/events" class="nav-item">Events</a>
+                        <a href="/leaderboard" class="nav-item">Leaderboard</a>
+                        <a href="/business" class="nav-item">For Business</a>
+                    </nav>
+                    <a href="https://t.me/DefyTONBot/app?startapp=c_abc123" class="header-cta">Open in Telegram</a>
+                    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu1">
+            <a href="#" class="mobile-menu-item" onclick="toggleSubmenu(event, 'mobileCat1')">Categories ▾</a>
+            <div class="mobile-submenu" id="mobileCat1">
+                <a href="/categories/morning-routine" class="mobile-submenu-item"><span>🏃</span> Morning Routine</a>
+                <a href="/categories/reading" class="mobile-submenu-item"><span>📚</span> Reading</a>
+                <a href="/categories/wellness" class="mobile-submenu-item"><span>🧘</span> Wellness</a>
+                <a href="/categories/fitness" class="mobile-submenu-item"><span>💪</span> Fitness</a>
+            </div>
+            <a href="/events" class="mobile-menu-item">Events</a>
+            <a href="/leaderboard" class="mobile-menu-item">Leaderboard</a>
+            <a href="/business" class="mobile-menu-item">For Business</a>
+            <a href="https://t.me/DefyTONBot/app?startapp=c_abc123" class="mobile-menu-cta">Open in Telegram</a>
+        </div>
+
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="/">Home</a><span>›</span>
+                <a href="/categories/running">Running</a><span>›</span>
+                <span class="breadcrumb-current">30-Day Morning Run</span>
+            </nav>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <!-- Challenge Title & Description -->
+                <div class="challenge-title-section">
+                    <h1 class="challenge-title">30-Day Morning Run</h1>
+                    <p class="challenge-description">
+                        Run at least 2km every morning for 30 days. AI will verify your running photo with timestamp.
+                    </p>
+                </div>
+
+                <!-- Badges -->
+                <div class="badges">
+                    <a href="/categories/running" style="text-decoration:none;">
+                        <span class="badge badge-category">Running</span>
+                    </a>
+                    <span class="badge badge-medium">MEDIUM</span>
+                </div>
+
+                <!-- Info Card (Challenge Details) -->
+                <div class="info-card">
+                    <div class="info-row">
+                        <span class="info-label">📅 Schedule</span>
+                        <span class="info-value">Jun 1, 2026 ~ Jun 30, 2026</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">📷 Verification</span>
+                        <span class="info-value">1 time per 1 day</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">💰 Deposit</span>
+                        <span class="info-value">5 ~ 30 GRAM</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">🎁 Reward</span>
+                        <span class="info-value info-value--highlight">+10%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">✅ Updated</span>
+                        <span class="info-value">Jun 16, 2025</span>
+                    </div>
+                </div>
+
+                <!-- CTA Button -->
+                <div class="cta-wrapper">
+                    <a href="https://t.me/DefyTONBot/app?startapp=c_abc123" class="cta-button">
+                        🚀 Join Challenge in Telegram
+                    </a>
+                </div>
+
+                <!-- Related Challenges -->
+                <div class="related-section">
+                    <h2 class="related-title">Related Challenges</h2>
+                    <div class="related-grid">
+                        <a href="/challenges/xY7pQ2" class="related-card">
+                            <div class="related-card-title">5AM Wake Up Challenge</div>
+                            <div class="related-card-meta">
+                                <span class="related-card-badge" style="background:rgba(249,115,22,0.15);color:#fb923c;">HARD</span>
+                                <span class="related-card-badge" style="background:rgba(59,130,246,0.15);color:#60a5fa;">14 days</span>
+                            </div>
+                            <div class="related-card-deposit">5 ~ 15 GRAM · +15%</div>
+                        </a>
+                        <a href="/challenges/mN4wR8" class="related-card">
+                            <div class="related-card-title">Morning Yoga Flow</div>
+                            <div class="related-card-meta">
+                                <span class="related-card-badge" style="background:rgba(59,130,246,0.15);color:#60a5fa;">MEDIUM</span>
+                                <span class="related-card-badge" style="background:rgba(34,197,94,0.15);color:#4ade80;">21 days</span>
+                            </div>
+                            <div class="related-card-deposit">1 ~ 10 GRAM · +8%</div>
+                        </a>
+                        <a href="/challenges/kL9tU5" class="related-card">
+                            <div class="related-card-title">Early Bird January</div>
+                            <div class="related-card-meta">
+                                <span class="related-card-badge" style="background:rgba(34,197,94,0.15);color:#4ade80;">EASY</span>
+                                <span class="related-card-badge" style="background:rgba(59,130,246,0.15);color:#60a5fa;">31 days</span>
+                            </div>
+                            <div class="related-card-deposit">1 ~ 5 GRAM · +5%</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="container">
+                <div class="footer-logo">DefyTON</div>
+                <nav class="footer-nav">
+                    <a href="/">Challenges</a>
+                    <a href="/events">Events</a>
+                    <a href="/leaderboard">Leaderboard</a>
+                    <a href="/terms">Terms</a>
+                    <a href="/privacy">Privacy</a>
+                </nav>
+                <div class="footer-copyright">&copy; 2026 DefyTON. All rights reserved.</div>
+            </div>
+        </footer>
+
+        <!-- JSON-LD -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Event",
+            "name": "30-Day Morning Run",
+            "description": "Run at least 2km every morning for 30 days. AI will verify your running photo with timestamp.",
+            "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+            "eventStatus": "https://schema.org/EventScheduled",
+            "startDate": "2026-06-01",
+            "endDate": "2026-06-30",
+            "location": { "@type": "VirtualLocation", "url": "https://DefyTON.com" },
+            "organizer": { "@type": "Organization", "name": "DefyTON", "url": "https://DefyTON.com" },
+            "offers": { "@type": "Offer", "price": "5", "priceCurrency": "GRAM", "availability": "https://schema.org/InStock" }
+        }
+        </script>
+    </div>
+
+    <!-- Case 2: 404 — inactive or non-existent -->
+    <div id="case-notfound" class="case-content">
+        <!-- Mini Header -->
+        <header class="mini-header">
+            <div class="container">
+                <div class="mini-header-inner">
+                    <a href="/" class="header-logo">DefyTON</a>
+                    <a href="https://t.me/DefyTONBot/app" class="header-cta">Open in Telegram</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Error Content -->
+            <div class="error-section">
+                <div class="error-icon">🔍</div>
+                <h1 class="error-title">Challenge Not Found</h1>
+                <p class="error-message">
+                    This challenge is no longer available or doesn't exist. Explore other challenges in Telegram.
+                </p>
+                <a href="https://t.me/DefyTONBot/app" class="cta-button">
+                    🚀 Open in Telegram
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="container">
+                <div class="footer-logo">DefyTON</div>
+                <nav class="footer-nav">
+                    <a href="/">Challenges</a>
+                    <a href="/events">Events</a>
+                    <a href="/leaderboard">Leaderboard</a>
+                    <a href="/terms">Terms</a>
+                    <a href="/privacy">Privacy</a>
+                </nav>
+                <div class="footer-copyright">&copy; 2026 DefyTON. All rights reserved.</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Case Tab Switching Script -->
+    <script>
+        function showCase(caseId) {
+            document.querySelectorAll('.case-content').forEach(function(el) {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.case-tab').forEach(function(el) {
+                el.classList.remove('active');
+            });
+            document.getElementById('case-' + caseId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function toggleMobileMenu() {
+            var menu = document.getElementById('mobileMenu1');
+            menu.classList.toggle('open');
+        }
+
+        function toggleSubmenu(e, id) {
+            e.preventDefault();
+            var submenu = document.getElementById(id);
+            submenu.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

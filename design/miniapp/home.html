@@ -1,0 +1,2306 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Home - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== Home Screen Styles ===== */
+
+    /* Level Progress Bar */
+    .level-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .level-bar:active {
+      transform: scale(0.98);
+    }
+
+    .level-bar__badge {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-white);
+      background: var(--color-primary-gradient);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+
+    .level-bar__info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .level-bar__name {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+
+    .level-bar__next {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+    }
+
+    /* Hero Section */
+    .hero {
+      background: var(--gradient-yellow);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      text-align: center;
+      color: var(--color-text-white);
+      box-shadow: var(--shadow-lg);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .hero:active {
+      transform: scale(0.98);
+    }
+
+    .hero__streak {
+      font-size: var(--font-size-display);
+      font-weight: var(--font-weight-black);
+      line-height: var(--line-height-tight);
+    }
+
+    .hero__label {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-black);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-4);
+    }
+
+    .hero__stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-3);
+    }
+
+    .hero--empty {
+      background: var(--color-bg-elevated);
+      color: var(--color-text-secondary);
+    }
+
+    .hero--empty .stat-box {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Mission Button */
+    .mission-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-3);
+      width: 100%;
+      padding: var(--space-5);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-black);
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+      color: var(--color-text-white);
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      box-shadow: var(--shadow-lg);
+      min-height: 56px;
+    }
+
+    .mission-btn:active {
+      transform: scale(0.98);
+    }
+
+    .mission-btn--todo {
+      background: var(--gradient-blue);
+    }
+
+    .mission-btn--done {
+      background: var(--gradient-green);
+    }
+
+    .mission-btn--disabled {
+      background: var(--color-bg-elevated);
+      color: var(--color-text-tertiary);
+      box-shadow: none;
+      cursor: default;
+    }
+
+    .mission-btn--disabled:active {
+      transform: none;
+    }
+
+    /* Settings full-width button */
+    .settings-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      width: 100%;
+      padding: var(--space-4);
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .settings-btn:active {
+      transform: scale(0.98);
+    }
+
+    .settings-btn__icon {
+      font-size: 28px;
+    }
+
+    .settings-btn__text {
+      flex: 1;
+    }
+
+    .settings-btn__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+    }
+
+    .settings-btn__subtitle {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    /* Toast for level up */
+    .levelup-toast {
+      position: fixed;
+      top: var(--space-6);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3000;
+      padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      text-transform: uppercase;
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+      box-shadow: var(--shadow-lg);
+      animation: slideDown var(--transition-normal);
+    }
+
+    .levelup-toast[hidden] {
+      display: none;
+    }
+
+    .hero__challenge-name {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: var(--space-2);
+    }
+
+    .hero--empty .hero__challenge-name {
+      color: var(--color-text-tertiary);
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translate(-50%, -10px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    /* Add to Home Screen Banner */
+    .home-screen-banner {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-info-bg);
+      border: 1px solid var(--color-info-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .home-screen-banner:active {
+      transform: scale(0.98);
+    }
+
+    .home-screen-banner__icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .home-screen-banner__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .home-screen-banner__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-info-text);
+    }
+
+    .home-screen-banner__subtitle {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+    }
+
+    .home-screen-banner__close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-tertiary);
+      border-radius: var(--radius-full);
+      transition: background-color var(--transition-fast);
+    }
+
+    .home-screen-banner__close:active {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* ===== Daily Check-in Card ===== */
+    .checkin-card {
+      background: var(--color-bg-card);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .checkin-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .checkin-card__header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .checkin-card__header-left .icon {
+      font-size: var(--font-size-lg);
+    }
+
+    .checkin-card__header-left h3 {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin: 0;
+    }
+
+    .checkin-card__today-count {
+      font-size: var(--font-size-2xs);
+      color: var(--color-text-tertiary);
+    }
+
+    .checkin-card__streak {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+      margin-top: var(--space-2);
+    }
+
+    /* Weekly Progress Bar */
+    .weekly-progress {
+      display: flex;
+      justify-content: space-between;
+      gap: 4px;
+      margin-top: var(--space-3);
+    }
+
+    .weekly-progress__day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .weekly-progress__label {
+      font-size: 10px;
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-tertiary);
+      text-transform: uppercase;
+    }
+
+    .weekly-progress__dot {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: var(--font-weight-bold);
+      transition: all var(--transition-normal);
+    }
+
+    .weekly-progress__dot--done {
+      background-color: var(--color-success);
+      color: var(--color-text-white);
+    }
+
+    .weekly-progress__dot--missed {
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-tertiary);
+      border: 1px solid var(--color-border);
+    }
+
+    .weekly-progress__dot--today {
+      background-color: var(--color-bg-card);
+      border: 2px solid var(--color-primary);
+      color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    }
+
+    .weekly-progress__dot--today.done {
+      background-color: var(--color-success);
+      border-color: var(--color-success);
+      color: var(--color-text-white);
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+    }
+
+    .weekly-progress__dot--future {
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-disabled);
+      opacity: 0.5;
+    }
+
+    /* Check-in Button */
+    .checkin-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: var(--space-4);
+      border-radius: var(--radius-md);
+      border: none;
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      min-height: 48px;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      margin-top: var(--space-3);
+    }
+
+    .checkin-btn:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    .checkin-btn--restart {
+      background: var(--gradient-yellow);
+    }
+
+    /* Tomorrow Preview */
+    .checkin-card__tomorrow {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      margin-top: var(--space-2);
+    }
+
+    /* Challenge Nudge */
+    .checkin-nudge {
+      background: var(--color-info-bg);
+      border: 1px solid var(--color-info-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3);
+      margin-top: var(--space-3);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .checkin-nudge:active {
+      transform: scale(0.98);
+    }
+
+    .checkin-nudge__header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .checkin-nudge__badge {
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-black);
+      color: var(--color-success-text);
+      background: var(--color-success-bg-deep);
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+    }
+
+    .checkin-nudge__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .checkin-nudge__desc {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Completed (Compact) Card */
+    .checkin-card--compact .checkin-card__header-left h3 {
+      font-size: var(--font-size-sm);
+    }
+
+    .checkin-card--compact .checkin-done-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+
+    /* Streak Reset Notice */
+    .checkin-reset {
+      background: var(--color-warning-bg);
+      border: 1px solid var(--color-warning-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3);
+      margin-top: var(--space-2);
+    }
+
+    .checkin-reset__text {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-warning-text);
+    }
+
+    .checkin-reset__best {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Onboarding Card */
+    .checkin-onboarding {
+      text-align: center;
+    }
+
+    .checkin-onboarding__title {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+    }
+
+    .checkin-onboarding__rewards {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      margin-bottom: var(--space-3);
+    }
+
+    .checkin-onboarding__reward-row {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+    }
+
+    .checkin-onboarding__reward-row strong {
+      color: var(--color-text);
+      font-weight: var(--font-weight-bold);
+    }
+
+    .checkin-onboarding__bonus {
+      font-size: var(--font-size-xs);
+      color: var(--color-success-text);
+      font-weight: var(--font-weight-bold);
+      margin-top: var(--space-1);
+    }
+
+    /* Milestone Modal */
+    .milestone-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--color-bg-overlay);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: var(--space-6);
+    }
+
+    .milestone-modal[hidden] {
+      display: none;
+    }
+
+    .milestone-modal__content {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      text-align: center;
+      max-width: 320px;
+      width: 100%;
+      box-shadow: var(--shadow-xl);
+      animation: modalSlideUp var(--transition-slow);
+    }
+
+    @keyframes modalSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .milestone-modal__emoji {
+      font-size: 48px;
+      margin-bottom: var(--space-3);
+    }
+
+    .milestone-modal__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+    }
+
+    .milestone-modal__desc {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-2);
+    }
+
+    .milestone-modal__bonus {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-black);
+      color: var(--color-success-text);
+      margin-bottom: var(--space-4);
+    }
+
+    .milestone-modal__actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .milestone-modal__btn {
+      width: 100%;
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+      border: none;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      min-height: 44px;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .milestone-modal__btn:active {
+      transform: scale(0.98);
+    }
+
+    .milestone-modal__btn--primary {
+      background: var(--color-primary-gradient);
+      color: var(--color-text-white);
+    }
+
+    .milestone-modal__btn--secondary {
+      background: var(--color-bg-elevated);
+      color: var(--color-text-secondary);
+    }
+
+    .milestone-modal__btn--ghost {
+      background: none;
+      color: var(--color-text-tertiary);
+    }
+
+    /* Reward Popup Animation */
+    .reward-popup {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 3000;
+      padding: var(--space-4) var(--space-6);
+      border-radius: var(--radius-md);
+      background: var(--color-success-bg-deep);
+      border: 2px solid var(--color-success-border);
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-black);
+      color: var(--color-success-text);
+      box-shadow: var(--shadow-lg);
+      animation: rewardBounce 0.5s ease;
+    }
+
+    .reward-popup[hidden] {
+      display: none;
+    }
+
+    @keyframes rewardBounce {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      50% { transform: translate(-50%, -50%) scale(1.1); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">신규 사용자</button>
+    <button data-case="2">미션 대기</button>
+    <button data-case="3">미션 완료</button>
+    <button data-case="4">부분 완료</button>
+    <button data-case="5">레벨업</button>
+    <button data-case="6">스트릭 리셋</button>
+    <button data-case="7">공지 배너</button>
+    <button data-case="8">홈 화면</button>
+    <button data-case="9">체크인 온보딩</button>
+    <button data-case="10">체크인 미완료</button>
+    <button data-case="11">체크인 완료</button>
+    <button data-case="12">체크인 리셋</button>
+  </nav>
+
+  <div class="mobile-container">
+    </nav>
+
+    <!-- ===== Case 1: New User (첫 진입) ===== -->
+    <main class="screen active" id="case-1">
+      <div class="space-y-4">
+        <!-- Daily Check-in Card (Onboarding) -->
+        <div class="checkin-card">
+          <div class="checkin-onboarding">
+            <div style="font-size: 36px; margin-bottom: var(--space-2);">✅</div>
+            <div class="checkin-onboarding__title">Daily Check-in</div>
+            <div class="checkin-onboarding__rewards">
+              <div class="checkin-onboarding__reward-row">
+                <strong>Day 1:</strong> 0.001 GRAM → <strong>Day 7:</strong> 0.007 GRAM
+              </div>
+              <div class="checkin-onboarding__reward-row">Linear increase — check in daily!</div>
+              <div class="checkin-onboarding__bonus">🎁 7-day bonus: +0.01 GRAM</div>
+              <div class="checkin-onboarding__bonus">🎁 30-day bonus: +0.05 GRAM</div>
+            </div>
+            <button class="checkin-btn" data-action="checkin-start">
+              Start My Streak
+            </button>
+          </div>
+        </div>
+
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.0</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 0</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 0%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 1 GRAM</span>
+        </div>
+
+        <!-- Hero Section (Empty) -->
+        <div class="hero hero--empty">
+          <div class="hero__streak">0</div>
+          <div class="hero__label">Start your streak!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 0</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 0</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 0%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Disabled) -->
+        <button class="mission-btn mission-btn--disabled" disabled>
+          ✨ Start your first challenge!
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">0.0 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: Active + Mission Todo ===== -->
+    <main class="screen" id="case-2">
+      <div class="space-y-4">
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.2</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 2</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 40%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 7 GRAM</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero">
+          <div class="hero__streak">🔥 5</div>
+          <div class="hero__challenge-name">30-Day Morning Run</div>
+          <div class="hero__label">On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 2</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 3</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 85%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo) -->
+        <button class="mission-btn mission-btn--todo" data-action="mission">
+          📸 DO YOUR MISSION
+        </button>
+
+        <!-- Daily Check-in Card (Compact/Done) -->
+        <div class="checkin-card checkin-card--compact">
+          <div class="checkin-card__header">
+            <div class="checkin-card__header-left">
+              <span class="icon" style="font-size: var(--font-size-sm);">✅</span>
+              <h3>Done</h3>
+              <span class="checkin-done-badge">· 🔥 5 days</span>
+            </div>
+            <span class="checkin-card__today-count">👥 47</span>
+          </div>
+          <div class="weekly-progress">
+            <div class="weekly-progress__day"><span class="weekly-progress__label">M</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">W</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">F</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--today done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--future">·</div></div>
+          </div>
+          <div class="checkin-card__tomorrow">Tomorrow: 0.006 GRAM</div>
+        </div>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">7.5 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 3: Active + Mission Done ===== -->
+    <main class="screen" id="case-3">
+      <div class="space-y-4">
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.2</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 2</span>
+            <div class="progress">
+              <div class="progress__bar progress__bar--success" style="width: 40%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 7 GRAM</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero">
+          <div class="hero__streak">🔥 6</div>
+          <div class="hero__challenge-name">Daily Reading Challenge</div>
+          <div class="hero__label">On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 2</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 3</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 88%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Done) -->
+        <button class="mission-btn mission-btn--done" data-action="mission-done">
+          ✅ MISSION DONE!
+        </button>
+
+        <!-- Daily Check-in Card (Compact/Done) -->
+        <div class="checkin-card checkin-card--compact">
+          <div class="checkin-card__header">
+            <div class="checkin-card__header-left">
+              <span class="icon" style="font-size: var(--font-size-sm);">✅</span>
+              <h3>Done</h3>
+              <span class="checkin-done-badge">· 🔥 5 days</span>
+            </div>
+            <span class="checkin-card__today-count">👥 47</span>
+          </div>
+          <div class="weekly-progress">
+            <div class="weekly-progress__day"><span class="weekly-progress__label">M</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">W</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">F</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--today done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--future">·</div></div>
+          </div>
+          <div class="checkin-card__tomorrow">Tomorrow: 0.006 GRAM</div>
+        </div>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">7.5 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 4: Multiple Active + Partial Done ===== -->
+    <main class="screen" id="case-4">
+      <div class="space-y-4">
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.3</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 3</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 33%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 15 GRAM</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero">
+          <div class="hero__streak">🔥 12</div>
+          <div class="hero__challenge-name">Morning Meditation</div>
+          <div class="hero__label">On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 3</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 7</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 92%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo - partial done) -->
+        <button class="mission-btn mission-btn--todo" data-action="mission">
+          📸 DO YOUR MISSION
+        </button>
+
+        <!-- Daily Check-in Card (Compact/Done) -->
+        <div class="checkin-card checkin-card--compact">
+          <div class="checkin-card__header">
+            <div class="checkin-card__header-left">
+              <span class="icon" style="font-size: var(--font-size-sm);">✅</span>
+              <h3>Done</h3>
+              <span class="checkin-done-badge">· 🔥 5 days</span>
+            </div>
+            <span class="checkin-card__today-count">👥 47</span>
+          </div>
+          <div class="weekly-progress">
+            <div class="weekly-progress__day"><span class="weekly-progress__label">M</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">W</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">F</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--today done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--future">·</div></div>
+          </div>
+          <div class="checkin-card__tomorrow">Tomorrow: 0.006 GRAM</div>
+        </div>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">18.2 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 5: Level Up ===== -->
+    <main class="screen" id="case-5">
+      <div class="space-y-4">
+        <!-- Level Bar (New Level) -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.3</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 3</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 5%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 15 GRAM</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero">
+          <div class="hero__streak">🔥 14</div>
+          <div class="hero__challenge-name">Fitness Challenge</div>
+          <div class="hero__label">On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 2</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 5</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 95%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo) -->
+        <button class="mission-btn mission-btn--todo" data-action="mission">
+          📸 DO YOUR MISSION
+        </button>
+
+        <!-- Daily Check-in Card (Compact/Done) -->
+        <div class="checkin-card checkin-card--compact">
+          <div class="checkin-card__header">
+            <div class="checkin-card__header-left">
+              <span class="icon" style="font-size: var(--font-size-sm);">✅</span>
+              <h3>Done</h3>
+              <span class="checkin-done-badge">· 🔥 5 days</span>
+            </div>
+            <span class="checkin-card__today-count">👥 47</span>
+          </div>
+          <div class="weekly-progress">
+            <div class="weekly-progress__day"><span class="weekly-progress__label">M</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">W</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">F</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--today done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--future">·</div></div>
+          </div>
+          <div class="checkin-card__tomorrow">Tomorrow: 0.006 GRAM</div>
+        </div>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">15.8 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level Up Toast -->
+      <div class="levelup-toast" id="levelup-toast">
+        🎉 Level Up! You're now Level 3
+      </div>
+    </main>
+
+    <!-- ===== Case 6: Streak Reset ===== -->
+    <main class="screen" id="case-6">
+      <div class="space-y-4">
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.2</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 2</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 60%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 7 GRAM</span>
+        </div>
+
+        <!-- Hero Section (Streak Reset) -->
+        <div class="hero hero--empty">
+          <div class="hero__streak">0</div>
+          <div class="hero__label">Start your streak!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 1</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 2</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 67%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo - restart streak) -->
+        <button class="mission-btn mission-btn--todo" data-action="mission">
+          📸 DO YOUR MISSION
+        </button>
+
+        <!-- Daily Check-in Card (Compact/Done) -->
+        <div class="checkin-card checkin-card--compact">
+          <div class="checkin-card__header">
+            <div class="checkin-card__header-left">
+              <span class="icon" style="font-size: var(--font-size-sm);">✅</span>
+              <h3>Done</h3>
+              <span class="checkin-done-badge">· 🔥 5 days</span>
+            </div>
+            <span class="checkin-card__today-count">👥 47</span>
+          </div>
+          <div class="weekly-progress">
+            <div class="weekly-progress__day"><span class="weekly-progress__label">M</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">W</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">F</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--today done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--future">·</div></div>
+          </div>
+          <div class="checkin-card__tomorrow">Tomorrow: 0.006 GRAM</div>
+        </div>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">9.3 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 7: Notice Banner (공지 배너 있음) ===== -->
+    <main class="screen" id="case-7">
+      <div class="space-y-4">
+        <!-- Notice Banner -->
+        <div class="card card--compact card--interactive" style="background: var(--color-warning-bg); border-color: var(--color-warning-border);">
+          <div class="flex items-center gap-3">
+            <span style="font-size: 20px;">📢</span>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                Server maintenance on May 20
+              </div>
+            </div>
+            <span class="badge badge--warning" style="flex-shrink: 0;">+2 more</span>
+          </div>
+        </div>
+
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.3</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 3</span>
+            <div class="progress" style="height: 6px;">
+              <div class="progress__bar" style="width: 45%;"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 15 GRAM</span>
+        </div>
+
+        <!-- Hero -->
+        <div class="hero">
+          <div class="hero__streak">🔥 12</div>
+          <div class="hero__challenge-name">Morning Meditation</div>
+          <div class="hero__label">Days On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 3</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 5</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 87%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo) -->
+        <button class="mission-btn mission-btn--todo">
+          <span class="mission-btn__icon">📸</span>
+          <div class="mission-btn__text">
+            <div class="mission-btn__title">Do Your Mission</div>
+            <div class="mission-btn__subtitle">Keep your streak alive</div>
+          </div>
+        </button>
+
+        <!-- Daily Check-in Card (Compact/Done) -->
+        <div class="checkin-card checkin-card--compact">
+          <div class="checkin-card__header">
+            <div class="checkin-card__header-left">
+              <span class="icon" style="font-size: var(--font-size-sm);">✅</span>
+              <h3>Done</h3>
+              <span class="checkin-done-badge">· 🔥 5 days</span>
+            </div>
+            <span class="checkin-card__today-count">👥 47</span>
+          </div>
+          <div class="weekly-progress">
+            <div class="weekly-progress__day"><span class="weekly-progress__label">M</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">W</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">F</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--today done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--future">·</div></div>
+          </div>
+          <div class="checkin-card__tomorrow">Tomorrow: 0.006 GRAM</div>
+        </div>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">15.5 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 8: Add to Home Screen Banner ===== -->
+    <main class="screen" id="case-8">
+      <div class="space-y-4">
+        <!-- Notice Banner -->
+        <div class="card card--compact card--interactive" style="background: var(--color-warning-bg); border-color: var(--color-warning-border);">
+          <div class="flex items-center gap-3">
+            <span style="font-size: 20px;">📢</span>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                Server maintenance on May 20
+              </div>
+            </div>
+            <span class="badge badge--warning" style="flex-shrink: 0;">+2 more</span>
+          </div>
+        </div>
+
+        <!-- Add to Home Screen Banner -->
+        <div class="home-screen-banner" id="home-screen-banner">
+          <span class="home-screen-banner__icon">📱</span>
+          <div class="home-screen-banner__content">
+            <div class="home-screen-banner__title">Add to Home Screen</div>
+            <div class="home-screen-banner__subtitle">Launch with one tap</div>
+          </div>
+          <button class="home-screen-banner__close" id="home-screen-banner-close" aria-label="Dismiss banner">✕</button>
+        </div>
+
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.3</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 3</span>
+            <div class="progress" style="height: 6px;">
+              <div class="progress__bar" style="width: 45%;"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 15 GRAM</span>
+        </div>
+
+        <!-- Hero -->
+        <div class="hero">
+          <div class="hero__streak">🔥 12</div>
+          <div class="hero__challenge-name">Morning Meditation</div>
+          <div class="hero__label">Days On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 3</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 5</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 87%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo) -->
+        <button class="mission-btn mission-btn--todo" data-action="mission">
+          📸 DO YOUR MISSION
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">15.5 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 9: Check-in Onboarding (첫 체크인) ===== -->
+    <main class="screen" id="case-9">
+      <div class="space-y-4">
+        <!-- Notice Banner -->
+        <div class="card card--compact card--interactive" style="background: var(--color-warning-bg); border-color: var(--color-warning-border);">
+          <div class="flex items-center gap-3">
+            <span style="font-size: 20px;">📢</span>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                Welcome event extended!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Check-in Card: Onboarding -->
+        <div class="checkin-card">
+          <div class="checkin-onboarding">
+            <div style="font-size: 36px; margin-bottom: var(--space-2);">✅</div>
+            <div class="checkin-onboarding__title">Daily Check-in</div>
+            <div class="checkin-onboarding__rewards">
+              <div class="checkin-onboarding__reward-row">
+                <strong>Day 1:</strong> 0.001 GRAM → <strong>Day 7:</strong> 0.007 GRAM
+              </div>
+              <div class="checkin-onboarding__reward-row">Linear increase — check in daily!</div>
+              <div class="checkin-onboarding__bonus">🎁 7-day bonus: +0.01 GRAM</div>
+              <div class="checkin-onboarding__bonus">🎁 30-day bonus: +0.05 GRAM</div>
+            </div>
+            <button class="checkin-btn" data-action="checkin-start">
+              Start My Streak
+            </button>
+          </div>
+        </div>
+
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.0</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 0</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 0%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 1 GRAM</span>
+        </div>
+
+        <!-- Hero Section (New User) -->
+        <div class="hero hero--empty">
+          <div class="hero__streak">0</div>
+          <div class="hero__label">Start your streak!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 0</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 0</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 0%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Disabled) -->
+        <button class="mission-btn mission-btn--disabled" disabled>
+          ✨ Start your first challenge!
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">0.0 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 10: Check-in Ready (미체크인 + 넛지) ===== -->
+    <main class="screen" id="case-10">
+      <div class="space-y-4">
+        <!-- Daily Check-in Card: Ready -->
+        <div class="checkin-card">
+          <!-- Header -->
+          <div class="checkin-card__header">
+            <div class="checkin-card__header-left">
+              <span class="icon">✅</span>
+              <h3>Daily Check-in</h3>
+            </div>
+            <span class="checkin-card__today-count">👥 47 checked in today</span>
+          </div>
+
+          <!-- Streak -->
+          <div class="checkin-card__streak">🔥 5 day streak</div>
+
+          <!-- Weekly Progress Bar -->
+          <div class="weekly-progress">
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">M</span>
+              <div class="weekly-progress__dot weekly-progress__dot--done">✓</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">T</span>
+              <div class="weekly-progress__dot weekly-progress__dot--done">✓</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">W</span>
+              <div class="weekly-progress__dot weekly-progress__dot--done">✓</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">T</span>
+              <div class="weekly-progress__dot weekly-progress__dot--done">✓</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">F</span>
+              <div class="weekly-progress__dot weekly-progress__dot--done">✓</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">S</span>
+              <div class="weekly-progress__dot weekly-progress__dot--today">●</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">S</span>
+              <div class="weekly-progress__dot weekly-progress__dot--future">·</div>
+            </div>
+          </div>
+
+          <!-- Check-in Button -->
+          <button class="checkin-btn" data-action="checkin">
+            Tap to Check In · 0.006 GRAM
+          </button>
+
+          <!-- Tomorrow Preview -->
+          <div class="checkin-card__tomorrow">Tomorrow: 0.007 GRAM + 🎁 7-day bonus</div>
+
+          <!-- Challenge Nudge (Case 12 표현) -->
+          <div class="checkin-nudge" data-action="nudge">
+            <div class="checkin-nudge__header">
+              <span class="checkin-nudge__badge">FREE</span>
+              <span class="checkin-nudge__title">Say Hello Challenge</span>
+            </div>
+            <div class="checkin-nudge__desc">Take a photo of anything — 7 days, zero cost</div>
+          </div>
+        </div>
+
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.1</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 1</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 30%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 3 GRAM</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero hero--empty">
+          <div class="hero__streak">0</div>
+          <div class="hero__label">Start your streak!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 0</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 0</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 0%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Disabled) -->
+        <button class="mission-btn mission-btn--disabled" disabled>
+          ✨ Start your first challenge!
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">1.5 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reward Popup (shown on check-in success) -->
+      <div class="reward-popup" id="reward-popup-10" hidden>+0.006 GRAM ✓</div>
+
+      <!-- Milestone Modal (7-day bonus) -->
+      <div class="milestone-modal" id="milestone-modal-10" hidden>
+        <div class="milestone-modal__content">
+          <div class="milestone-modal__emoji">🎉</div>
+          <div class="milestone-modal__title">7-Day Streak!</div>
+          <div class="milestone-modal__desc">You've checked in 7 days in a row!</div>
+          <div class="milestone-modal__bonus">+0.01 GRAM Bonus</div>
+          <div class="milestone-modal__actions">
+            <button class="milestone-modal__btn milestone-modal__btn--primary" data-action="share-telegram">
+              📤 Share to Telegram
+            </button>
+            <button class="milestone-modal__btn milestone-modal__btn--secondary" data-action="copy-link">
+              🔗 Copy Link
+            </button>
+            <button class="milestone-modal__btn milestone-modal__btn--ghost" data-action="close-modal" data-target="milestone-modal-10">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 11: Check-in Completed (축소) ===== -->
+    <main class="screen" id="case-11">
+      <div class="space-y-4">
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.2</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 2</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 55%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 7 GRAM</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero">
+          <div class="hero__streak">🔥 10</div>
+          <div class="hero__challenge-name">Daily Reading Challenge</div>
+          <div class="hero__label">On Fire!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 2</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 4</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 90%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo) -->
+        <button class="mission-btn mission-btn--todo" data-action="mission">
+          📸 DO YOUR MISSION
+        </button>
+
+        <!-- Daily Check-in Card: Completed (Compact) — 인증 버튼 아래 배치 -->
+        <div class="checkin-card checkin-card--compact">
+          <div class="checkin-card__header">
+            <div class="checkin-card__header-left">
+              <span class="icon" style="font-size: var(--font-size-sm);">✅</span>
+              <h3>Done</h3>
+              <span class="checkin-done-badge">· 🔥 7 days</span>
+            </div>
+            <span class="checkin-card__today-count">👥 63</span>
+          </div>
+          <div class="weekly-progress">
+            <div class="weekly-progress__day"><span class="weekly-progress__label">M</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">W</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">T</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">F</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--done">✓</div></div>
+            <div class="weekly-progress__day"><span class="weekly-progress__label">S</span><div class="weekly-progress__dot weekly-progress__dot--today done">✓</div></div>
+          </div>
+          <div class="checkin-card__tomorrow">Tomorrow: 0.007 GRAM</div>
+        </div>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">5.2 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 12: Check-in Streak Reset ===== -->
+    <main class="screen" id="case-12">
+      <div class="space-y-4">
+        <!-- Daily Check-in Card: Streak Reset -->
+        <div class="checkin-card">
+          <!-- Header -->
+          <div class="checkin-card__header">
+            <div class="checkin-card__header-left">
+              <span class="icon">✅</span>
+              <h3>Daily Check-in</h3>
+            </div>
+            <span class="checkin-card__today-count">👥 32 checked in today</span>
+          </div>
+
+          <!-- Streak Reset Notice -->
+          <div class="checkin-reset">
+            <div class="checkin-reset__text">⚠️ Your streak was reset</div>
+            <div class="checkin-reset__best">Previous best: 12 days</div>
+          </div>
+
+          <!-- Weekly Progress Bar (mostly empty) -->
+          <div class="weekly-progress">
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">M</span>
+              <div class="weekly-progress__dot weekly-progress__dot--done">✓</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">T</span>
+              <div class="weekly-progress__dot weekly-progress__dot--done">✓</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">W</span>
+              <div class="weekly-progress__dot weekly-progress__dot--done">✓</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">T</span>
+              <div class="weekly-progress__dot weekly-progress__dot--missed">✗</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">F</span>
+              <div class="weekly-progress__dot weekly-progress__dot--today">●</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">S</span>
+              <div class="weekly-progress__dot weekly-progress__dot--future">·</div>
+            </div>
+            <div class="weekly-progress__day">
+              <span class="weekly-progress__label">S</span>
+              <div class="weekly-progress__dot weekly-progress__dot--future">·</div>
+            </div>
+          </div>
+
+          <!-- Restart Button -->
+          <button class="checkin-btn checkin-btn--restart" data-action="checkin-restart">
+            Restart My Streak · 0.001 GRAM
+          </button>
+
+          <!-- Tomorrow Preview -->
+          <div class="checkin-card__tomorrow">Tomorrow: 0.002 GRAM</div>
+        </div>
+
+        <!-- Level Bar -->
+        <div class="level-bar">
+          <span class="level-bar__badge">Lv.2</span>
+          <div class="level-bar__info">
+            <span class="level-bar__name">Level 2</span>
+            <div class="progress">
+              <div class="progress__bar" style="width: 45%"></div>
+            </div>
+          </div>
+          <span class="level-bar__next">Next: 7 GRAM</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero hero--empty">
+          <div class="hero__streak">0</div>
+          <div class="hero__label">Start your streak!</div>
+          <div class="hero__stats">
+            <div class="stat-box">
+              <span class="stat-box__value">💪 1</span>
+              <span class="stat-box__label">Active</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">🏆 3</span>
+              <span class="stat-box__label">Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box__value">⭐ 78%</span>
+              <span class="stat-box__label">Win</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Button (Todo) -->
+        <button class="mission-btn mission-btn--todo" data-action="mission">
+          📸 DO YOUR MISSION
+        </button>
+
+        <!-- Action Grid -->
+        <div class="action-grid">
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">📋</span>
+            <span class="action-grid__item-title">My Challenges</span>
+            <span class="action-grid__item-subtitle">Track progress</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">✨</span>
+            <span class="action-grid__item-title">New Challenge</span>
+            <span class="action-grid__item-subtitle">Start today</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">💰</span>
+            <span class="action-grid__item-title">Wallet</span>
+            <span class="action-grid__item-subtitle">4.8 GRAM</span>
+          </div>
+          <div class="action-grid__item">
+            <span class="action-grid__item-icon">🏆</span>
+            <span class="action-grid__item-title">Leaderboard</span>
+            <span class="action-grid__item-subtitle">Beat your friends</span>
+          </div>
+        </div>
+
+        <!-- Biz -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">🏪</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Grow Your Audience</div>
+            <div class="settings-btn__subtitle">Get real followers</div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-btn">
+          <span class="settings-btn__icon">⚙️</span>
+          <div class="settings-btn__text">
+            <div class="settings-btn__title">Settings</div>
+            <div class="settings-btn__subtitle">Help & preferences</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reward Popup (shown on restart success) -->
+      <div class="reward-popup" id="reward-popup-12" hidden>+0.001 GRAM ✓</div>
+    </main>
+
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+
+      // Show level up toast for Case 5
+      const toast = document.getElementById('levelup-toast');
+      if (toast) {
+        if (caseId === '5') {
+          toast.hidden = false;
+          setTimeout(() => { toast.hidden = true; }, 3000);
+        } else {
+          toast.hidden = true;
+        }
+      }
+
+      // Hide reward popups and modals when switching cases
+      document.querySelectorAll('.reward-popup').forEach(p => p.hidden = true);
+      document.querySelectorAll('.milestone-modal').forEach(m => m.hidden = true);
+    });
+
+    // Mission Button Interaction (visual feedback only)
+    document.querySelectorAll('[data-action="mission"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.style.transform = 'scale(0.95)';
+        btn.style.opacity = '0.8';
+        setTimeout(() => {
+          btn.style.transform = '';
+          btn.style.opacity = '';
+        }, 200);
+      });
+    });
+
+    document.querySelectorAll('[data-action="mission-done"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          btn.style.transform = '';
+        }, 200);
+      });
+    });
+
+    // Action Grid Item Interaction (visual feedback)
+    document.querySelectorAll('.action-grid__item').forEach(item => {
+      item.addEventListener('click', () => {
+        item.style.transform = 'scale(0.96)';
+        setTimeout(() => {
+          item.style.transform = '';
+        }, 150);
+      });
+    });
+
+    // Level Bar Interaction
+    document.querySelectorAll('.level-bar').forEach(bar => {
+      bar.addEventListener('click', () => {
+        bar.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+          bar.style.transform = '';
+        }, 150);
+      });
+    });
+
+    // Show level up toast on initial load if Case 5 is active
+    window.addEventListener('DOMContentLoaded', () => {
+      const activeCase = document.querySelector('.case-switcher button.active');
+      if (activeCase && activeCase.dataset.case === '5') {
+        const toast = document.getElementById('levelup-toast');
+        if (toast) {
+          toast.hidden = false;
+          setTimeout(() => { toast.hidden = true; }, 3000);
+        }
+      }
+    });
+
+    // Home Screen Banner Interaction
+    const homeScreenBanner = document.getElementById('home-screen-banner');
+    const homeScreenBannerClose = document.getElementById('home-screen-banner-close');
+
+    if (homeScreenBanner) {
+      homeScreenBanner.addEventListener('click', () => {
+        homeScreenBanner.style.opacity = '0';
+        homeScreenBanner.style.transform = 'scale(0.95)';
+        setTimeout(() => { homeScreenBanner.style.display = 'none'; }, 200);
+      });
+    }
+
+    if (homeScreenBannerClose) {
+      homeScreenBannerClose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        homeScreenBanner.style.opacity = '0';
+        homeScreenBanner.style.transform = 'scale(0.95)';
+        setTimeout(() => { homeScreenBanner.style.display = 'none'; }, 200);
+      });
+    }
+
+    // ===== Daily Check-in Interactions =====
+
+    // Check-in button (Case 10: Ready to check in)
+    document.querySelectorAll('[data-action="checkin"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.style.transform = 'scale(0.95)';
+        btn.style.opacity = '0.8';
+        setTimeout(() => {
+          btn.style.transform = '';
+          btn.style.opacity = '';
+          // Show reward popup
+          const popup = document.getElementById('reward-popup-10');
+          if (popup) {
+            popup.hidden = false;
+            setTimeout(() => { popup.hidden = true; }, 2000);
+          }
+        }, 300);
+      });
+    });
+
+    // Start My Streak button (Case 9: Onboarding)
+    document.querySelectorAll('[data-action="checkin-start"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.style.transform = 'scale(0.95)';
+        btn.style.opacity = '0.8';
+        btn.textContent = '+0.001 GRAM ✓';
+        btn.style.background = 'var(--gradient-green)';
+        setTimeout(() => {
+          btn.style.transform = '';
+          btn.style.opacity = '';
+        }, 300);
+      });
+    });
+
+    // Restart My Streak button (Case 12: Streak Reset)
+    document.querySelectorAll('[data-action="checkin-restart"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.style.transform = 'scale(0.95)';
+        btn.style.opacity = '0.8';
+        setTimeout(() => {
+          btn.style.transform = '';
+          btn.style.opacity = '';
+          // Show reward popup
+          const popup = document.getElementById('reward-popup-12');
+          if (popup) {
+            popup.hidden = false;
+            setTimeout(() => { popup.hidden = true; }, 2000);
+          }
+        }, 300);
+      });
+    });
+
+    // Milestone Modal — Show demo (double-click check-in shows modal)
+    (function() {
+      let checkinClickCount = 0;
+      document.querySelectorAll('[data-action="checkin"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          checkinClickCount++;
+          if (checkinClickCount >= 2) {
+            setTimeout(() => {
+              const modal = document.getElementById('milestone-modal-10');
+              if (modal) modal.hidden = false;
+            }, 2500);
+            checkinClickCount = 0;
+          }
+        });
+      });
+    })();
+
+    // Close milestone modal
+    document.querySelectorAll('[data-action="close-modal"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        const modal = document.getElementById(target);
+        if (modal) modal.hidden = true;
+      });
+    });
+
+    // Close modal on overlay click
+    document.querySelectorAll('.milestone-modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.hidden = true;
+        }
+      });
+    });
+
+    // Challenge Nudge Interaction
+    document.querySelectorAll('[data-action="nudge"]').forEach(nudge => {
+      nudge.addEventListener('click', () => {
+        nudge.style.transform = 'scale(0.97)';
+        nudge.style.opacity = '0.8';
+        setTimeout(() => {
+          nudge.style.transform = '';
+          nudge.style.opacity = '';
+        }, 200);
+      });
+    });
+  </script>
+</body>
+</html>

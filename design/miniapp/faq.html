@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FAQ - Mini App</title>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <style>
+    /* ===== FAQ Screen Styles ===== */
+
+    /* FAQ Category Section */
+    .faq-category {
+      margin-bottom: var(--space-4);
+    }
+
+    .faq-category__header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) 0;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-black);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+    }
+
+    .faq-category__icon {
+      font-size: 18px;
+    }
+
+    /* FAQ Item (Accordion) */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      background-color: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-item__question {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      width: 100%;
+      text-align: left;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+      min-height: 48px;
+      background: none;
+      border: none;
+    }
+
+    .faq-item__question:active {
+      background-color: var(--color-bg-elevated);
+    }
+
+    .faq-item__arrow {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      flex-shrink: 0;
+      transition: transform var(--transition-normal);
+      width: 16px;
+      text-align: center;
+    }
+
+    .faq-item--open .faq-item__arrow {
+      transform: rotate(90deg);
+    }
+
+    .faq-item__text {
+      flex: 1;
+    }
+
+    .faq-item__answer {
+      display: none;
+      padding: 0 var(--space-4) var(--space-4) calc(var(--space-4) + 16px + var(--space-3));
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-relaxed);
+    }
+
+    .faq-item--open .faq-item__answer {
+      display: block;
+    }
+
+    /* Support Link */
+    .support-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-6) var(--space-4);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-primary);
+      text-align: center;
+    }
+
+    .support-link a {
+      color: var(--color-primary);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Case Switcher -->
+  <nav class="case-switcher">
+    <button class="active" data-case="1">기본</button>
+    <button data-case="2">펼침</button>
+  </nav>
+
+  <div class="mobile-container">
+
+    <!-- ===== Case 1: 기본 상태 (모든 질문 접힘) ===== -->
+    <main class="screen active" id="case-1">
+      <div style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+
+        <!-- Getting Started -->
+        <div class="faq-category">
+          <div class="faq-category__header">
+            <span class="faq-category__icon">🚀</span>
+            Getting Started
+          </div>
+          <div class="faq-list">
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What is DefyTON?</span>
+              </button>
+              <div class="faq-item__answer">
+                Stake GRAM on habit challenges, verify daily with photos, and AI judges your progress. Complete 100% to get your deposit back plus rewards.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">Is my money safe?</span>
+              </button>
+              <div class="faq-item__answer">
+                Your deposit is held securely. On success, you get 100% back plus rewards. On failure, only the penalty is deducted and the rest is returned.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">How do I get started?</span>
+              </button>
+              <div class="faq-item__answer">
+                1) Buy GRAM → 2) Pick a challenge → 3) Set your deposit → 4) Verify daily with photos. That's it!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Money & Withdrawals -->
+        <div class="faq-category">
+          <div class="faq-category__header">
+            <span class="faq-category__icon">💰</span>
+            Money & Withdrawals
+          </div>
+          <div class="faq-list">
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">How do I buy GRAM?</span>
+              </button>
+              <div class="faq-item__answer">
+                Go to Wallet → Connect your wallet → Choose a package (1/5/15/30/60 GRAM) → Approve in your wallet app. A 10% service fee is included.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What's the 10% purchase fee?</span>
+              </button>
+              <div class="faq-item__answer">
+                When you buy 5 GRAM, 5.5 GRAM is charged from your wallet. 0.5 GRAM is the service fee. Your balance shows 5 GRAM.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What's the difference between Deposit and Reward?</span>
+              </button>
+              <div class="faq-item__answer">
+                Deposit = money you put in. Reward = bonus earned from completing challenges. Withdrawal fees differ for each.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">How do I withdraw?</span>
+              </button>
+              <div class="faq-item__answer">
+                Wallet → Withdraw → Enter amount → Submit request. Processed within 24 hours after admin approval.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What are the withdrawal fees?</span>
+              </button>
+              <div class="faq-item__answer">
+                Deposit withdrawal: free. Reward withdrawal: 0–10% depending on your level (higher level = lower fee).
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">Can I cancel a withdrawal?</span>
+              </button>
+              <div class="faq-item__answer">
+                Only while it's in PENDING status. Once processing starts, it cannot be cancelled.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Verification -->
+        <div class="faq-category">
+          <div class="faq-category__header">
+            <span class="faq-category__icon">📸</span>
+            AI Verification
+          </div>
+          <div class="faq-list">
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What photos are accepted?</span>
+              </button>
+              <div class="faq-item__answer">
+                Photos that match the challenge topic, taken on the same day. AI analyzes the content to verify.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What if AI rejects my photo?</span>
+              </button>
+              <div class="faq-item__answer">
+                You can retake and resubmit on the same day. If you believe it's unfair, submit a Dispute for manual review.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What is a Dispute?</span>
+              </button>
+              <div class="faq-item__answer">
+                When AI rejects your photo unfairly, write a reason and submit. An admin will manually review and may override the decision.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">Can I use the same photo twice?</span>
+              </button>
+              <div class="faq-item__answer">
+                No. Previously approved photos are detected automatically. You must take a new photo each time.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Challenges -->
+        <div class="faq-category">
+          <div class="faq-category__header">
+            <span class="faq-category__icon">🎯</span>
+            Challenges
+          </div>
+          <div class="faq-list">
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What happens if I miss a day?</span>
+              </button>
+              <div class="faq-item__answer">
+                Your streak resets and verification rate drops. If below 100% at the end, a penalty is deducted from your deposit.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">Can I quit a challenge?</span>
+              </button>
+              <div class="faq-item__answer">
+                Only within the give-up period (varies by challenge, check the detail page). 10% penalty is deducted and the rest is returned.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What happens when a challenge ends?</span>
+              </button>
+              <div class="faq-item__answer">
+                100% verification rate → full deposit back + reward. Below 100% → penalty deducted, rest returned.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">Can I join multiple challenges?</span>
+              </button>
+              <div class="faq-item__answer">
+                Yes, you can participate in multiple challenges. Check each challenge's details for any restrictions.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Levels & Rewards -->
+        <div class="faq-category">
+          <div class="faq-category__header">
+            <span class="faq-category__icon">⭐</span>
+            Levels & Rewards
+          </div>
+          <div class="faq-list">
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">How do levels work?</span>
+              </button>
+              <div class="faq-item__answer">
+                Your level is based on Reward GRAM you hold (Level 0–10). Higher level = lower withdrawal fee.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">Can my level go down?</span>
+              </button>
+              <div class="faq-item__answer">
+                Yes, if you withdraw Rewards. Deposit withdrawals don't affect your level.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support Link -->
+        <div class="support-link">
+          Still need help? <a href="mailto:rudtjq1213@gmail.com">Contact Support</a>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== Case 2: 질문 펼침 (첫 번째 카테고리 첫 질문 열림) ===== -->
+    <main class="screen" id="case-2">
+      <div style="padding: var(--page-padding-x); padding-top: var(--page-padding-y);">
+
+        <!-- Getting Started -->
+        <div class="faq-category">
+          <div class="faq-category__header">
+            <span class="faq-category__icon">🚀</span>
+            Getting Started
+          </div>
+          <div class="faq-list">
+            <!-- First item OPEN -->
+            <div class="faq-item faq-item--open">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What is DefyTON?</span>
+              </button>
+              <div class="faq-item__answer">
+                Stake GRAM on habit challenges, verify daily with photos, and AI judges your progress. Complete 100% to get your deposit back plus rewards.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">Is my money safe?</span>
+              </button>
+              <div class="faq-item__answer">
+                Your deposit is held securely. On success, you get 100% back plus rewards. On failure, only the penalty is deducted and the rest is returned.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">How do I get started?</span>
+              </button>
+              <div class="faq-item__answer">
+                1) Buy GRAM → 2) Pick a challenge → 3) Set your deposit → 4) Verify daily with photos. That's it!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- (나머지 카테고리는 Case 1과 동일, 접힌 상태) -->
+        <div class="faq-category">
+          <div class="faq-category__header">
+            <span class="faq-category__icon">💰</span>
+            Money & Withdrawals
+          </div>
+          <div class="faq-list">
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">How do I buy GRAM?</span>
+              </button>
+              <div class="faq-item__answer">Go to Wallet → Connect your wallet → Choose a package (1/5/15/30/60 GRAM) → Approve in your wallet app. A 10% service fee is included.</div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What's the 10% purchase fee?</span>
+              </button>
+              <div class="faq-item__answer">When you buy 5 GRAM, 5.5 GRAM is charged from your wallet. 0.5 GRAM is the service fee. Your balance shows 5 GRAM.</div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What's the difference between Deposit and Reward?</span>
+              </button>
+              <div class="faq-item__answer">Deposit = money you put in. Reward = bonus earned from completing challenges. Withdrawal fees differ for each.</div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">How do I withdraw?</span>
+              </button>
+              <div class="faq-item__answer">Wallet → Withdraw → Enter amount → Submit request. Processed within 24 hours after admin approval.</div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">What are the withdrawal fees?</span>
+              </button>
+              <div class="faq-item__answer">Deposit withdrawal: free. Reward withdrawal: 0–10% depending on your level (higher level = lower fee).</div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-item__question" data-faq-toggle>
+                <span class="faq-item__arrow">▶</span>
+                <span class="faq-item__text">Can I cancel a withdrawal?</span>
+              </button>
+              <div class="faq-item__answer">Only while it's in PENDING status. Once processing starts, it cannot be cancelled.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support Link -->
+        <div class="support-link">
+          Still need help? <a href="mailto:rudtjq1213@gmail.com">Contact Support</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Case Switcher
+    document.querySelector('.case-switcher').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const caseId = btn.dataset.case;
+      document.querySelectorAll('.case-switcher button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('case-' + caseId).classList.add('active');
+    });
+
+    // Accordion Toggle
+    document.querySelectorAll('[data-faq-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.faq-item');
+        item.classList.toggle('faq-item--open');
+      });
+    });
+  </script>
+</body>
+</html>
